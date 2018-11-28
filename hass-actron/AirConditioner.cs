@@ -82,14 +82,15 @@ namespace HMX.HASSActron
 				MQTT.SendMessage("actron/aircon/mode", (_airConditionerData.bOn ? Enum.GetName(typeof(ModeMQTT), _airConditionerData.iMode).ToLower() : "off"));
 				MQTT.SendMessage("actron/aircon/settemperature", _airConditionerData.dblSetTemperature.ToString());
 				MQTT.SendMessage("actron/aircon/temperature", _airConditionerData.dblRoomTemperature.ToString());
-				MQTT.SendMessage("actron/aircon/zone1", _airConditionerData.bZone1 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone2", _airConditionerData.bZone2 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone3", _airConditionerData.bZone3 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone4", _airConditionerData.bZone4 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone5", _airConditionerData.bZone1 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone6", _airConditionerData.bZone2 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone7", _airConditionerData.bZone3 ? "ON" : "OFF");
-				MQTT.SendMessage("actron/aircon/zone8", _airConditionerData.bZone4 ? "ON" : "OFF");
+				// Need to move to an array instead of 8 x boolean.
+				if (_dZones.Count >= 1) MQTT.SendMessage("actron/aircon/zone1", _airConditionerData.bZone1 ? "ON" : "OFF");
+				if (_dZones.Count >= 2) MQTT.SendMessage("actron/aircon/zone2", _airConditionerData.bZone2 ? "ON" : "OFF");
+				if (_dZones.Count >= 3) MQTT.SendMessage("actron/aircon/zone3", _airConditionerData.bZone3 ? "ON" : "OFF");
+				if (_dZones.Count >= 4) MQTT.SendMessage("actron/aircon/zone4", _airConditionerData.bZone4 ? "ON" : "OFF");
+				if (_dZones.Count >= 5) MQTT.SendMessage("actron/aircon/zone5", _airConditionerData.bZone5 ? "ON" : "OFF");
+				if (_dZones.Count >= 6) MQTT.SendMessage("actron/aircon/zone6", _airConditionerData.bZone6 ? "ON" : "OFF");
+				if (_dZones.Count >= 7) MQTT.SendMessage("actron/aircon/zone7", _airConditionerData.bZone7 ? "ON" : "OFF");
+				if (_dZones.Count >= 8) MQTT.SendMessage("actron/aircon/zone8", _airConditionerData.bZone8 ? "ON" : "OFF");
 			}
 
 			lock (_oLockCommand)
@@ -175,14 +176,13 @@ namespace HMX.HASSActron
 
 			Logging.WriteDebugLog("AirConditioner.ChangeMode() [0x{0}] Changing Mode: {1}", lRequestId.ToString("X8"), Enum.GetName(typeof(AirConditionerMode), mode));
 
-			lock (_oLockData)
+			lock (_oLockCommand)
 			{
 				command.amOn = (mode == AirConditionerMode.None ? false : true);
-				command.tempTarget = _airConditionerData.dblSetTemperature;
-				command.fanSpeed = _airConditionerData.iFanSpeed;
-				command.mode = (mode == AirConditionerMode.None ? _airConditionerData.iMode : (int)mode);
-				command.enabledZones = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}", _airConditionerData.bZone1 ? "1" : "0", _airConditionerData.bZone2 ? "1" : "0", _airConditionerData.bZone3 ? "1" : "0", _airConditionerData.bZone4 ? "1" : "0", _airConditionerData.bZone5 ? "1" : "0", _airConditionerData.bZone6 ? "1" : "0", _airConditionerData.bZone7 ? "1" : "0", _airConditionerData.bZone8 ? "1" : "0");
-
+				command.tempTarget = _airConditionerCommand.tempTarget;
+				command.fanSpeed = _airConditionerCommand.fanSpeed;
+				command.mode = (int) mode;
+				command.enabledZones = _airConditionerCommand.enabledZones;
 			}
 
 			PostCommand(lRequestId, "System", command);
@@ -194,7 +194,7 @@ namespace HMX.HASSActron
 
 			Logging.WriteDebugLog("AirConditioner.ChangeFanSpeed() [0x{0}] Changing Fan Speed: {1}", lRequestId.ToString("X8"), Enum.GetName(typeof(FanSpeed), speed));
 
-			lock (_oLockData)
+			lock (_oLockCommand)
 			{
 				command.amOn = _airConditionerCommand.amOn;
 				command.tempTarget = _airConditionerCommand.tempTarget;
@@ -213,7 +213,7 @@ namespace HMX.HASSActron
 
 			Logging.WriteDebugLog("AirConditioner.ChangeZone() [0x{0}] Changing Zone: {1}", lRequestId.ToString("X8"), iZone);
 
-			lock (_oLockData)
+			lock (_oLockCommand)
 			{
 				command.amOn = _airConditionerCommand.amOn;
 				command.tempTarget = _airConditionerCommand.tempTarget;
@@ -240,7 +240,7 @@ namespace HMX.HASSActron
 
 			Logging.WriteDebugLog("AirConditioner.ChangeTemperature() [0x{0}] Changing Temperature: {1}", lRequestId.ToString("X8"), dblTemperature);
 
-			lock (_oLockData)
+			lock (_oLockCommand)
 			{
 				command.amOn = _airConditionerCommand.amOn;
 				command.tempTarget = dblTemperature;

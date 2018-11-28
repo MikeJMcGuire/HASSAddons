@@ -83,8 +83,6 @@ namespace HMX.HASSActron.Controllers
 			strData = reader.ReadToEnd();
 			reader.Dispose();
 
-			// Logging.WriteDebugLog("DeviceController.Data() Data: {0}", strData);
-
 			try
 			{
 				header = JsonConvert.DeserializeObject<AirConditionerDataHeader>(strData);
@@ -112,6 +110,10 @@ namespace HMX.HASSActron.Controllers
 						data.bZone2 = (aZones[1].ToString() == "1");
 						data.bZone3 = (aZones[2].ToString() == "1");
 						data.bZone4 = (aZones[3].ToString() == "1");
+						data.bZone5 = (aZones[4].ToString() == "1");
+						data.bZone6 = (aZones[5].ToString() == "1");
+						data.bZone7 = (aZones[6].ToString() == "1");
+						data.bZone8 = (aZones[7].ToString() == "1");
 
 						AirConditioner.PostData(data);
 

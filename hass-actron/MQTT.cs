@@ -29,18 +29,10 @@ namespace HMX.HASSActron
 			_strClientId = strClientId;
 			_messageHandler = messageHandler;
 
-			MqttClientOptionsBuilderTlsParameters optionsTLS = new MqttClientOptionsBuilderTlsParameters
-			{
-				IgnoreCertificateChainErrors = true,
-				UseTls = true,
-				AllowUntrustedCertificates = true
-			};
-
 			IManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
 				.WithClientId(_strClientId)
 				.WithCredentials(strUser, strPassword)
 				.WithTcpServer(strMQTTServer)
-				//.WithTls(optionsTLS)
 				.Build())
 			.Build();
 
