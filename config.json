@@ -5,6 +5,10 @@
   "description": "An add-on for Actron Air Conditioners using the Actron Connect Wi-Fi module.",
   "startup": "before",
   "boot": "auto",
-  "options": {},
-  "schema": {}
+  "options": {
+    "setting1": "test"
+  },
+  "schema": {
+    "setting1": "str"
+  }
 }

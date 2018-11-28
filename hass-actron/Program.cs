@@ -14,7 +14,7 @@ namespace HMX.HASSActron
 
 			try
 			{
-				configuration = new ConfigurationBuilder().AddJsonFile("config.json", false, true).Build();
+				configuration = new ConfigurationBuilder().AddJsonFile("options.json", false, true).Build();
 			}
 			catch (Exception eException)
 			{
