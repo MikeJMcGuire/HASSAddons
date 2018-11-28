@@ -1,4 +1,4 @@
-﻿using HMX.HASSActron;
+﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,9 +21,7 @@ namespace HMX.HASSActron
 		private static object _oLockData = new object();
 		private static bool _bPendingCommand = false;
 		private static bool _bPendingZone = false;
-		private static string _strApplicationPath;
 		private static Dictionary<int, Zone> _dZones = new Dictionary<int, Zone>();
-		private const string _strZonesFile = "\\Zones.json";
 		private static bool _bDataReceived = false;
 
 		public static Dictionary<int, Zone> Zones
@@ -31,14 +29,11 @@ namespace HMX.HASSActron
 			get { return _dZones; }
 		}
 
-		public static bool Configure(string strApplicationPath)
+		public static bool Configure(IConfigurationRoot configuration)
 		{
-			string strZoneDataFile;
 			List<Zone> lZones;
 
 			Logging.WriteDebugLog("AirConditioner.Configure()");
-
-			_strApplicationPath = strApplicationPath;
 
 			lock (_oLockData)
 			{
@@ -47,22 +42,17 @@ namespace HMX.HASSActron
 
 			try
 			{
-				strZoneDataFile = strApplicationPath + _strZonesFile;
+				lZones = JsonConvert.DeserializeObject<List<Zone>>(configuration["Zones"]);
 
-				if (File.Exists(strZoneDataFile))
+				foreach (Zone zone in lZones)
 				{
-					lZones = JsonConvert.DeserializeObject<List<Zone>>(File.ReadAllText(strZoneDataFile));
-
-					foreach (Zone zone in lZones)
-					{
-						Logging.WriteDebugLog("AirConditioner.Configure() Zone: {0}, Id: {1}", zone.Name, zone.Id);
-						_dZones.Add(zone.Id, zone);
-					}
+					Logging.WriteDebugLog("AirConditioner.Configure() Zone: {0}, Id: {1}", zone.Name, zone.Id);
+					_dZones.Add(zone.Id, zone);
 				}
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("AirConditioner.Configure()", eException, "Unable to read json file.");
+				Logging.WriteDebugLogError("AirConditioner.Configure()", eException, "Unable to read zones.");
 
 				return false;
 			}

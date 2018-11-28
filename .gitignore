@@ -3,3 +3,5 @@
 ################################################################################
 
 /.vs
+/hass-actron/.vs/hass-actron/v15/Server/sqlite3
+/hass-actron/obj

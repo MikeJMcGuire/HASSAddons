@@ -6,10 +6,32 @@
   "startup": "before",
   "boot": "auto",
   "options": {
-    "setting1": "test"
+    "MQTTUser": "test",
+    "MQTTPassword": "test",
+    "MQTTBroker": "localhost",
+    "MQTTEncrypted": false,
+    "Zones": [
+      {
+        "Name": "Zone 1",
+        "Id": 1
+      },
+      {
+        "Name": "Zone 2",
+        "Id": 2
+      }
+    ]
   },
   "schema": {
-    "setting1": "str"
+    "MQTTUser": "str",
+    "MQTTPassword": "str",
+    "MQTTBroker": "str",
+    "MQTTEncrypted": "bool",
+    "Zones": [
+      {
+        "Name": "str",
+        "Id": "int"
+      }
+    ]
   },
   "ports": {
     "80/tcp": 80
