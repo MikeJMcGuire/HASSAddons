@@ -8,13 +8,13 @@ namespace HMX.HASSActron
     internal class Service
     {
 		private static string _strServiceName = "hass-actron";
-
+		
 		public static void Start()
         {
 			IConfigurationRoot configuration;
 			IWebHost webHost;
 
-			Logging.WriteDebugLog("ServiceCore.Start()");
+			Logging.WriteDebugLog("Service.Start()");
 
 			try
 			{
@@ -22,7 +22,7 @@ namespace HMX.HASSActron
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("Program.Main()", eException, "Unable to build configuration instance.");
+				Logging.WriteDebugLogError("Service.Start()", eException, "Unable to build configuration instance.");
 				return;
 			}
 
@@ -36,16 +36,23 @@ namespace HMX.HASSActron
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("Program.Main()", eException, "Unable to build Kestrel instance.");
+				Logging.WriteDebugLogError("Service.Start()", eException, "Unable to build Kestrel instance.");
 				return;
 			}
 
 			webHost.Run();
 		}
 
+		public static void Stop()
+		{
+			Logging.WriteDebugLog("Service.Stop()");
+
+			MQTT.StopMQTT();
+		}
+
 		private static void MQTTRegister()
 		{
-			Logging.WriteDebugLog("ServiceCore.MQTTRegister()");
+			Logging.WriteDebugLog("Service.MQTTRegister()");
 
 			MQTT.SendMessage("homeassistant/climate/actron/aircon/config", "{{\"name\":\"Air Conditioner\",\"icon\":\"mdi:air-conditioner\",\"optimistic\":\"false\",\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"fan_modes\":[\"high\",\"medium\",\"low\"],\"mode_command_topic\":\"actron/aircon/mode/set\",\"temperature_command_topic\":\"actron/aircon/temperature/set\",\"fan_mode_command_topic\":\"actron/aircon/fan/set\",\"min_temp\":\"16\",\"max_temp\":\"25\",\"fan_mode_state_topic\":\"actron/aircon/fanmode\",\"temperature_state_topic\":\"actron/aircon/settemperature\",\"mode_state_topic\":\"actron/aircon/mode\",\"current_temperature_topic\":\"actron/aircon/temperature\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower());
 
@@ -65,7 +72,7 @@ namespace HMX.HASSActron
 			long lRequestId = 0;
 			double dblTemperature = 0;
 
-			Logging.WriteDebugLog("ServiceCore.MQTTProcessor() {0}", strTopic);
+			Logging.WriteDebugLog("Service.MQTTProcessor() {0}", strTopic);
 
 			switch (strTopic)
 			{
@@ -83,6 +90,22 @@ namespace HMX.HASSActron
 
 				case "actron/aircon/zone4/set":
 					AirConditioner.ChangeZone(lRequestId, 4, strPayload == "ON" ? true : false);
+					break;
+
+				case "actron/aircon/zone5/set":
+					AirConditioner.ChangeZone(lRequestId, 5, strPayload == "ON" ? true : false);
+					break;
+
+				case "actron/aircon/zone6/set":
+					AirConditioner.ChangeZone(lRequestId, 6, strPayload == "ON" ? true : false);
+					break;
+
+				case "actron/aircon/zone7/set":
+					AirConditioner.ChangeZone(lRequestId, 7, strPayload == "ON" ? true : false);
+					break;
+
+				case "actron/aircon/zone8/set":
+					AirConditioner.ChangeZone(lRequestId, 8, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/mode/set":
@@ -119,7 +142,7 @@ namespace HMX.HASSActron
 					break;
 
 				case "actron/aircon/fan/set":
-					Logging.WriteDebugLog("ServiceCore.MQTTProcessor() {0}: {1}", strTopic, strPayload);
+					Logging.WriteDebugLog("Service.MQTTProcessor() {0}: {1}", strTopic, strPayload);
 
 					switch (strPayload)
 					{
@@ -142,7 +165,7 @@ namespace HMX.HASSActron
 					break;
 
 				case "actron/aircon/temperature/set":
-					Logging.WriteDebugLog("ServiceCore.MQTTProcessor() {0}: {1}", strTopic, strPayload);
+					Logging.WriteDebugLog("Service.MQTTProcessor() {0}: {1}", strTopic, strPayload);
 
 					if (double.TryParse(strPayload, out dblTemperature))
 						AirConditioner.ChangeTemperature(lRequestId, dblTemperature);

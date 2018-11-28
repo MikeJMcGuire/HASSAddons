@@ -49,6 +49,8 @@ namespace HMX.HASSActron
 		private void OnStopping()
 		{
 			Logging.WriteDebugLog("ASPNETCoreStartup.OnStopping()");
+
+			Service.Stop();
 		}
 
 		private void OnStopped()
