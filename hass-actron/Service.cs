@@ -28,9 +28,9 @@ namespace HMX.HASSActron
 
 			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "localhost", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
-			MQTTRegister();
-
 			AirConditioner.Configure(configuration);
+
+			MQTTRegister();
 
 			try
 			{
