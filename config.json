@@ -10,5 +10,8 @@
   },
   "schema": {
     "setting1": "str"
+  },
+  "ports": {
+    "80/tcp": 80
   }
 }
