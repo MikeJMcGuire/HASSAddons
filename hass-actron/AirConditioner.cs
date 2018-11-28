@@ -1,15 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
+
 
 namespace HMX.HASSActron
 {
@@ -31,7 +23,7 @@ namespace HMX.HASSActron
 
 		public static bool Configure(IConfigurationRoot configuration)
 		{
-			List<Zone> lZones;
+			Zone zone;
 
 			Logging.WriteDebugLog("AirConditioner.Configure()");
 
@@ -42,14 +34,19 @@ namespace HMX.HASSActron
 
 			try
 			{
-				//lZones = JsonConvert.DeserializeObject<List<Zone>>(configuration.GetSection("Zones"));
-
-				//foreach (Zone zone in lZones)
-				foreach ( IConfigurationSection x in configuration.GetSection("Zones").GetChildren())
+				foreach (IConfigurationSection zoneConfig in configuration.GetSection("Zones").GetChildren())
 				{
-					
-					Logging.WriteDebugLog("AirConditioner.Configure() Zone: {0}, Id: {1}", x.GetValue<string>("Name"), x.GetValue<int>("Id"));
-					//_dZones.Add(zone.Id, zone);
+					zone = new Zone(zoneConfig.GetValue<string>("Name"), zoneConfig.GetValue<int>("Id"));
+
+					Logging.WriteDebugLog("AirConditioner.Configure() Zone: {0}, Id: {1}", zone.Name, zone.Id);
+
+					_dZones.Add(zone.Id, zone);
+
+					if (_dZones.Count > 8)
+					{
+						Logging.WriteDebugLog("AirConditioner.Configure() Maximum Zones Reached (8)");
+						break;
+					}
 				}
 			}
 			catch (Exception eException)
@@ -89,6 +86,10 @@ namespace HMX.HASSActron
 				MQTT.SendMessage("actron/aircon/zone2", _airConditionerData.bZone2 ? "ON" : "OFF");
 				MQTT.SendMessage("actron/aircon/zone3", _airConditionerData.bZone3 ? "ON" : "OFF");
 				MQTT.SendMessage("actron/aircon/zone4", _airConditionerData.bZone4 ? "ON" : "OFF");
+				MQTT.SendMessage("actron/aircon/zone5", _airConditionerData.bZone1 ? "ON" : "OFF");
+				MQTT.SendMessage("actron/aircon/zone6", _airConditionerData.bZone2 ? "ON" : "OFF");
+				MQTT.SendMessage("actron/aircon/zone7", _airConditionerData.bZone3 ? "ON" : "OFF");
+				MQTT.SendMessage("actron/aircon/zone8", _airConditionerData.bZone4 ? "ON" : "OFF");
 			}
 
 			lock (_oLockCommand)
@@ -108,7 +109,7 @@ namespace HMX.HASSActron
 
 				if (!_bPendingZone)
 				{
-					strZones = string.Format("{0},{1},{2},{3},0,0,0,0", _airConditionerData.bZone1 ? "1" : "0", _airConditionerData.bZone2 ? "1" : "0", _airConditionerData.bZone3 ? "1" : "0", _airConditionerData.bZone4 ? "1" : "0");
+					strZones = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}", _airConditionerData.bZone1 ? "1" : "0", _airConditionerData.bZone2 ? "1" : "0", _airConditionerData.bZone3 ? "1" : "0", _airConditionerData.bZone4 ? "1" : "0", _airConditionerData.bZone5 ? "1" : "0", _airConditionerData.bZone6 ? "1" : "0", _airConditionerData.bZone7 ? "1" : "0", _airConditionerData.bZone8 ? "1" : "0");
 					
 					if (_airConditionerCommand.enabledZones != strZones)
 					{
@@ -180,7 +181,8 @@ namespace HMX.HASSActron
 				command.tempTarget = _airConditionerData.dblSetTemperature;
 				command.fanSpeed = _airConditionerData.iFanSpeed;
 				command.mode = (mode == AirConditionerMode.None ? _airConditionerData.iMode : (int)mode);
-				command.enabledZones = string.Format("{0},{1},{2},{3},0,0,0,0", _airConditionerData.bZone1 ? "1" : "0", _airConditionerData.bZone2 ? "1" : "0", _airConditionerData.bZone3 ? "1" : "0", _airConditionerData.bZone4 ? "1" : "0");
+				command.enabledZones = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}", _airConditionerData.bZone1 ? "1" : "0", _airConditionerData.bZone2 ? "1" : "0", _airConditionerData.bZone3 ? "1" : "0", _airConditionerData.bZone4 ? "1" : "0", _airConditionerData.bZone5 ? "1" : "0", _airConditionerData.bZone6 ? "1" : "0", _airConditionerData.bZone7 ? "1" : "0", _airConditionerData.bZone8 ? "1" : "0");
+
 			}
 
 			PostCommand(lRequestId, "System", command);
@@ -225,7 +227,7 @@ namespace HMX.HASSActron
 				{
 					strZones[iZone - 1] = bOn ? "1" : "0";
 
-					command.enabledZones = string.Format("{0},{1},{2},{3},0,0,0,0", strZones[0], strZones[1], strZones[2], strZones[3]);
+					command.enabledZones = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}", strZones[0], strZones[1], strZones[2], strZones[3], strZones[4], strZones[5], strZones[6], strZones[7]);
 				}
 			}
 
@@ -248,8 +250,6 @@ namespace HMX.HASSActron
 			}
 
 			PostCommand(lRequestId, "System", command);
-		}
-
-	
+		}	
 	}
 }

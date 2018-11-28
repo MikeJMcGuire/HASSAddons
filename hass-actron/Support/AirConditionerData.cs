@@ -20,6 +20,10 @@ namespace HMX.HASSActron
 		public bool bZone2;
 		public bool bZone3;
 		public bool bZone4;
+		public bool bZone5;
+		public bool bZone6;
+		public bool bZone7;
+		public bool bZone8;
 		public DateTime dtLastUpdate;
 		public bool bPendingCommand;
 		public bool bPendingZone;
