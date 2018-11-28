@@ -42,12 +42,14 @@ namespace HMX.HASSActron
 
 			try
 			{
-				lZones = JsonConvert.DeserializeObject<List<Zone>>(configuration["Zones"]);
+				//lZones = JsonConvert.DeserializeObject<List<Zone>>(configuration.GetSection("Zones"));
 
-				foreach (Zone zone in lZones)
+				//foreach (Zone zone in lZones)
+				foreach ( IConfigurationSection x in configuration.GetSection("Zones").GetChildren())
 				{
-					Logging.WriteDebugLog("AirConditioner.Configure() Zone: {0}, Id: {1}", zone.Name, zone.Id);
-					_dZones.Add(zone.Id, zone);
+					
+					Logging.WriteDebugLog("AirConditioner.Configure() Zone: {0}, Id: {1}", x.GetValue<string>("Name"), x.GetValue<int>("Id"));
+					//_dZones.Add(zone.Id, zone);
 				}
 			}
 			catch (Exception eException)
