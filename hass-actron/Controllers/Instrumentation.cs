@@ -12,6 +12,8 @@ namespace HMX.HASSActron.Controllers
 		{
 			ContentResult result = new ContentResult();
 
+			Logging.WriteDebugLog("Instrumentation.Test() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
 			result.ContentType = "text/html";
 			result.StatusCode = 200;
 
