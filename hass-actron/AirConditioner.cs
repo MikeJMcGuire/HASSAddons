@@ -75,8 +75,6 @@ namespace HMX.HASSActron
 			{
 				_airConditionerData = data;
 				_airConditionerData.dtLastUpdate = DateTime.Now;
-				_airConditionerData.bPendingCommand = _bPendingCommand;
-				_airConditionerData.bPendingZone = _bPendingZone;
 
 				MQTT.SendMessage("actron/aircon/fanmode", Enum.GetName(typeof(FanSpeed), _airConditionerData.iFanSpeed).ToLower());
 				MQTT.SendMessage("actron/aircon/mode", (_airConditionerData.bOn ? Enum.GetName(typeof(ModeMQTT), _airConditionerData.iMode).ToLower() : "off"));
@@ -181,7 +179,7 @@ namespace HMX.HASSActron
 				command.amOn = (mode == AirConditionerMode.None ? false : true);
 				command.tempTarget = _airConditionerCommand.tempTarget;
 				command.fanSpeed = _airConditionerCommand.fanSpeed;
-				command.mode = (int) mode;
+				command.mode = (mode == AirConditionerMode.None ? _airConditionerData.iMode : (int) mode);
 				command.enabledZones = _airConditionerCommand.enabledZones;
 			}
 

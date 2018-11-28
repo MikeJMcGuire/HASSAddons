@@ -25,7 +25,5 @@ namespace HMX.HASSActron
 		public bool bZone7;
 		public bool bZone8;
 		public DateTime dtLastUpdate;
-		public bool bPendingCommand;
-		public bool bPendingZone;
 	}
 }
