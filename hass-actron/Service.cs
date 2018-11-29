@@ -8,7 +8,10 @@ namespace HMX.HASSActron
     internal class Service
     {
 		private static string _strServiceName = "hass-actron";
-		
+		private static string _strDeviceName = "Air Conditioner";
+		private static string _strConfigFile = "/data/options.json";
+
+
 		public static void Start()
         {
 			IConfigurationRoot configuration;
@@ -18,7 +21,7 @@ namespace HMX.HASSActron
 
 			try
 			{
-				configuration = new ConfigurationBuilder().AddJsonFile("/data/options.json", false, true).Build();
+				configuration = new ConfigurationBuilder().AddJsonFile(_strConfigFile, false, true).Build();
 			}
 			catch (Exception eException)
 			{
@@ -26,7 +29,7 @@ namespace HMX.HASSActron
 				return;
 			}
 
-			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "localhost", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
+			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
 			AirConditioner.Configure(configuration);
 
@@ -56,7 +59,7 @@ namespace HMX.HASSActron
 		{
 			Logging.WriteDebugLog("Service.MQTTRegister()");
 
-			MQTT.SendMessage("homeassistant/climate/actron/aircon/config", "{{\"name\":\"Air Conditioner\",\"icon\":\"mdi:air-conditioner\",\"optimistic\":\"false\",\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"fan_modes\":[\"high\",\"medium\",\"low\"],\"mode_command_topic\":\"actron/aircon/mode/set\",\"temperature_command_topic\":\"actron/aircon/temperature/set\",\"fan_mode_command_topic\":\"actron/aircon/fan/set\",\"min_temp\":\"16\",\"max_temp\":\"25\",\"fan_mode_state_topic\":\"actron/aircon/fanmode\",\"temperature_state_topic\":\"actron/aircon/settemperature\",\"mode_state_topic\":\"actron/aircon/mode\",\"current_temperature_topic\":\"actron/aircon/temperature\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower());
+			MQTT.SendMessage("homeassistant/climate/actronaircon/config", "{{\"name\":\"{1}\",\"icon\":\"mdi:air-conditioner\",\"optimistic\":\"false\",\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"fan_modes\":[\"high\",\"medium\",\"low\"],\"mode_command_topic\":\"actron/aircon/mode/set\",\"temperature_command_topic\":\"actron/aircon/temperature/set\",\"fan_mode_command_topic\":\"actron/aircon/fan/set\",\"min_temp\":\"16\",\"max_temp\":\"25\",\"fan_mode_state_topic\":\"actron/aircon/fanmode\",\"temperature_state_topic\":\"actron/aircon/settemperature\",\"mode_state_topic\":\"actron/aircon/mode\",\"current_temperature_topic\":\"actron/aircon/temperature\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strDeviceName);
 
 			foreach (int iZone in AirConditioner.Zones.Keys)
 			{
