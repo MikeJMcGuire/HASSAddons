@@ -150,7 +150,17 @@ namespace HMX.HASSActron.Controllers
 
 			httpClient.DefaultRequestHeaders.Connection.Add("close");
 
-			
+
+			foreach (string strHeader in HttpContext.Response.Headers.Keys)
+			{
+				if (strHeader != "Host" && strHeader != "Content-Length")
+				{
+					Logging.WriteDebugLog("Header: " + strHeader);
+					httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Response.Headers[strHeader].ToString());
+				}
+			}
+
+
 			MemoryStream y = new MemoryStream();
 			StreamWriter t = new StreamWriter(y);
 			
