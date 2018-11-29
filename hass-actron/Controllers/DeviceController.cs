@@ -156,7 +156,7 @@ namespace HMX.HASSActron.Controllers
 				if (strHeader != "Host" && strHeader != "Content-Length")
 				{
 					Logging.WriteDebugLog("Header: " + strHeader);
-					httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Response.Headers[strHeader].ToString());
+					httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
 				}
 			}
 
