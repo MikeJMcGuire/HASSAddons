@@ -153,17 +153,19 @@ namespace HMX.HASSActron.Controllers
 			
 			MemoryStream y = new MemoryStream();
 			StreamWriter t = new StreamWriter(y);
-			StreamContent x = new StreamContent(y);
+			
 
 			t.Write(strData);
 			t.Flush();
+
+			StreamContent x = new StreamContent(y);
 
 			try
 			{
 				cancellationToken = new CancellationTokenSource();
 				cancellationToken.CancelAfter(5000);
 
-				httpResponse = await httpClient.PostAsync(Uri.EscapeUriString(strURL), x, cancellationToken.Token);
+				httpResponse = await httpClient.PostAsync(strURL, x, cancellationToken.Token);
 
 				if (httpResponse.IsSuccessStatusCode)
 				{
