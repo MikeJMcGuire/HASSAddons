@@ -150,18 +150,7 @@ namespace HMX.HASSActron.Controllers
 
 			httpClient.DefaultRequestHeaders.Connection.Add("close");
 
-
-
-
-			MemoryStream y = new MemoryStream();
-			StreamWriter t = new StreamWriter(y);
-			
-
-			t.Write(strData);
-			t.Flush();
-
-			StreamContent x = new StreamContent(y);
-
+			StringContent z = new StringContent(strData);
 
 			foreach (string strHeader in HttpContext.Request.Headers.Keys)
 			{
@@ -174,7 +163,7 @@ namespace HMX.HASSActron.Controllers
 							break;
 
 						case "Content-Type":
-							x.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(HttpContext.Request.Headers[strHeader].ToString());
+							z.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(HttpContext.Request.Headers[strHeader].ToString());
 							break;
 
 						case "X-Ninja-Token":
@@ -193,7 +182,7 @@ namespace HMX.HASSActron.Controllers
 				cancellationToken = new CancellationTokenSource();
 				cancellationToken.CancelAfter(5000);
 
-				httpResponse = await httpClient.PostAsync(strURL, x, cancellationToken.Token);
+				httpResponse = await httpClient.PostAsync(strURL, z, cancellationToken.Token);
 
 				if (httpResponse.IsSuccessStatusCode)
 				{
