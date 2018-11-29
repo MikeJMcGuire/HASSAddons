@@ -131,7 +131,7 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
-			string strURL = "http://172.16.51.10/" + HttpContext.Request.Path;
+			string strURL = "http://172.16.51.10" + HttpContext.Request.Path;
 
 			Logging.WriteDebugLog("Path: " + HttpContext.Request.Path);
 			Logging.WriteDebugLog("URL: " + strURL);
