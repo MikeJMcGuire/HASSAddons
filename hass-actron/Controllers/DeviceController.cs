@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HMX.HASSActron.Controllers
@@ -62,7 +64,7 @@ namespace HMX.HASSActron.Controllers
 		}
 
 		[Route("data")]
-		public IActionResult Data(string version, string device)
+		public async Task<IActionResult> Data(string version, string device)
 		{
 			AirConditionerData data = new AirConditionerData();
 			AirConditionerDataHeader header;
@@ -128,6 +130,59 @@ namespace HMX.HASSActron.Controllers
 			response.result = 1;
 			response.error = null;
 			response.id = 0;
+
+			string strURL = "http://172.16.51.10/" + HttpContext.Request.Path;
+
+			Logging.WriteDebugLog("Path: " + HttpContext.Request.Path);
+			Logging.WriteDebugLog("URL: " + strURL);
+
+			HttpClient httpClient = null;
+			HttpClientHandler httpClientHandler;
+			HttpResponseMessage httpResponse = null;
+			CancellationTokenSource cancellationToken = null;
+			string strContent;
+
+			httpClientHandler = new HttpClientHandler();
+			httpClientHandler.Proxy = null;
+			httpClientHandler.UseProxy = false;
+
+			httpClient = new HttpClient(httpClientHandler);
+
+			httpClient.DefaultRequestHeaders.Connection.Add("close");
+
+			
+			MemoryStream y = new MemoryStream();
+			StringWriter t = new StringWriter(y);
+			StreamContent x = new StreamContent(y);
+
+			t.Write(strData);
+			t.Flush();
+
+			try
+			{
+				cancellationToken = new CancellationTokenSource();
+				cancellationToken.CancelAfter(5000);
+
+				httpResponse = await httpClient.PostAsync(Uri.EscapeUriString(strURL), x, cancellationToken.Token);
+
+				if (httpResponse.IsSuccessStatusCode)
+				{
+					strContent = await httpResponse.Content.ReadAsStringAsync();
+					Logging.WriteDebugLog("Response: " + strContent);
+				}
+				else
+				{
+					Logging.WriteDebugLog("Response: " + httpResponse.StatusCode);
+				}
+			}
+			catch (Exception eException)
+			{
+				Logging.WriteDebugLogError("DeviceController.Data()", eException, "Unable to process API HTTP response.");
+			}
+
+			cancellationToken?.Dispose();
+			httpResponse?.Dispose();
+			httpClient?.Dispose();
 
 			return new ObjectResult(response);
 		}
