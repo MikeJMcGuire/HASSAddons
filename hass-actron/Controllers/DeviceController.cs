@@ -151,14 +151,6 @@ namespace HMX.HASSActron.Controllers
 			httpClient.DefaultRequestHeaders.Connection.Add("close");
 
 
-			foreach (string strHeader in HttpContext.Request.Headers.Keys)
-			{
-				if (strHeader != "Host" && strHeader != "Content-Length")
-				{
-					Logging.WriteDebugLog("Header: " + strHeader);
-					httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
-				}
-			}
 
 
 			MemoryStream y = new MemoryStream();
@@ -169,6 +161,23 @@ namespace HMX.HASSActron.Controllers
 			t.Flush();
 
 			StreamContent x = new StreamContent(y);
+
+
+			foreach (string strHeader in HttpContext.Request.Headers.Keys)
+			{
+				if (strHeader != "Host" && strHeader != "Content-Length")
+				{
+					Logging.WriteDebugLog("Header: " + strHeader);
+					try
+					{
+						x.Headers.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
+					}
+					catch (Exception eException)
+					{
+						Logging.WriteDebugLogError("DeviceController.Data()", eException, "Unable to add request header.");
+					}
+				}
+			}
 
 			try
 			{
