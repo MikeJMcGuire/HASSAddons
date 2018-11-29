@@ -151,7 +151,7 @@ namespace HMX.HASSActron.Controllers
 			httpClient.DefaultRequestHeaders.Connection.Add("close");
 
 
-			foreach (string strHeader in HttpContext.Response.Headers.Keys)
+			foreach (string strHeader in HttpContext.Request.Headers.Keys)
 			{
 				if (strHeader != "Host" && strHeader != "Content-Length")
 				{
