@@ -24,6 +24,7 @@ namespace HMX.HASSActron.Controllers
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("Accept, Content-Type, Authorization, Content-Length, X-Requested-With, X-Ninja-Token"));
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
+			HttpContext.Response.Headers.Add("Connection", "close");
 
 			command = AirConditioner.GetCommand(out strCommandType);
 
@@ -35,7 +36,7 @@ namespace HMX.HASSActron.Controllers
 
 				result.ContentType = "application/json";
 				result.StatusCode = 200;
-
+	
 				if (strCommandType == "4")
 				{
 					result.Content = string.Format("{{\"DEVICE\":[{{\"G\":\"0\",\"V\":2,\"D\":4,\"DA\":{{\"amOn\":{0},\"tempTarget\":{1},\"fanSpeed\":{2},\"mode\":{3}}}}}]}}",
