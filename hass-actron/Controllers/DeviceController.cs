@@ -165,17 +165,26 @@ namespace HMX.HASSActron.Controllers
 
 			foreach (string strHeader in HttpContext.Request.Headers.Keys)
 			{
-				if (strHeader != "Host" && strHeader != "Content-Length")
+				try
 				{
-					Logging.WriteDebugLog("Header: " + strHeader);
-					try
+					switch (strHeader)
 					{
-						x.Headers.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
-					}
-					catch (Exception eException)
-					{
-						Logging.WriteDebugLogError("DeviceController.Data()", eException, "Unable to add request header.");
-					}
+						case "User-Agent":
+							httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpContext.Request.Headers[strHeader].ToString());
+							break;
+
+						case "Content-Type":
+							x.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(HttpContext.Request.Headers[strHeader].ToString());
+							break;
+
+						case "X-Ninja-Token":
+							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
+							break;
+					}						
+				}
+				catch (Exception eException)
+				{
+					Logging.WriteDebugLogError("DeviceController.Data()", eException, "Unable to add request header.");
 				}
 			}
 
