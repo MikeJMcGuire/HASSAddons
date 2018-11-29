@@ -152,7 +152,7 @@ namespace HMX.HASSActron.Controllers
 
 			
 			MemoryStream y = new MemoryStream();
-			StringWriter t = new StringWriter(y);
+			StreamWriter t = new StreamWriter(y);
 			StreamContent x = new StreamContent(y);
 
 			t.Write(strData);
