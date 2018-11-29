@@ -36,8 +36,6 @@ namespace HMX.HASSActron.Controllers
 				result.ContentType = "application/json";
 				result.StatusCode = 200;
 
-				HttpContext.Response.Headers.Add("Connection", "close");
-
 				if (strCommandType == "4")
 				{
 					result.Content = string.Format("{{\"DEVICE\":[{{\"G\":\"0\",\"V\":2,\"D\":4,\"DA\":{{\"amOn\":{0},\"tempTarget\":{1},\"fanSpeed\":{2},\"mode\":{3}}}}}]}}",
