@@ -249,10 +249,6 @@ namespace HMX.HASSActron.Controllers
 							httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpContext.Request.Headers[strHeader].ToString());
 							break;
 
-						case "Content-Type":
-							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
-							break;
-
 						case "X-Ninja-Token":
 							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
 							break;
