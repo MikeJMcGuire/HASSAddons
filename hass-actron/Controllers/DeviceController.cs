@@ -270,13 +270,17 @@ namespace HMX.HASSActron.Controllers
 				if (httpResponse.IsSuccessStatusCode)
 				{
 					strContent = await httpResponse.Content.ReadAsStringAsync();
-					Logging.WriteDebugLog("Response: " + strContent);
 
-					contentResult = new ContentResult();
-					contentResult.ContentType = httpResponse.Content.Headers.ContentType.MediaType;
-					contentResult.Content = strContent;
+					if (strContent.Length > 0)
+					{
+						Logging.WriteDebugLog("Response: " + strContent);
 
-					result = contentResult;
+						contentResult = new ContentResult();
+						contentResult.ContentType = httpResponse.Content.Headers.ContentType.MediaType;
+						contentResult.Content = strContent;
+
+						result = contentResult;
+					}
 				}
 				else
 				{
