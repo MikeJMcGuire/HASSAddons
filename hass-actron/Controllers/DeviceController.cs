@@ -15,7 +15,7 @@ namespace HMX.HASSActron.Controllers
     public class DeviceController : Controller
 	{
 		[Route("commands")]
-		public IActionResult Command(string version, string device)
+		public async Task<IActionResult> Command(string version, string device)
 		{
 			AirConditionerCommand command;
 			ContentResult result;
@@ -30,7 +30,12 @@ namespace HMX.HASSActron.Controllers
 			command = AirConditioner.GetCommand(out strCommandType);
 
 			if (strCommandType != "4" & strCommandType != "5")
-				return new EmptyResult();
+			{
+				if (!Service.ForwardToOriginalWebService)
+					return new EmptyResult();
+				else
+					return await ForwardCommandToOriginalWebService();
+			}
 			else
 			{
 				result = new ContentResult();
@@ -64,7 +69,7 @@ namespace HMX.HASSActron.Controllers
 		}
 
 		[Route("data")]
-		public async Task<IActionResult> Data(string version, string device)
+		public IActionResult Data(string version, string device)
 		{
 			AirConditionerData data = new AirConditionerData();
 			AirConditionerDataHeader header;
@@ -131,16 +136,23 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
-			string strURL = "http://172.16.51.10/" + HttpContext.Request.Path;
+			if (Service.ForwardToOriginalWebService)
+				ForwardDataToOriginalWebService(strData);
 
-			Logging.WriteDebugLog("Path: " + HttpContext.Request.Path);
-			Logging.WriteDebugLog("URL: " + strURL);
+			return new ObjectResult(response);
+		}
 
+		private async void ForwardDataToOriginalWebService(string strData)
+		{
 			HttpClient httpClient = null;
 			HttpClientHandler httpClientHandler;
 			HttpResponseMessage httpResponse = null;
 			CancellationTokenSource cancellationToken = null;
+			StringContent stringContent;
 			string strContent;
+			string strURL = "http://172.16.51.10" + HttpContext.Request.Path;
+
+			Logging.WriteDebugLog("DeviceController.ForwardDataToOriginalWebService() URL: " + strURL);
 
 			httpClientHandler = new HttpClientHandler();
 			httpClientHandler.Proxy = null;
@@ -150,20 +162,39 @@ namespace HMX.HASSActron.Controllers
 
 			httpClient.DefaultRequestHeaders.Connection.Add("close");
 
-			
-			MemoryStream y = new MemoryStream();
-			StreamWriter t = new StreamWriter(y);
-			StreamContent x = new StreamContent(y);
+			stringContent = new StringContent(strData);
 
-			t.Write(strData);
-			t.Flush();
+			foreach (string strHeader in HttpContext.Request.Headers.Keys)
+			{
+				try
+				{
+					switch (strHeader)
+					{
+						case "User-Agent":
+							httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpContext.Request.Headers[strHeader].ToString());
+							break;
+
+						case "Content-Type":
+							stringContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(HttpContext.Request.Headers[strHeader].ToString());
+							break;
+
+						case "X-Ninja-Token":
+							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
+							break;
+					}
+				}
+				catch (Exception eException)
+				{
+					Logging.WriteDebugLogError("DeviceController.ForwardDataToOriginalWebService()", eException, "Unable to add request header ({0}).", strHeader);
+				}
+			}
 
 			try
 			{
 				cancellationToken = new CancellationTokenSource();
 				cancellationToken.CancelAfter(5000);
 
-				httpResponse = await httpClient.PostAsync(Uri.EscapeUriString(strURL), x, cancellationToken.Token);
+				httpResponse = await httpClient.PostAsync(strURL, stringContent, cancellationToken.Token);
 
 				if (httpResponse.IsSuccessStatusCode)
 				{
@@ -177,14 +208,95 @@ namespace HMX.HASSActron.Controllers
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("DeviceController.Data()", eException, "Unable to process API HTTP response.");
+				Logging.WriteDebugLogError("DeviceController.ForwardDataToOriginalWebService()", eException, "Unable to process API HTTP response.");
+			}
+
+			cancellationToken?.Dispose();
+			httpResponse?.Dispose();
+			httpClient?.Dispose();
+		}
+
+		private async Task<IActionResult> ForwardCommandToOriginalWebService()
+		{
+			IActionResult result;
+			ContentResult contentResult;
+			HttpClient httpClient = null;
+			HttpClientHandler httpClientHandler;
+			HttpResponseMessage httpResponse = null;
+			CancellationTokenSource cancellationToken = null;
+			string strURL = "http://172.16.51.10" + HttpContext.Request.Path;
+			string strContent;
+
+			Logging.WriteDebugLog("DeviceController.ForwardCommandToOriginalWebService() URL: " + strURL);
+
+			httpClientHandler = new HttpClientHandler();
+			httpClientHandler.Proxy = null;
+			httpClientHandler.UseProxy = false;
+
+			httpClient = new HttpClient(httpClientHandler);
+
+			httpClient.DefaultRequestHeaders.Connection.Add("close");
+
+			result = new EmptyResult();
+
+			foreach (string strHeader in HttpContext.Request.Headers.Keys)
+			{
+				try
+				{
+					switch (strHeader)
+					{
+						case "User-Agent":
+							httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpContext.Request.Headers[strHeader].ToString());
+							break;
+
+						case "X-Ninja-Token":
+							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
+							break;
+					}
+				}
+				catch (Exception eException)
+				{
+					Logging.WriteDebugLogError("DeviceController.ForwardCommandToOriginalWebService()", eException, "Unable to add request header ({0}).", strHeader);
+				}
+			}
+
+			try
+			{
+				cancellationToken = new CancellationTokenSource();
+				cancellationToken.CancelAfter(5000);
+
+				httpResponse = await httpClient.GetAsync(strURL, cancellationToken.Token);
+
+				if (httpResponse.IsSuccessStatusCode)
+				{
+					strContent = await httpResponse.Content.ReadAsStringAsync();
+
+					if (strContent.Length > 0)
+					{
+						Logging.WriteDebugLog("Response: " + strContent);
+
+						contentResult = new ContentResult();
+						contentResult.ContentType = httpResponse.Content.Headers.ContentType.MediaType;
+						contentResult.Content = strContent;
+
+						result = contentResult;
+					}
+				}
+				else
+				{
+					Logging.WriteDebugLog("Response: " + httpResponse.StatusCode);
+				}
+			}
+			catch (Exception eException)
+			{
+				Logging.WriteDebugLogError("DeviceController.ForwardCommandToOriginalWebService()", eException, "Unable to process API HTTP response.");
 			}
 
 			cancellationToken?.Dispose();
 			httpResponse?.Dispose();
 			httpClient?.Dispose();
 
-			return new ObjectResult(response);
+			return result;
 		}
 	}
 }
