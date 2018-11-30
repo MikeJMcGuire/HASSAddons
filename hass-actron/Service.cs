@@ -10,7 +10,12 @@ namespace HMX.HASSActron
 		private static string _strServiceName = "hass-actron";
 		private static string _strDeviceName = "Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
+		private static bool _bForward = false;
 
+		public static bool ForwardToOriginalWebService
+		{
+			get { return _bForward; }
+		}
 
 		public static void Start()
         {
@@ -28,6 +33,8 @@ namespace HMX.HASSActron
 				Logging.WriteDebugLogError("Service.Start()", eException, "Unable to build configuration instance.");
 				return;
 			}
+
+			bool.TryParse(configuration["ForwardToOriginalWebService"] ?? "false", out _bForward);
 
 			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
