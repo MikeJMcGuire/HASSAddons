@@ -6,7 +6,7 @@
   "url": "https://github.com/MikeJMcGuire/hass-actron",
   "startup": "before",
   "boot": "auto",
-  "image": "mikejmcguire/hassaddons/image-{arch}-hass-actron",
+  "image": "mikejmcguire/hass-actron/image-{arch}-hass-actron",
   "options": {
     "MQTTUser": "mqttuser",
     "MQTTPassword": "mqttpassword",
