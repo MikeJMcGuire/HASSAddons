@@ -3,7 +3,7 @@ ARG BUILD_FROM
 FROM $BUILD_FROM AS base
 WORKDIR /app
 
-FROM microsoft/dotnet:2.0-sdk AS build
+FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
 COPY hass-actron/hass-actron.csproj hass-actron/
 RUN dotnet restore hass-actron/hass-actron.csproj
