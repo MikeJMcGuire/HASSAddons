@@ -1,0 +1,8 @@
+{
+    "squash": false,
+    "build_from": {
+        "amd64": "microsoft/dotnet:2.0-runtime",
+        "armhf": "microsoft/dotnet:2.0.0-runtime-stretch-arm32v7"
+    },
+    "args": {}
+}
