@@ -10,11 +10,11 @@ namespace HMX.HASSActron
 		private static string _strServiceName = "hass-actron";
 		private static string _strDeviceName = "Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
-		private static bool _bForward = false;
+		private static string _strForwardHost = "";
 
-		public static bool ForwardToOriginalWebService
+		public static string ForwardToInternalWebService
 		{
-			get { return _bForward; }
+			get { return _strForwardHost; }
 		}
 
 		public static void Start()
@@ -34,7 +34,7 @@ namespace HMX.HASSActron
 				return;
 			}
 
-			bool.TryParse(configuration["ForwardToOriginalWebService"] ?? "false", out _bForward);
+			_strForwardHost = configuration["ForwardToInternalWebService"] ?? "";
 
 			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 

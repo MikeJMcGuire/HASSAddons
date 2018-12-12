@@ -17,7 +17,7 @@ namespace HMX.HASSActron.Controllers
 			result.ContentType = "text/html";
 			result.StatusCode = 200;
 
-			result.Content = "OK";
+			result.Content = "Last Update from Air Conditioner: " + AirConditioner.LastUpdate;
 
 			return result;
 		}

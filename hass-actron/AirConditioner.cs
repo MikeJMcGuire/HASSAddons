@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 
-
 namespace HMX.HASSActron
 {
 	public class AirConditioner
@@ -19,6 +18,11 @@ namespace HMX.HASSActron
 		public static Dictionary<int, Zone> Zones
 		{
 			get { return _dZones; }
+		}
+
+		public static DateTime LastUpdate
+		{
+			get { return _airConditionerData.dtLastUpdate; }
 		}
 
 		public static bool Configure(IConfigurationRoot configuration)

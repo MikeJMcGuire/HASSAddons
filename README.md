@@ -14,6 +14,3 @@ You will need to ensure (through a local DNS configuration on your router or hom
 At this stage, you will also need to ensure that you've used the Actron Connect application to configure your Air Conditioner before making these changes.
 
 The add-on will need to maintain the TCP port 80 binding, as the air conditioner will only attempt to connect to the system on port 80.
-
-The add-on has an option to forard to the original web service, which will enable both the add-on and the original web service to operate simultaneously enabling both Home Assistant and the Actron Connect mobile application.
-

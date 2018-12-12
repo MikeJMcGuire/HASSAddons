@@ -1,20 +1,14 @@
-﻿using HMX.HASSActron;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HMX.HASSActron.Controllers
 {
 	[Route("usage")]
 	public class UsageController : Controller
 	{
-		private static bool _bFirstUsage = true;
-
 		[Route("log")]
-		public async Task<IActionResult> Log()
+		public IActionResult Log()
 		{
 			UsageResponse response = new UsageResponse();
 			string[] strElements, strSubElements;
@@ -59,9 +53,6 @@ namespace HMX.HASSActron.Controllers
 
 				strEvent = string.Format("The air conditioner was turned {0} locally.", bMode ? "on" : "off");
 				Logging.WriteDebugLog("UsageController.Log() [0x{0}] Log Entry: {1}", 0.ToString("X8"), strEvent);
-
-				if (_bFirstUsage)
-					_bFirstUsage = false;
 			}
 			catch (Exception eException)
 			{
