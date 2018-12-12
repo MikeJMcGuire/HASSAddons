@@ -1,6 +1,6 @@
-ARG arch
+ARG BUILD_FROM
 
-FROM microsoft/dotnet:2.0-runtime AS base
+FROM $BUILD_FROM AS base
 WORKDIR /app
 
 FROM microsoft/dotnet:2.0-sdk AS build
