@@ -6,12 +6,16 @@
   "url": "https://github.com/MikeJMcGuire/hass-actron",
   "startup": "before",
   "boot": "auto",
-  "image": "mikejmcguire/hass-actron/image-{arch}-hass-actron",
+  "image": "mikejmcguire/hass-actron-{arch}",
+  "arch": [
+    "amd64",
+    "armhf",
+    "i386"
+  ],
   "options": {
     "MQTTUser": "mqttuser",
     "MQTTPassword": "mqttpassword",
     "MQTTBroker": "core-mosquitto",
-    "ForwardToOriginalWebService": false,
     "Zones": [
       {
         "Name": "Zone 1",
@@ -27,7 +31,7 @@
     "MQTTUser": "str?",
     "MQTTPassword": "str?",
     "MQTTBroker": "str",
-    "ForwardToOriginalWebService": "bool?",
+    "ForwardToInternalWebService": "str?",
     "Zones": [
       {
         "Name": "str",

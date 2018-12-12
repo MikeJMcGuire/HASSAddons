@@ -31,7 +31,7 @@ namespace HMX.HASSActron.Controllers
 
 			if (strCommandType != "4" & strCommandType != "5")
 			{
-				if (!Service.ForwardToOriginalWebService)
+				if (Service.ForwardToInternalWebService == "")
 					return new EmptyResult();
 				else
 					return await ForwardCommandToOriginalWebService();
@@ -136,7 +136,7 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
-			if (Service.ForwardToOriginalWebService)
+			if (Service.ForwardToInternalWebService != "")
 				ForwardDataToOriginalWebService(strData);
 
 			return new ObjectResult(response);
@@ -150,7 +150,7 @@ namespace HMX.HASSActron.Controllers
 			CancellationTokenSource cancellationToken = null;
 			StringContent stringContent;
 			string strContent;
-			string strURL = "http://172.16.51.10" + HttpContext.Request.Path;
+			string strURL = "http://" + Service.ForwardToInternalWebService + HttpContext.Request.Path;
 
 			Logging.WriteDebugLog("DeviceController.ForwardDataToOriginalWebService() URL: " + strURL);
 
@@ -224,7 +224,7 @@ namespace HMX.HASSActron.Controllers
 			HttpClientHandler httpClientHandler;
 			HttpResponseMessage httpResponse = null;
 			CancellationTokenSource cancellationToken = null;
-			string strURL = "http://172.16.51.10" + HttpContext.Request.Path;
+			string strURL = "http://" + Service.ForwardToInternalWebService + HttpContext.Request.Path;
 			string strContent;
 
 			Logging.WriteDebugLog("DeviceController.ForwardCommandToOriginalWebService() URL: " + strURL);
