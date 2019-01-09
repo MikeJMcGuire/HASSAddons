@@ -3,7 +3,7 @@ Actron Air Conditioner Add-On for Home Assistant
 
 This *experimental* add-on for Home Assistant enables you to control an Actron Air Conditioner equipped with the Actron Connect wireless module. 
 
-For this initial release, the add-on requires you to use the Mosquitto MQTT broker on your Home Assistant device, with authentication enabled and a valid credential supplied.
+For this initial release, the add-on requires you to use the Mosquitto MQTT broker on your Home Assistant device, with authentication enabled and a valid credential supplied. You'll also need to ensure that MQTT discovery is enabled with the default prefix 'homeassistant' for HA to discover the climate device and zone switches.
 
 Using this add-on will prevent the Actron Connect application from working on your mobile device, as the communications from the Air Conditioner to the cloud service need to be intercepted and routed to this add-on.
 
