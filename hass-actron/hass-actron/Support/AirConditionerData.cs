@@ -24,6 +24,14 @@ namespace HMX.HASSActron
 		public bool bZone6;
 		public bool bZone7;
 		public bool bZone8;
+		public double dblZone1Temperature;
+		public double dblZone2Temperature;
+		public double dblZone3Temperature;
+		public double dblZone4Temperature;
+		public double dblZone5Temperature;
+		public double dblZone6Temperature;
+		public double dblZone7Temperature;
+		public double dblZone8Temperature;
 		public DateTime dtLastUpdate;
 	}
 }

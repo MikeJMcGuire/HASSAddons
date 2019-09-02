@@ -11,10 +11,16 @@ namespace HMX.HASSActron
 		private static string _strDeviceName = "Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
 		private static string _strForwardHost = "";
+		private static bool _bRegisterZoneTemperatures = false;
 
 		public static string ForwardToInternalWebService
 		{
 			get { return _strForwardHost; }
+		}
+
+		public static bool RegisterZoneTemperatures
+		{
+			get { return _bRegisterZoneTemperatures; }
 		}
 
 		public static void Start()
@@ -35,6 +41,8 @@ namespace HMX.HASSActron
 			}
 
 			_strForwardHost = configuration["ForwardToInternalWebService"] ?? "";
+
+			bool.TryParse(configuration["RegisterZoneTemperatures"] ?? "false", out _bRegisterZoneTemperatures);
 
 			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
@@ -72,6 +80,11 @@ namespace HMX.HASSActron
 			{
 				MQTT.SendMessage(string.Format("homeassistant/switch/actron/airconzone{0}/config", iZone), "{{\"name\":\"{0} Zone\",\"state_topic\":\"actron/aircon/zone{1}\",\"command_topic\":\"actron/aircon/zone{1}/set\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"state_on\":\"ON\",\"state_off\":\"OFF\",\"availability_topic\":\"{2}/status\"}}", AirConditioner.Zones[iZone].Name, iZone, _strServiceName.ToLower());
 				MQTT.Subscribe("actron/aircon/zone{0}/set", iZone);
+
+				if (_bRegisterZoneTemperatures)
+					MQTT.SendMessage(string.Format("homeassistant/sensor/actron/airconzone{0}/config", iZone), "{{\"name\":\"{0}\",\"state_topic\":\"actron/aircon/zone{1}/temperature\",\"unit_of_measurement\":\"°C\",\"availability_topic\":\"{2}/status\"}}", AirConditioner.Zones[iZone].Name, iZone, _strServiceName.ToLower());
+				else
+					MQTT.SendMessage(string.Format("homeassistant/sensor/actron/airconzone{0}/config", iZone), "{}"); // Clear existing devices
 			}
 
 			MQTT.Subscribe("actron/aircon/mode/set");

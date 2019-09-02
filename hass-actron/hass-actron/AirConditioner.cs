@@ -93,6 +93,18 @@ namespace HMX.HASSActron
 				if (_dZones.Count >= 6) MQTT.SendMessage("actron/aircon/zone6", _airConditionerData.bZone6 ? "ON" : "OFF");
 				if (_dZones.Count >= 7) MQTT.SendMessage("actron/aircon/zone7", _airConditionerData.bZone7 ? "ON" : "OFF");
 				if (_dZones.Count >= 8) MQTT.SendMessage("actron/aircon/zone8", _airConditionerData.bZone8 ? "ON" : "OFF");
+
+				if (Service.RegisterZoneTemperatures)
+				{
+					if (_dZones.Count >= 1) MQTT.SendMessage("actron/aircon/zone1/temperature", _airConditionerData.dblZone1Temperature.ToString());
+					if (_dZones.Count >= 2) MQTT.SendMessage("actron/aircon/zone2/temperature", _airConditionerData.dblZone2Temperature.ToString());
+					if (_dZones.Count >= 3) MQTT.SendMessage("actron/aircon/zone3/temperature", _airConditionerData.dblZone3Temperature.ToString());
+					if (_dZones.Count >= 4) MQTT.SendMessage("actron/aircon/zone4/temperature", _airConditionerData.dblZone4Temperature.ToString());
+					if (_dZones.Count >= 5) MQTT.SendMessage("actron/aircon/zone5/temperature", _airConditionerData.dblZone5Temperature.ToString());
+					if (_dZones.Count >= 6) MQTT.SendMessage("actron/aircon/zone6/temperature", _airConditionerData.dblZone6Temperature.ToString());
+					if (_dZones.Count >= 7) MQTT.SendMessage("actron/aircon/zone7/temperature", _airConditionerData.dblZone7Temperature.ToString());
+					if (_dZones.Count >= 8) MQTT.SendMessage("actron/aircon/zone8/temperature", _airConditionerData.dblZone8Temperature.ToString());
+				}
 			}
 
 			lock (_oLockCommand)
