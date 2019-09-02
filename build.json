@@ -1,9 +1,9 @@
 {
-    "squash": false,
-    "build_from": {
-        "amd64": "microsoft/dotnet:2.2-runtime",
-        "armhf": "microsoft/dotnet:2.2-runtime-stretch-slim-arm32v7",
-        "i386": "microsoft/dotnet:2.2-runtime"
-    },
-    "args": {}
+  "squash": false,
+  "build_from": {
+    "amd64": "mcr.microsoft.com/dotnet/core/runtime:2.2",
+    "armhf": "mcr.microsoft.com/dotnet/core/runtime:2.2-stretch-slim-arm32v7",
+    "i386": "mcr.microsoft.com/dotnet/core/runtime:2.2"
+  },
+  "args": {}
 }

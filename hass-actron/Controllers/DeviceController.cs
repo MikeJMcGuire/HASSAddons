@@ -78,7 +78,7 @@ namespace HMX.HASSActron.Controllers
 			DataResponse response = new DataResponse();
 			StreamReader reader;
 			string strData;
-			Newtonsoft.Json.Linq.JArray aZones;
+			Newtonsoft.Json.Linq.JArray aZones, aZoneTemperatures;
 
 			Logging.WriteDebugLog("DeviceController.Data() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
@@ -121,6 +121,16 @@ namespace HMX.HASSActron.Controllers
 						data.bZone6 = (aZones[5].ToString() == "1");
 						data.bZone7 = (aZones[6].ToString() == "1");
 						data.bZone8 = (aZones[7].ToString() == "1");
+
+						aZoneTemperatures = (Newtonsoft.Json.Linq.JArray)dDataField["individualZoneTemperatures_oC"];
+						if (aZones[0].ToString() != "null") double.TryParse(aZones[0].ToString(), out data.dblZone1Temperature);
+						if (aZones[1].ToString() != "null") double.TryParse(aZones[1].ToString(), out data.dblZone2Temperature);
+						if (aZones[2].ToString() != "null") double.TryParse(aZones[2].ToString(), out data.dblZone3Temperature);
+						if (aZones[3].ToString() != "null") double.TryParse(aZones[3].ToString(), out data.dblZone4Temperature);
+						if (aZones[4].ToString() != "null") double.TryParse(aZones[4].ToString(), out data.dblZone5Temperature);
+						if (aZones[5].ToString() != "null") double.TryParse(aZones[5].ToString(), out data.dblZone6Temperature);
+						if (aZones[6].ToString() != "null") double.TryParse(aZones[6].ToString(), out data.dblZone7Temperature);
+						if (aZones[7].ToString() != "null") double.TryParse(aZones[7].ToString(), out data.dblZone8Temperature);							
 
 						AirConditioner.PostData(data);
 
