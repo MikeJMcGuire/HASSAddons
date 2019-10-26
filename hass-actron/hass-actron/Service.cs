@@ -10,13 +10,7 @@ namespace HMX.HASSActron
 		private static string _strServiceName = "hass-actron";
 		private static string _strDeviceName = "Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
-		private static string _strForwardHost = "";
 		private static bool _bRegisterZoneTemperatures = false;
-
-		public static string ForwardToInternalWebService
-		{
-			get { return _strForwardHost; }
-		}
 
 		public static bool RegisterZoneTemperatures
 		{
@@ -39,8 +33,6 @@ namespace HMX.HASSActron
 				Logging.WriteDebugLogError("Service.Start()", eException, "Unable to build configuration instance.");
 				return;
 			}
-
-			_strForwardHost = configuration["ForwardToInternalWebService"] ?? "";
 
 			bool.TryParse(configuration["RegisterZoneTemperatures"] ?? "false", out _bRegisterZoneTemperatures);
 

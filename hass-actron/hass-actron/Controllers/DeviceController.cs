@@ -14,58 +14,64 @@ namespace HMX.HASSActron.Controllers
 	[Route("rest/{version:required}/block/{device:required}")]
     public class DeviceController : Controller
 	{
+		private static int _iTimeout = 10000;
+
 		[Route("commands")]
 		public async Task<IActionResult> Command(string version, string device)
 		{
 			AirConditionerCommand command;
-			ContentResult result;
+			CancellationToken cancellationToken = new CancellationToken();
+			ActionResult result;
+			ContentResult contentResult;
 			string strCommandType;
 
-			Logging.WriteDebugLog("DeviceController.Command() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+			Logging.WriteDebugLog("DeviceController.Command() Client Start: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("Accept, Content-Type, Authorization, Content-Length, X-Requested-With, X-Ninja-Token"));
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
+			if (!await AirConditioner.EventCommand.WaitOneAsync(_iTimeout, cancellationToken))
+				return new EmptyResult();
+
 			command = AirConditioner.GetCommand(out strCommandType);
 
 			if (strCommandType != "4" & strCommandType != "5")
-			{
-				if (Service.ForwardToInternalWebService == "")
-					return new EmptyResult();
-				else
-					return await ForwardCommandToOriginalWebService();
-			}
+				result = new EmptyResult();
 			else
 			{
-				result = new ContentResult();
+				contentResult = new ContentResult();
 
-				result.ContentType = "application/json";
-				result.StatusCode = 200;
+				contentResult.ContentType = "application/json";
+				contentResult.StatusCode = 200;
 
 				if (strCommandType == "4")
 				{
-					result.Content = string.Format("{{\"DEVICE\":[{{\"G\":\"0\",\"V\":2,\"D\":4,\"DA\":{{\"amOn\":{0},\"tempTarget\":{1},\"fanSpeed\":{2},\"mode\":{3}}}}}]}}",
+					contentResult.Content = string.Format("{{\"DEVICE\":[{{\"G\":\"0\",\"V\":2,\"D\":4,\"DA\":{{\"amOn\":{0},\"tempTarget\":{1},\"fanSpeed\":{2},\"mode\":{3}}}}}]}}",
 						command.amOn ? "true" : "false",
 						command.tempTarget.ToString("F1"),
 						command.fanSpeed.ToString(),
 						command.mode.ToString()
 					);
 
-					Logging.WriteDebugLog("DeviceController.Command() Command: {0}", result.Content);
+					Logging.WriteDebugLog("DeviceController.Command() Command: {0}", contentResult.Content);
 
 				}
 				else if (strCommandType == "5")
 				{
-					result.Content = string.Format("{{\"DEVICE\":[{{\"G\":\"0\",\"V\":2,\"D\":5,\"DA\":{{\"enabledZones\":[{0}]}}}}]}}",
+					contentResult.Content = string.Format("{{\"DEVICE\":[{{\"G\":\"0\",\"V\":2,\"D\":5,\"DA\":{{\"enabledZones\":[{0}]}}}}]}}",
 						command.enabledZones
 					);
 
-					Logging.WriteDebugLog("DeviceController.Command() Command: {0}", result.Content);
+					Logging.WriteDebugLog("DeviceController.Command() Command: {0}", contentResult.Content);
 				}
 
-				return result;
+				result = contentResult;
 			}
+
+			Logging.WriteDebugLog("DeviceController.Command() Client End: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
+			return result;
 		}
 
 		[Route("data")]
@@ -146,167 +152,7 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
-			if (Service.ForwardToInternalWebService != "")
-				ForwardDataToOriginalWebService(strData);
-
 			return new ObjectResult(response);
-		}
-
-		private async void ForwardDataToOriginalWebService(string strData)
-		{
-			HttpClient httpClient = null;
-			HttpClientHandler httpClientHandler;
-			HttpResponseMessage httpResponse = null;
-			CancellationTokenSource cancellationToken = null;
-			StringContent stringContent;
-			string strContent;
-			string strURL = "http://" + Service.ForwardToInternalWebService + HttpContext.Request.Path;
-
-			Logging.WriteDebugLog("DeviceController.ForwardDataToOriginalWebService() URL: " + strURL);
-
-			httpClientHandler = new HttpClientHandler();
-			httpClientHandler.Proxy = null;
-			httpClientHandler.UseProxy = false;
-
-			httpClient = new HttpClient(httpClientHandler);
-
-			httpClient.DefaultRequestHeaders.Connection.Add("close");
-
-			stringContent = new StringContent(strData);
-
-			foreach (string strHeader in HttpContext.Request.Headers.Keys)
-			{
-				try
-				{
-					switch (strHeader)
-					{
-						case "User-Agent":
-							httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpContext.Request.Headers[strHeader].ToString());
-							break;
-
-						case "Content-Type":
-							stringContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(HttpContext.Request.Headers[strHeader].ToString());
-							break;
-
-						case "X-Ninja-Token":
-							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
-							break;
-					}
-				}
-				catch (Exception eException)
-				{
-					Logging.WriteDebugLogError("DeviceController.ForwardDataToOriginalWebService()", eException, "Unable to add request header ({0}).", strHeader);
-				}
-			}
-
-			try
-			{
-				cancellationToken = new CancellationTokenSource();
-				cancellationToken.CancelAfter(5000);
-
-				httpResponse = await httpClient.PostAsync(strURL, stringContent, cancellationToken.Token);
-
-				if (httpResponse.IsSuccessStatusCode)
-				{
-					strContent = await httpResponse.Content.ReadAsStringAsync();
-					Logging.WriteDebugLog("Response: " + strContent);
-				}
-				else
-				{
-					Logging.WriteDebugLog("Response: " + httpResponse.StatusCode);
-				}
-			}
-			catch (Exception eException)
-			{
-				Logging.WriteDebugLogError("DeviceController.ForwardDataToOriginalWebService()", eException, "Unable to process API HTTP response.");
-			}
-
-			cancellationToken?.Dispose();
-			httpResponse?.Dispose();
-			httpClient?.Dispose();
-		}
-
-		private async Task<IActionResult> ForwardCommandToOriginalWebService()
-		{
-			IActionResult result;
-			ContentResult contentResult;
-			HttpClient httpClient = null;
-			HttpClientHandler httpClientHandler;
-			HttpResponseMessage httpResponse = null;
-			CancellationTokenSource cancellationToken = null;
-			string strURL = "http://" + Service.ForwardToInternalWebService + HttpContext.Request.Path;
-			string strContent;
-
-			Logging.WriteDebugLog("DeviceController.ForwardCommandToOriginalWebService() URL: " + strURL);
-
-			httpClientHandler = new HttpClientHandler();
-			httpClientHandler.Proxy = null;
-			httpClientHandler.UseProxy = false;
-
-			httpClient = new HttpClient(httpClientHandler);
-
-			httpClient.DefaultRequestHeaders.Connection.Add("close");
-
-			result = new EmptyResult();
-
-			foreach (string strHeader in HttpContext.Request.Headers.Keys)
-			{
-				try
-				{
-					switch (strHeader)
-					{
-						case "User-Agent":
-							httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpContext.Request.Headers[strHeader].ToString());
-							break;
-
-						case "X-Ninja-Token":
-							httpClient.DefaultRequestHeaders.Add(strHeader, HttpContext.Request.Headers[strHeader].ToString());
-							break;
-					}
-				}
-				catch (Exception eException)
-				{
-					Logging.WriteDebugLogError("DeviceController.ForwardCommandToOriginalWebService()", eException, "Unable to add request header ({0}).", strHeader);
-				}
-			}
-
-			try
-			{
-				cancellationToken = new CancellationTokenSource();
-				cancellationToken.CancelAfter(5000);
-
-				httpResponse = await httpClient.GetAsync(strURL, cancellationToken.Token);
-
-				if (httpResponse.IsSuccessStatusCode)
-				{
-					strContent = await httpResponse.Content.ReadAsStringAsync();
-
-					if (strContent.Length > 0)
-					{
-						Logging.WriteDebugLog("Response: " + strContent);
-
-						contentResult = new ContentResult();
-						contentResult.ContentType = httpResponse.Content.Headers.ContentType.MediaType;
-						contentResult.Content = strContent;
-
-						result = contentResult;
-					}
-				}
-				else
-				{
-					Logging.WriteDebugLog("Response: " + httpResponse.StatusCode);
-				}
-			}
-			catch (Exception eException)
-			{
-				Logging.WriteDebugLogError("DeviceController.ForwardCommandToOriginalWebService()", eException, "Unable to process API HTTP response.");
-			}
-
-			cancellationToken?.Dispose();
-			httpResponse?.Dispose();
-			httpClient?.Dispose();
-
-			return result;
-		}
+		}		
 	}
 }

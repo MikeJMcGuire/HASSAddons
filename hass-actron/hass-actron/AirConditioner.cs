@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace HMX.HASSActron
 {
@@ -14,6 +15,7 @@ namespace HMX.HASSActron
 		private static bool _bPendingZone = false;
 		private static Dictionary<int, Zone> _dZones = new Dictionary<int, Zone>();
 		private static bool _bDataReceived = false;
+		private static ManualResetEvent _eventCommand;
 
 		public static Dictionary<int, Zone> Zones
 		{
@@ -25,11 +27,18 @@ namespace HMX.HASSActron
 			get { return _airConditionerData.dtLastUpdate; }
 		}
 
+		public static ManualResetEvent EventCommand
+		{
+			get { return _eventCommand; }
+		}
+		
 		public static bool Configure(IConfigurationRoot configuration)
 		{
 			Zone zone;
 
 			Logging.WriteDebugLog("AirConditioner.Configure()");
+
+			_eventCommand = new ManualResetEvent(false);
 
 			lock (_oLockData)
 			{
@@ -157,6 +166,12 @@ namespace HMX.HASSActron
 				else
 					strCommandType = "";
 
+				if (!_bPendingCommand & !_bPendingZone)
+				{
+					Logging.WriteDebugLog("AirConditioner.GetCommand() Command Event Reset");
+					_eventCommand.Reset();
+				}
+
 				return _airConditionerCommand;
 			}
 		}
@@ -171,12 +186,16 @@ namespace HMX.HASSActron
 				{
 					Logging.WriteDebugLog("AirConditioner.PostCommand() [0x{0}] Command Update", lRequestId.ToString("X8"));
 					_bPendingCommand = true;
+					Logging.WriteDebugLog("AirConditioner.GetCommand() Command Event Set");
+					_eventCommand.Set();
 				}
 
 				if (_airConditionerCommand.enabledZones != command.enabledZones)
 				{
 					Logging.WriteDebugLog("AirConditioner.PostCommand() [0x{0}] Zone Update", lRequestId.ToString("X8"));
 					_bPendingZone = true;
+					Logging.WriteDebugLog("AirConditioner.GetCommand() Command Event Set");
+					_eventCommand.Set();
 				}
 
 				_airConditionerCommand = command;
