@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HMX.HASSActron.Controllers
 {
-	public class Instrumentation : Controller
+	public class InstrumentationController : Controller
 	{
 		[Route("/")]
 		public IActionResult Test()

@@ -4,4 +4,5 @@
  
 /.vs
 /hass-actron/.vs
+/hass-actron/bin
 /hass-actron/obj

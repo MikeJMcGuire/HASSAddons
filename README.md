@@ -11,13 +11,17 @@ You will need to ensure (through a local DNS configuration on your router or hom
 - actron-connect.actronair.com.au
 - actron.ninja.is (older firmware versions)
 - que.actronair.com.au (more recent firmware versions)
+- updates.lx-cloud.com (more recent firmware versions)
 
 At this stage, you will also need to ensure that you've used the Actron Connect application to configure your Air Conditioner before making these changes.
 
 The add-on will need to maintain the TCP port 80 binding, as the air conditioner will only attempt to connect to the system on port 80.
 
+If you add the local DNS entry for updates.lx-cloud.com, it will prevent the ActronConnect module from auto-updating. Feel free to use auto-updating, but there is a risk that an update will prevent the ActronConnect from working with Home Assistant. If this happens though, let me know and we can investigate the changes.
+
+New Features (v0.6)
+- Supports newer firmware versions of the Actron Connect that use HTTP long polling (still in testing).
+
 New Features (v0.5)
 - For air conditioners with per-zone temperatures, set 'RegisterZoneTemperatures' to true in the options.json (add-on options). This will create per-zone sensor elements in Home Assistant.
 
-Planned (v0.5+)
-- Newer firmware versions of the Actron Connect are using que.actronair.com.au for the web service (instead of actron.ninja.is). I understand that the add-on works with the new version of the Actron Connect's firmware, but it would be good to do more testing (looking for volunteers!)
