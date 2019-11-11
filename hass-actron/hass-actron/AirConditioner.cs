@@ -16,6 +16,8 @@ namespace HMX.HASSActron
 		private static Dictionary<int, Zone> _dZones = new Dictionary<int, Zone>();
 		private static bool _bDataReceived = false;
 		private static ManualResetEvent _eventCommand;
+		private static DateTime _dtLastCommand = DateTime.MinValue;
+		private static int _iSuppressTimer = 10; // Seconds
 
 		public static Dictionary<int, Zone> Zones
 		{
@@ -120,7 +122,9 @@ namespace HMX.HASSActron
 			{
 				if (!_bPendingCommand)
 				{
-					if (_airConditionerCommand.amOn != _airConditionerData.bOn || _airConditionerCommand.fanSpeed != _airConditionerData.iFanSpeed || _airConditionerCommand.mode != _airConditionerData.iMode || _airConditionerCommand.tempTarget != _airConditionerData.dblSetTemperature)
+					if (DateTime.Now.Subtract(_dtLastCommand) < TimeSpan.FromSeconds(_iSuppressTimer))
+						Logging.WriteDebugLog("AirConditioner.PostData() Suppressing Command Update");
+					else if (_airConditionerCommand.amOn != _airConditionerData.bOn || _airConditionerCommand.fanSpeed != _airConditionerData.iFanSpeed || _airConditionerCommand.mode != _airConditionerData.iMode || _airConditionerCommand.tempTarget != _airConditionerData.dblSetTemperature)
 					{
 						Logging.WriteDebugLog("AirConditioner.PostData() Updating Command");
 
@@ -131,7 +135,9 @@ namespace HMX.HASSActron
 					}
 				}
 
-				if (!_bPendingZone)
+				if (DateTime.Now.Subtract(_dtLastCommand) < TimeSpan.FromSeconds(_iSuppressTimer))
+					Logging.WriteDebugLog("AirConditioner.PostData() Suppressing Zone Update");
+				else if (!_bPendingZone)
 				{
 					strZones = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}", _airConditionerData.bZone1 ? "1" : "0", _airConditionerData.bZone2 ? "1" : "0", _airConditionerData.bZone3 ? "1" : "0", _airConditionerData.bZone4 ? "1" : "0", _airConditionerData.bZone5 ? "1" : "0", _airConditionerData.bZone6 ? "1" : "0", _airConditionerData.bZone7 ? "1" : "0", _airConditionerData.bZone8 ? "1" : "0");
 					
@@ -188,6 +194,8 @@ namespace HMX.HASSActron
 					_bPendingCommand = true;
 					Logging.WriteDebugLog("AirConditioner.GetCommand() Command Event Set");
 					_eventCommand.Set();
+
+					_dtLastCommand = DateTime.Now;
 				}
 
 				if (_airConditionerCommand.enabledZones != command.enabledZones)
@@ -196,6 +204,8 @@ namespace HMX.HASSActron
 					_bPendingZone = true;
 					Logging.WriteDebugLog("AirConditioner.GetCommand() Command Event Set");
 					_eventCommand.Set();
+
+					_dtLastCommand = DateTime.Now;
 				}
 
 				_airConditionerCommand = command;

@@ -1,6 +1,6 @@
 {
   "name": "Actron Air Conditioner",
-  "version": "0.6",
+  "version": "0.7",
   "slug": "hass-actron",
   "description": "An add-on for Actron Air Conditioners using the Actron Connect Wi-Fi module.",
   "url": "https://github.com/MikeJMcGuire/hass-actron",
@@ -10,6 +10,7 @@
   "arch": [
     "amd64",
     "armhf",
+    "armv7",
     "i386"
   ],
   "options": {
