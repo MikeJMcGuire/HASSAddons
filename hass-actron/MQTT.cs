@@ -1,5 +1,7 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Options;
+using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
 using System;
 using System.Collections.Generic;
@@ -38,12 +40,12 @@ namespace HMX.HASSActron
 
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
-			_mqtt.ApplicationMessageReceived += MessageProcessor;
+			_mqtt.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(MessageProcessor);
 
 			await _mqtt.StartAsync(options);
 		}
 
-		private static void MessageProcessor(object sender, MqttApplicationMessageReceivedEventArgs e)
+		private static void MessageProcessor(MqttApplicationMessageReceivedEventArgs e)
 		{
 			Logging.WriteDebugLog("MQTT.MessageProcessor() {0}", e.ApplicationMessage.Topic);
 
