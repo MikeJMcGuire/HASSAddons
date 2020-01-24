@@ -1,6 +1,6 @@
 {
   "name": "NGINX Home Assistant SSL Proxy",
-  "version": "0.1",
+  "version": "0.2",
   "slug": "hass-proxy",
   "description": "An SSL/TLS proxy for external access to Home Assistant",
   "url": "https://github.com/MikeJMcGuire/hass-proxy",
@@ -10,6 +10,7 @@
   "arch": [
     "amd64",
     "armhf",
+    "armv7",
     "i386"
   ],
   "ports": {
