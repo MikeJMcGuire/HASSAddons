@@ -1,0 +1,10 @@
+version: '2'
+services:
+  hassactron:
+    container_name: hassactron  
+    image: "mikejmcguire/hass-actron-amd64:latest"
+    restart: always
+    ports:
+      - "80:80" 
+    volumes:
+      - /pathtoconfigfile:/data

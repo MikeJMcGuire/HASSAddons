@@ -1,10 +1,10 @@
 {
   "squash": false,
   "build_from": {
-    "amd64": "mcr.microsoft.com/dotnet/core/runtime:latest",
-    "armhf": "mcr.microsoft.com/dotnet/core/runtime:3.0-buster-slim-arm32v7",
-    "armv7": "mcr.microsoft.com/dotnet/core/runtime:3.0-buster-slim-arm32v7",
-    "i386": "mcr.microsoft.com/dotnet/core/runtime:latest"
+    "amd64": "mcr.microsoft.com/dotnet/core/runtime:3.1.1-buster-slim",
+    "armhf": "mcr.microsoft.com/dotnet/core/runtime:3.1.1-buster-slim-arm32v7",
+    "armv7": "mcr.microsoft.com/dotnet/core/runtime:3.1.1-buster-slim-arm32v7",
+    "i386": "mcr.microsoft.com/dotnet/core/runtime:3.1.1-buster-slim"
   },
   "args": {}
 }
