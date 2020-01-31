@@ -178,6 +178,8 @@ namespace HMX.HASSActron
 					}
 				}
 			}
+
+			MQTT.Update(null);
 		}
 
 		public static AirConditionerCommand GetCommand(out string strCommandType)
