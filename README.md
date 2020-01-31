@@ -19,6 +19,9 @@ The add-on will need to maintain the TCP port 80 binding, as the air conditioner
 
 If you add the local DNS entry for updates.lx-cloud.com, it will prevent the ActronConnect module from auto-updating. Feel free to use auto-updating, but there is a risk that an update will prevent the ActronConnect from working with Home Assistant. If this happens though, let me know and we can investigate the changes.
 
+New Features (v0.91)
+- MQTT devices will now appear online/offline depending on the connection status of the Actron Connect (i.e. if the Actron Connect is not sending data to the add-on, the MQTT devices will appear as unavailable).
+
 New Features (v0.9)
 - Command changes are reflected back to HA immediately to prevent the appearance of changes not taking effect.
 - Compressor state reflected in HA climate entity.

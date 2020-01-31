@@ -18,6 +18,7 @@ namespace HMX.HASSActron
 		private static string _strClientId = "";
 		private static Timer _timerMQTT = null;
 		private static MessageHandler _messageHandler = null;
+		private static int _iLastUpdateThreshold = 10; // Minutes
 		
 		public static async void StartMQTT(string strMQTTServer, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{
@@ -61,9 +62,12 @@ namespace HMX.HASSActron
 				_mqtt.SubscribeAsync(string.Format(strTopicFormat, strParams));
 		}
 
-		private static void Update(object oState)
+		public static void Update(object oState)
 		{
-			SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "online");
+			if (DateTime.Now >= AirConditioner.LastUpdate.AddMinutes(_iLastUpdateThreshold))
+				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
+			else
+				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "online");
 		}
 
 		public static void StopMQTT()
