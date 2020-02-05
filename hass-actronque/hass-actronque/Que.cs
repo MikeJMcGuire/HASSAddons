@@ -14,11 +14,11 @@ namespace HMX.HASSActronQue
 	{
 		private static string _strQueBaseURL = "https://que.actronair.com.au";
 		private static string _strBaseUserAgent = "nxgen-ios/1214 CFNetwork/976 Darwin/18.2.0";
-		private static string _strDeviceName = "TestClient";
+		private static string _strDeviceName = "HASSActronQue";
 		private static string _strAirConditionerName = "Que Air Conditioner";
 		private static string _strPairingTokenFile = "/data/pairingtoken.json";
 		private static string _strBearerTokenFile = "/data/bearertoken.json";
-		private static string _strDeviceUniqueIdentifier = "1111";
+		private static string _strDeviceUniqueIdentifier = "980374590873";
 		private static string _strQueUser, _strQuePassword, _strSerialNumber;
 		private static string _strNextEventURL = "";
 		private static HttpClient _httpClient = null, _httpClientAuth = null;
