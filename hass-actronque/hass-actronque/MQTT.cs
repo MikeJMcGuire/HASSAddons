@@ -22,6 +22,8 @@ namespace HMX.HASSActronQue
 		
 		public static async void StartMQTT(string strMQTTServer, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{
+			IManagedMqttClientOptions options;
+
 			Logging.WriteDebugLog("MQTT.StartMQTT()");
 
 			if (strMQTTServer == null || strMQTTServer == "")
@@ -34,7 +36,7 @@ namespace HMX.HASSActronQue
 
 			if (strUser == "")
 			{
-				IManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
+				options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
 					.WithClientId(_strClientId)
 					.WithTcpServer(strMQTTServer)
 					.Build())
@@ -42,7 +44,7 @@ namespace HMX.HASSActronQue
 			}
 			else
 			{
-				IManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
+				options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
 					.WithClientId(_strClientId)
 					.WithCredentials(strUser, strPassword)
 					.WithTcpServer(strMQTTServer)
