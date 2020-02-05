@@ -1,0 +1,9 @@
+{
+  "MQTTUser": "",
+  "MQTTPassword": "",
+  "MQTTBroker": "core-mosquitto",
+  "QueUser": "queuser",
+  "QuePassword": "quepassword",
+  "QueSerial": "queserialnumber",
+  "ZoneCount": 8
+}
