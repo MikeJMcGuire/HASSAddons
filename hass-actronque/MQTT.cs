@@ -32,12 +32,23 @@ namespace HMX.HASSActronQue
 			_strClientId = strClientId;
 			_messageHandler = messageHandler;
 
-			IManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
-				.WithClientId(_strClientId)
-				.WithCredentials(strUser, strPassword)
-				.WithTcpServer(strMQTTServer)
-				.Build())
-			.Build();
+			if (strUser == "")
+			{
+				IManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
+					.WithClientId(_strClientId)
+					.WithTcpServer(strMQTTServer)
+					.Build())
+				.Build();
+			}
+			else
+			{
+				IManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
+					.WithClientId(_strClientId)
+					.WithCredentials(strUser, strPassword)
+					.WithTcpServer(strMQTTServer)
+					.Build())
+				.Build();
+			}
 
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
