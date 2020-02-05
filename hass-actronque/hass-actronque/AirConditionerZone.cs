@@ -8,6 +8,8 @@ namespace HMX.HASSActronQue
 	{
 		public string Name; // NV_Title
 		public double Temperature; // LiveTemp_oC
+		public double SetTemperatureCooling; // TemperatureSetpoint_Cool_oC
+		public double SetTemperatureHeating; // TemperatureSetpoint_Heat_oC
 		public bool State;
 	}
 }

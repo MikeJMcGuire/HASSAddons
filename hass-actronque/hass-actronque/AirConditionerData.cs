@@ -12,6 +12,7 @@ namespace HMX.HASSActronQue
 		public bool On; // isOn
 		public double SetTemperatureCooling; // TemperatureSetpoint_Cool_oC
 		public double SetTemperatureHeating; // TemperatureSetpoint_Heat_oC
+		public double Temperature; // LiveTemp_oC
 		public string CompressorState; // CompressorMode
 		public DateTime LastUpdated;
 	}
