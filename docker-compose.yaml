@@ -1,0 +1,8 @@
+version: '2'
+services:
+  hassactronque:
+    container_name: hassactronque
+    image: "mikejmcguire/hass-actronque-amd64:latest"
+    restart: always
+    volumes:
+      - /pathtoconfigfile:/data
