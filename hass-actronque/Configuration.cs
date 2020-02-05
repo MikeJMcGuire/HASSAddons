@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,25 +8,25 @@ namespace HMX.HASSActronQue
 	public class Configuration
 	{
 		// Boolean
-		public static bool GetConfiguration(string strVariable, out bool bConfiguration)
+		public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
 		{
-			return GetConfiguration(strVariable, out bConfiguration, false);
+			return GetConfiguration(configuration, strVariable, out bConfiguration, false);
 		}
 
-		public static bool GetPrivateConfiguration(string strVariable, out bool bConfiguration)
+		public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
 		{
-			return GetConfiguration(strVariable, out bConfiguration, true);
+			return GetConfiguration(configuration, strVariable, out bConfiguration, true);
 		}
 
-		private static bool GetConfiguration(string strVariable, out bool bConfiguration, bool bPrivate)
+		private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration, bool bPrivate)
 		{
 			string strTemp;
 
 			Logging.WriteDebugLog("Configuration.GetConfiguration() Read {0}", strVariable);
 
-			if ((Environment.GetEnvironmentVariable(strVariable) ?? "") != "")
+			if ((configuration[strVariable] ?? "") != "")
 			{
-				strTemp = Environment.GetEnvironmentVariable(strVariable);
+				strTemp = configuration[strVariable];
 
 				if (!bool.TryParse(strTemp, out bConfiguration))
 				{
@@ -54,30 +55,35 @@ namespace HMX.HASSActronQue
 		}
 
 		// String
-		public static bool GetConfiguration(string strVariable, out string strConfiguration)
+		public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
 		{
-			return GetConfiguration(strVariable, out strConfiguration, false, false);
+			return GetConfiguration(configuration, strVariable, out strConfiguration, false, false);
 		}
 
-		public static bool GetOptionalConfiguration(string strVariable, out string strConfiguration)
+		public static bool GetOptionalConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
 		{
-			return GetConfiguration(strVariable, out strConfiguration, false, true);
+			return GetConfiguration(configuration, strVariable, out strConfiguration, false, true);
 		}
 
-		public static bool GetPrivateConfiguration(string strVariable, out string strConfiguration)
+		public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
 		{
-			return GetConfiguration(strVariable, out strConfiguration, true, false);
+			return GetConfiguration(configuration, strVariable, out strConfiguration, true, false);
 		}
 
-		private static bool GetConfiguration(string strVariable, out string strConfiguration, bool bPrivate, bool bOptional)
+		public static bool GetPrivateOptionalConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
+		{
+			return GetConfiguration(configuration, strVariable, out strConfiguration, true, true);
+		}
+
+		private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration, bool bPrivate, bool bOptional)
 		{
 			Logging.WriteDebugLog("Configuration.GetConfiguration() Read {0}", strVariable);
 
 			strConfiguration = "";
 
-			if ((Environment.GetEnvironmentVariable(strVariable) ?? "") != "")
+			if ((configuration[strVariable] ?? "") != "")
 			{
-				strConfiguration = Environment.GetEnvironmentVariable(strVariable);
+				strConfiguration = configuration[strVariable];
 
 				if (bPrivate)
 					Logging.WriteDebugLog("{0}: *******", strVariable);
@@ -99,25 +105,25 @@ namespace HMX.HASSActronQue
 		}
 
 		// Integer
-		public static bool GetConfiguration(string strVariable, out int iConfiguration)
+		public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out int iConfiguration)
 		{
-			return GetConfiguration(strVariable, out iConfiguration, false);
+			return GetConfiguration(configuration, strVariable, out iConfiguration, false);
 		}
 
-		public static bool GetPrivateConfiguration(string strVariable, out int iConfiguration)
+		public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out int iConfiguration)
 		{
-			return GetConfiguration(strVariable, out iConfiguration, true);
+			return GetConfiguration(configuration, strVariable, out iConfiguration, true);
 		}		
 
-		private static bool GetConfiguration(string strVariable, out int iConfiguration, bool bPrivate)
+		private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out int iConfiguration, bool bPrivate)
 		{
 			string strTemp;
 
 			Logging.WriteDebugLog("Configuration.GetConfiguration() Read {0}", strVariable);
 
-			if ((Environment.GetEnvironmentVariable(strVariable) ?? "") != "")
+			if ((configuration[strVariable] ?? "") != "")
 			{
-				strTemp = Environment.GetEnvironmentVariable(strVariable);
+				strTemp = configuration[strVariable];
 
 				if (!int.TryParse(strTemp, out iConfiguration))
 				{
