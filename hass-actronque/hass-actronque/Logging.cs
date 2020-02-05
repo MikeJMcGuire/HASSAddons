@@ -13,25 +13,35 @@ namespace HMX.HASSActronQue
     {
 		public static void WriteSystemLog(string strFormat, params object[] strParams)
 		{
-			WriteDebugLog(strFormat, strParams);
+			WriteLog(strFormat, strParams);
 		}
 
 		public static void WriteDebugLog(string strFormat, params object[] strParams)
 		{
-			WriteDebugLog(strFormat, strParams);
+			WriteLog(strFormat, strParams);
 		}
 
 		public static void WriteDebugLogError(string strFunction, string strFormat, params object[] strParams)
 		{
-			WriteDebugLog(string.Format("{0} Error: {1}", strFunction, string.Format(strFormat, strParams)));
+			WriteLog(string.Format("{0} Error: {1}", strFunction, string.Format(strFormat, strParams)));
+		}
+
+		public static void WriteDebugLogError(string strFunction, long lRequestId, string strFormat, params object[] strParams)
+		{
+			WriteLog(string.Format("{0} [0x{1}] Error: {2}", strFunction, lRequestId.ToString("X8"), string.Format(strFormat, strParams)));
 		}
 
 		public static void WriteDebugLogError(string strFunction, Exception eException, string strFormat, params object[] strParams)
 		{
-			WriteDebugLog(string.Format("{0} Error ({1}): ", strFunction, eException.GetType().ToString()) + strFormat + " " + eException.Message, strParams);
+			WriteLog(string.Format("{0} Error ({1}): ", strFunction, eException.GetType().ToString()) + strFormat + " " + eException.Message, strParams);
 		}
 		
-		private static void WriteDebugLog(string strFormat, params object[] strParams)
+		public static void WriteDebugLogError(string strFunction, long lRequestId, Exception eException, string strFormat, params object[] strParams)
+		{
+			WriteLog(string.Format("{0} [0x{1}] Error ({2}): ", strFunction, lRequestId.ToString("X8"), eException.GetType().ToString()) + strFormat + " " + eException.Message, strParams);
+		}
+
+		private static void WriteLog(string strFormat, params object[] strParams)
 		{
 			DateTime dtNow = DateTime.Now;
 			string strLogData, strLogMessage;

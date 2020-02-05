@@ -84,7 +84,7 @@ namespace HMX.HASSActronQue
 
 		private static void MQTTProcessor(string strTopic, string strPayload)
 		{
-			long lRequestId = 0;
+			/*long lRequestId = 0;
 			double dblTemperature = 0;
 
 			Logging.WriteDebugLog("Service.MQTTProcessor() {0}", strTopic);
@@ -186,8 +186,7 @@ namespace HMX.HASSActronQue
 						AirConditioner.ChangeTemperature(lRequestId, dblTemperature);
 
 					break;
-			}
+			}*/
 		}
     }
-
 }

@@ -64,7 +64,7 @@ namespace HMX.HASSActronQue
 
 		public static void Update(object oState)
 		{
-			if (DateTime.Now >= AirConditioner.LastUpdate.AddMinutes(_iLastUpdateThreshold))
+			if (DateTime.Now >= Que.LastUpdate.AddMinutes(_iLastUpdateThreshold))
 				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
 			else
 				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "online");
