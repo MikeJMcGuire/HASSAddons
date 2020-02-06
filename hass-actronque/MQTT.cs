@@ -18,7 +18,7 @@ namespace HMX.HASSActronQue
 		private static string _strClientId = "";
 		private static Timer _timerMQTT = null;
 		private static MessageHandler _messageHandler = null;
-		private static int _iLastUpdateThreshold = 10; // Minutes
+		private static int _iLastUpdateThreshold = 5; // Minutes
 		
 		public static async void StartMQTT(string strMQTTServer, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{

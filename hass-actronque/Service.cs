@@ -23,7 +23,7 @@ namespace HMX.HASSActronQue
 			IWebHost webHost;
 			string strMQTTUser, strMQTTPassword, strMQTTBroker;
 			string strQueUser, strQuePassword, strQueSerial;
-			int iZoneCount;
+			int iZoneCount, iPollInterval;
 
 			Logging.WriteDebugLog("Service.Start()");
 
@@ -43,6 +43,12 @@ namespace HMX.HASSActronQue
 			if (!Configuration.GetConfiguration(configuration, "MQTTBroker", out strMQTTBroker))
 				return;
 
+			if (!Configuration.GetConfiguration(configuration, "PollInterval", out iPollInterval) || iPollInterval < 10 || iPollInterval > 300)
+			{
+				Logging.WriteDebugLog("Service.Start() Poll interval must be between 10 and 300 (inclusive)");
+				return;
+			}
+
 			if (!Configuration.GetConfiguration(configuration, "QueUser", out strQueUser))
 				return;
 			if (!Configuration.GetPrivateConfiguration(configuration, "QuePassword", out strQuePassword))
@@ -58,7 +64,7 @@ namespace HMX.HASSActronQue
 	
 			MQTT.StartMQTT(strMQTTBroker, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
 
-			Que.Initialise(strQueUser, strQuePassword, strQueSerial, iZoneCount, _eventStop);
+			Que.Initialise(strQueUser, strQuePassword, strQueSerial, iPollInterval, iZoneCount, _eventStop);
 
 			try
 			{
@@ -84,109 +90,86 @@ namespace HMX.HASSActronQue
 
 		private static void MQTTProcessor(string strTopic, string strPayload)
 		{
-			/*long lRequestId = 0;
+			long lRequestId = RequestManager.GetRequestId();
+			int iZone = 0;
 			double dblTemperature = 0;
 
-			Logging.WriteDebugLog("Service.MQTTProcessor() {0}", strTopic);
+			Logging.WriteDebugLog("Service.MQTTProcessor() [0x{0}] {1}", lRequestId.ToString("X8"), strTopic);
 
-			switch (strTopic)
+			if (strTopic.StartsWith("actronque/zone") && strTopic.EndsWith("/set"))
 			{
-				case "actron/aircon/zone1/set":
-					AirConditioner.ChangeZone(lRequestId, 1, strPayload == "ON" ? true : false);
-					break;
+				iZone = int.Parse(strTopic.Substring(14, 1));
 
-				case "actron/aircon/zone2/set":
-					AirConditioner.ChangeZone(lRequestId, 2, strPayload == "ON" ? true : false);
-					break;
+				Que.ChangeZone(lRequestId, iZone, strPayload == "ON" ? true : false);
+			}
+			else
+			{
+				switch (strTopic)
+				{
+					case "actronque/mode/set":
+						switch (strPayload)
+						{
+							case "off":
+								Que.ChangeMode(lRequestId, AirConditionerMode.Off);
 
-				case "actron/aircon/zone3/set":
-					AirConditioner.ChangeZone(lRequestId, 3, strPayload == "ON" ? true : false);
-					break;
+								break;
 
-				case "actron/aircon/zone4/set":
-					AirConditioner.ChangeZone(lRequestId, 4, strPayload == "ON" ? true : false);
-					break;
+							case "auto":
+								Que.ChangeMode(lRequestId, AirConditionerMode.Automatic);
 
-				case "actron/aircon/zone5/set":
-					AirConditioner.ChangeZone(lRequestId, 5, strPayload == "ON" ? true : false);
-					break;
+								break;
 
-				case "actron/aircon/zone6/set":
-					AirConditioner.ChangeZone(lRequestId, 6, strPayload == "ON" ? true : false);
-					break;
+							case "cool":
+								Que.ChangeMode(lRequestId, AirConditionerMode.Cool);
 
-				case "actron/aircon/zone7/set":
-					AirConditioner.ChangeZone(lRequestId, 7, strPayload == "ON" ? true : false);
-					break;
+								break;
 
-				case "actron/aircon/zone8/set":
-					AirConditioner.ChangeZone(lRequestId, 8, strPayload == "ON" ? true : false);
-					break;
+							case "heat":
+								Que.ChangeMode(lRequestId, AirConditionerMode.Heat);
 
-				case "actron/aircon/mode/set":
-					Logging.WriteDebugLog("ServiceCore.MQTTProcessor() {0}: {1}", strTopic, strPayload);
+								break;
 
-					switch (strPayload)
-					{
-						case "off":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.None);
+							case "fan_only":
+								Que.ChangeMode(lRequestId, AirConditionerMode.Fan_Only);
 
-							break;
+								break;
+						}
 
-						case "auto":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.Automatic);
+						break;
 
-							break;
+					case "actronque/fan/set":
+						switch (strPayload)
+						{
+							case "hiautogh":
+								Que.ChangeFanMode(lRequestId, FanMode.Automatic);
 
-						case "cool":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.Cooling);
+								break;
 
-							break;
+							case "low":
+								Que.ChangeFanMode(lRequestId, FanMode.Low);
 
-						case "heat":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.Heating);
+								break;
 
-							break;
+							case "medium":
+								Que.ChangeFanMode(lRequestId, FanMode.Medium);
 
-						case "fan_only":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.FanOnly);
+								break;
 
-							break;
-					}
+							case "high":
+								Que.ChangeFanMode(lRequestId, FanMode.High);
 
-					break;
+								break;
+						}
 
-				case "actron/aircon/fan/set":
-					Logging.WriteDebugLog("Service.MQTTProcessor() {0}: {1}", strTopic, strPayload);
+						break;
 
-					switch (strPayload)
-					{
-						case "low":
-							AirConditioner.ChangeFanSpeed(lRequestId, FanSpeed.Low);
+					case "actronque/temperature/set":
+						if (double.TryParse(strPayload, out dblTemperature))
+							Que.ChangeTemperature(lRequestId, dblTemperature);
 
-							break;
-
-						case "medium":
-							AirConditioner.ChangeFanSpeed(lRequestId, FanSpeed.Medium);
-
-							break;
-
-						case "high":
-							AirConditioner.ChangeFanSpeed(lRequestId, FanSpeed.High);
-
-							break;
-					}
-
-					break;
-
-				case "actron/aircon/temperature/set":
-					Logging.WriteDebugLog("Service.MQTTProcessor() {0}: {1}", strTopic, strPayload);
-
-					if (double.TryParse(strPayload, out dblTemperature))
-						AirConditioner.ChangeTemperature(lRequestId, dblTemperature);
-
-					break;
-			}*/
+						break;
+				}
+			}
 		}
     }
 }

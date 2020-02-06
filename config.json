@@ -1,6 +1,6 @@
 {
   "name": "Actron Que Air Conditioner",
-  "version": "0.1",
+  "version": "0.11",
   "slug": "hass-actronque",
   "description": "An add-on for Actron Air Conditioners using the Actron Que module.",
   "url": "https://github.com/MikeJMcGuire/hass-actronque",
@@ -17,6 +17,7 @@
     "MQTTUser": "",
     "MQTTPassword": "",
     "MQTTBroker": "core-mosquitto",
+    "PollInterval": 30,
     "QueUser": "queuser",
     "QuePassword": "quepassword",
     "QueSerial": "queserialnumber",
@@ -26,6 +27,7 @@
     "MQTTUser": "str?",
     "MQTTPassword": "str?",
     "MQTTBroker": "str",
+    "PollInterval": "int(10,300)",
     "QueUser": "str",
     "QuePassword": "str",
     "QueSerial": "str",

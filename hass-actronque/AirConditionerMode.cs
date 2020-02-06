@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 
 namespace HMX.HASSActronQue
 {
-	public enum ModeMQTT
+	public enum AirConditionerMode
 	{
-		Automatic = 0,
-		Heat = 1,
-		Cool = 2,
-		Fan_Only = 3
+		Off,
+		Automatic,
+		Heat,
+		Cool,
+		Fan_Only
 	}
 }
