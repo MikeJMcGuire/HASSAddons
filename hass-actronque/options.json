@@ -2,6 +2,7 @@
   "MQTTUser": "",
   "MQTTPassword": "",
   "MQTTBroker": "core-mosquitto",
+  "PollInterval": 30,
   "QueUser": "queuser",
   "QuePassword": "quepassword",
   "QueSerial": "queserialnumber",

@@ -59,6 +59,5 @@ namespace HMX.HASSActronQue
 
 			Console.WriteLine(strLogData);
 		}
-
     }
 }
