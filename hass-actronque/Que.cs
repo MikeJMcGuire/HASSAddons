@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -12,7 +13,7 @@ namespace HMX.HASSActronQue
 {
 	public class Que
 	{
-		private static string _strQueBaseURL = "https://que.actronair.com.au";
+		private static string _strBaseURL = "https://que.actronair.com.au";
 		private static string _strBaseUserAgent = "nxgen-ios/1214 CFNetwork/976 Darwin/18.2.0";
 		private static string _strDeviceName = "HASSActronQue";
 		private static string _strAirConditionerName = "Air Conditioner";
@@ -55,12 +56,12 @@ namespace HMX.HASSActronQue
 			_httpClientAuth = new HttpClient(httpClientHandler);
 
 			_httpClientAuth.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
-			_httpClientAuth.BaseAddress = new Uri(_strQueBaseURL);
+			_httpClientAuth.BaseAddress = new Uri(_strBaseURL);
 
 			_httpClient = new HttpClient(httpClientHandler);
 
 			_httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
-			_httpClient.BaseAddress = new Uri(_strQueBaseURL);
+			_httpClient.BaseAddress = new Uri(_strBaseURL);
 		}
 
 		public static void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, int iPollInterval, int iZoneCount, ManualResetEvent eventStop)
@@ -133,7 +134,7 @@ namespace HMX.HASSActronQue
 			dynamic jsonResponse;
 			bool bRetVal = true;
 
-			Logging.WriteDebugLog("Que.GeneratePairingToken() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strQueBaseURL, strPageURL);
+			Logging.WriteDebugLog("Que.GeneratePairingToken() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strBaseURL, strPageURL);
 
 			if (_strDeviceUniqueIdentifier == "")
 			{
@@ -192,6 +193,13 @@ namespace HMX.HASSActronQue
 					goto Cleanup;
 				}
 			}
+			catch (OperationCanceledException eException)
+			{
+				Logging.WriteDebugLogError("Que.GeneratePairingToken()", lRequestId, eException, "Unable to process API HTTP response - operation timed out.");
+
+				bRetVal = false;
+				goto Cleanup;
+			}
 			catch (Exception eException)
 			{
 				if (eException.InnerException != null)
@@ -225,7 +233,7 @@ namespace HMX.HASSActronQue
 			dynamic jsonResponse;
 			bool bRetVal = true;
 
-			Logging.WriteDebugLog("Que.GenerateBearerToken() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strQueBaseURL, strPageURL);
+			Logging.WriteDebugLog("Que.GenerateBearerToken() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strBaseURL, strPageURL);
 
 			dtFormContent.Add("grant_type", "refresh_token");
 			dtFormContent.Add("refresh_token", _pairingToken.Token);
@@ -266,16 +274,23 @@ namespace HMX.HASSActronQue
 				{
 					if (httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 					{
-						Logging.WriteDebugLogError("Que.SendCommand()", lRequestId, "Unable to process API response: {0}/{1}. Refreshing pairing token.", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
+						Logging.WriteDebugLogError("Que.GenerateBearerToken()", lRequestId, "Unable to process API response: {0}/{1}. Refreshing pairing token.", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
 
 						_pairingToken = null;
 					}
 					else
-						Logging.WriteDebugLogError("Que.SendCommand()", lRequestId, "Unable to process API response: {0}/{1}", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
+						Logging.WriteDebugLogError("Que.GenerateBearerToken()", lRequestId, "Unable to process API response: {0}/{1}", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
 
 					bRetVal = false;
 					goto Cleanup;
 				}
+			}
+			catch (OperationCanceledException eException)
+			{
+				Logging.WriteDebugLogError("Que.GenerateBearerToken()", lRequestId, eException, "Unable to process API HTTP response - operation timed out.");
+
+				bRetVal = false;
+				goto Cleanup;
 			}
 			catch (Exception eException)
 			{
@@ -374,11 +389,10 @@ namespace HMX.HASSActronQue
 			else
 				strPageURL = _strNextEventURL;
 
-			Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strQueBaseURL, strPageURL);
+			Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strBaseURL, strPageURL);
 
 			if (!IsTokenValid())
 			{
-				Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Aborting - No Bearer Token", lRequestId.ToString("X8"));
 				bRetVal = false;
 				goto Cleanup;
 			}
@@ -646,6 +660,13 @@ namespace HMX.HASSActronQue
 					goto Cleanup;
 				}
 			}
+			catch (OperationCanceledException eException)
+			{
+				Logging.WriteDebugLogError("Que.GetAirConditionerEvents()", lRequestId, eException, "Unable to process API HTTP response - operation timed out.");
+				
+				bRetVal = false;
+				goto Cleanup;
+			}
 			catch (Exception eException)
 			{
 				if (eException.InnerException != null)
@@ -728,10 +749,7 @@ namespace HMX.HASSActronQue
 
 					case 1: // Queue Updated
 						if (!IsTokenValid())
-						{
-							Logging.WriteDebugLog("Que.QueueMonitor() Aborting - No Bearer Token");
 							continue;
-						}
 
 						await ProcessQueue();
 
@@ -739,10 +757,7 @@ namespace HMX.HASSActronQue
 
 					case WaitHandle.WaitTimeout: // Wait Timeout
 						if (!IsTokenValid())
-						{
-							Logging.WriteDebugLog("Que.QueueMonitor() Aborting - No Bearer Token");
 							continue;
-						}
 						
 						await ProcessQueue();
 
@@ -1087,7 +1102,7 @@ namespace HMX.HASSActronQue
 			string strPageURL = "/api/v0/client/ac-systems/cmds/send?serial=";
 			bool bRetVal = true;
 
-			Logging.WriteDebugLog("Que.SendCommand() [0x{0}] Base: {1}{2}{3}", lRequestId.ToString("X8"), _strQueBaseURL, strPageURL, _strSerialNumber);
+			Logging.WriteDebugLog("Que.SendCommand() [0x{0}] Base: {1}{2}{3}", lRequestId.ToString("X8"), _strBaseURL, strPageURL, _strSerialNumber);
 
 			try
 			{
@@ -1128,6 +1143,13 @@ namespace HMX.HASSActronQue
 						Logging.WriteDebugLogError("Que.SendCommand()", lRequestId, "Unable to process API response: {0}/{1}", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
 
 				}
+			}
+			catch (OperationCanceledException eException)
+			{
+				Logging.WriteDebugLogError("Que.SendCommand()", lRequestId, eException, "Unable to process API HTTP response - operation timed out.");
+
+				bRetVal = false;
+				goto Cleanup;
 			}
 			catch (Exception eException)
 			{
