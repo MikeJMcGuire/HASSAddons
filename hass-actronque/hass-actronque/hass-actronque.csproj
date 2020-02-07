@@ -4,6 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>HMX.HASSActronQue</RootNamespace>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyTitle>HASS Actron Que</AssemblyTitle>
+    <Company>HMX Consulting Pty Ltd</Company>
+    <Copyright>HMX Consulting Pty Ltd 2019</Copyright>
+    <Product>HASS Actron Que</Product>
   </PropertyGroup>
 
   <ItemGroup>
