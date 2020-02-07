@@ -6,3 +6,5 @@ Look for event driven notification/http long poll options for AC state change no
 trigger event retrieval after successful command push.
 
 enable set temperature to adjust temp range when in auto mode
+
+learn serial number automatically but provide override option for users with multiple Ques??
