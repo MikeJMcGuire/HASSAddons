@@ -23,7 +23,7 @@ namespace HMX.HASSActronQue
 			IWebHost webHost;
 			string strMQTTUser, strMQTTPassword, strMQTTBroker;
 			string strQueUser, strQuePassword, strQueSerial;
-			int iZoneCount, iPollInterval;
+			int iPollInterval;
 
 			Logging.WriteDebugLog("Service.Start()");
 
@@ -53,18 +53,11 @@ namespace HMX.HASSActronQue
 				return;
 			if (!Configuration.GetPrivateConfiguration(configuration, "QuePassword", out strQuePassword))
 				return;
-			if (!Configuration.GetConfiguration(configuration, "QueSerial", out strQueSerial))
-				return;
-
-			if (!Configuration.GetConfiguration(configuration, "ZoneCount", out iZoneCount) || iZoneCount < 0 || iZoneCount > 8)
-			{
-				Logging.WriteDebugLog("Service.Start() Zone Count must be between 0 and 8 (inclusive)");
-				return;
-			}
+			Configuration.GetOptionalConfiguration(configuration, "QueSerial", out strQueSerial);			
 	
 			MQTT.StartMQTT(strMQTTBroker, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
 
-			Que.Initialise(strQueUser, strQuePassword, strQueSerial, iPollInterval, iZoneCount, _eventStop);
+			Que.Initialise(strQueUser, strQuePassword, strQueSerial, iPollInterval, _eventStop);
 
 			try
 			{

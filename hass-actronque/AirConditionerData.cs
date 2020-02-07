@@ -6,7 +6,6 @@ namespace HMX.HASSActronQue
 {
 	public class AirConditionerData
 	{
-		public Dictionary<int, AirConditionerZone> Zones;
 		public string FanMode; // FanMode
 		public string Mode; // Mode
 		public bool On; // isOn
