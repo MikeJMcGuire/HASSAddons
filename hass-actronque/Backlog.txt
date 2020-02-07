@@ -1,7 +1,8 @@
-﻿Persist pairing token in file between app restarts.
-
-randomly generate device id on first start, and persist it across app restarts.
+﻿Persist pairing token in file between app restarts - done
+randomly generate device id on first start, and persist it across app restarts - done
 
 Look for event driven notification/http long poll options for AC state change notifications.
 
 trigger event retrieval after successful command push.
+
+enable set temperature to adjust temp range when in auto mode

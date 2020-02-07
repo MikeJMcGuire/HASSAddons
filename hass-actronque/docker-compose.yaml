@@ -6,3 +6,5 @@ services:
     restart: always
     volumes:
       - /pathtoconfigfile:/data
+   environment:
+      TZ: Australia/Sydney

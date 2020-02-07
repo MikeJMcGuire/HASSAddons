@@ -29,7 +29,7 @@ namespace HMX.HASSActronQue
 			if (strMQTTServer == null || strMQTTServer == "")
 				return;
 
-			_timerMQTT = new Timer(Update, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
+			_timerMQTT = new Timer(Update, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30));
 
 			_strClientId = strClientId;
 			_messageHandler = messageHandler;
