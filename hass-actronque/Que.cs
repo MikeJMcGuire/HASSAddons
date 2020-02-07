@@ -25,7 +25,7 @@ namespace HMX.HASSActronQue
 		private static string _strNextEventURL = "";
 		private static Queue<QueueCommand> _queueCommands = new Queue<QueueCommand>();
 		private static HttpClient _httpClient = null, _httpClientAuth = null;
-		private static int _iCancellationTime = 10; // Seconds
+		private static int _iCancellationTime = 15; // Seconds
 		private static int _iPollInterval = 15; // Seconds
 		private static int _iAuthenticationInterval = 60; // Seconds
 		private static int _iQueueInterval = 10; // Seconds
@@ -94,7 +94,7 @@ namespace HMX.HASSActronQue
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("Que.Initialise()", eException, "Unable to read json file.");
+				Logging.WriteDebugLogError("Que.Initialise()", eException, "Unable to read device json file.");
 			}
 
 			// Get Pairing Token
@@ -109,9 +109,8 @@ namespace HMX.HASSActronQue
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("Que.Initialise()", eException, "Unable to read json file.");
+				Logging.WriteDebugLogError("Que.Initialise()", eException, "Unable to read pairing token json file.");
 			}
-
 
 			threadMonitor = new Thread(new ThreadStart(TokenMonitor));
 			threadMonitor.Start();
@@ -142,7 +141,7 @@ namespace HMX.HASSActronQue
 
 				Logging.WriteDebugLog("Que.GeneratePairingToken() Device Id: {0}", _strDeviceUniqueIdentifier);
 
-				// Update Token File
+				// Update Device Id File
 				try
 				{
 					File.WriteAllText(_strDeviceIdFile, JsonConvert.SerializeObject(_strDeviceUniqueIdentifier));
@@ -353,7 +352,7 @@ namespace HMX.HASSActronQue
 							if (await GeneratePairingToken())
 								await GenerateBearerToken();
 						}
-						else if (_queToken== null)
+						else if (_queToken == null)
 							await GenerateBearerToken();
 						else if (_queToken != null && _queToken.TokenExpires <= DateTime.Now.Subtract(TimeSpan.FromMinutes(5)))
 						{
@@ -437,6 +436,11 @@ namespace HMX.HASSActronQue
 								{
 									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Incremental Update: {1}", lRequestId.ToString("X8"), change.Name);
 
+									lock (_oLockData)
+									{
+										_airConditionerData.LastUpdated = DateTime.Now;
+									}
+
 									// Compressor Mode
 									if (change.Name == "LiveAircon.CompressorMode")
 									{
@@ -456,7 +460,6 @@ namespace HMX.HASSActronQue
 									{
 										airConditionerData.Mode = change.Value.ToString();
 										if (airConditionerData.Mode == "")
-
 											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "UserAirconSettings.Mode");
 										else
 										{
@@ -471,7 +474,6 @@ namespace HMX.HASSActronQue
 									{
 										airConditionerData.FanMode = change.Value.ToString();
 										if (airConditionerData.FanMode == "")
-
 											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "UserAirconSettings.FanMode");
 										else
 										{
@@ -870,7 +872,10 @@ namespace HMX.HASSActronQue
 
 			// Power, Mode & Set Temperature
 			if (!_airConditionerData.On)
+			{
 				MQTT.SendMessage("actronque/mode", "off");
+				MQTT.SendMessage("actronque/settemperature", "");
+			}
 			else
 			{
 				switch (_airConditionerData.Mode)
@@ -892,6 +897,7 @@ namespace HMX.HASSActronQue
 
 					case "FAN":
 						MQTT.SendMessage("actronque/mode", "fan_only");
+						MQTT.SendMessage("actronque/settemperature", "");
 						break;
 
 					default:
