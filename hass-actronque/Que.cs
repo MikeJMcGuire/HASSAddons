@@ -411,7 +411,11 @@ namespace HMX.HASSActronQue
 
 					//Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Response: {1}", lRequestId.ToString("X8"), strResponse);
 
-					airConditionerData.LastUpdated = DateTime.Now;
+					airConditionerData.LastUpdated = DateTime.Now; 
+					lock (_oLockData)
+					{
+						_airConditionerData.LastUpdated = DateTime.Now;
+					}
 
 					strResponse = strResponse.Replace("ac-newer-events", "acnewerevents");
 
@@ -435,11 +439,6 @@ namespace HMX.HASSActronQue
 								foreach (JProperty change in jsonResponse.events[iEvent].data)
 								{
 									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Incremental Update: {1}", lRequestId.ToString("X8"), change.Name);
-
-									lock (_oLockData)
-									{
-										_airConditionerData.LastUpdated = DateTime.Now;
-									}
 
 									// Compressor Mode
 									if (change.Name == "LiveAircon.CompressorMode")
