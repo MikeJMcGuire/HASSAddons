@@ -10,19 +10,26 @@ namespace HMX.HASSActronQue
 		// Boolean
 		public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
 		{
-			return GetConfiguration(configuration, strVariable, out bConfiguration, false);
+			return GetConfiguration(configuration, strVariable, out bConfiguration, false, false);
+		}
+
+		public static bool GetOptionalConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
+		{
+			return GetConfiguration(configuration, strVariable, out bConfiguration, false, true);
 		}
 
 		public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
 		{
-			return GetConfiguration(configuration, strVariable, out bConfiguration, true);
+			return GetConfiguration(configuration, strVariable, out bConfiguration, true, false);
 		}
 
-		private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration, bool bPrivate)
+		private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration, bool bPrivate, bool bOptional)
 		{
 			string strTemp;
 
 			Logging.WriteDebugLog("Configuration.GetConfiguration() Read {0}", strVariable);
+
+			bConfiguration = false;
 
 			if ((configuration[strVariable] ?? "") != "")
 			{
@@ -44,10 +51,12 @@ namespace HMX.HASSActronQue
 
 				return true;
 			}
+			else if (bOptional)
+			{
+				return true;
+			}
 			else
 			{
-				bConfiguration = false;
-
 				Logging.WriteDebugLog("Service.Start()", "Missing configuration: {0}.", strVariable);
 
 				return false;
