@@ -14,7 +14,7 @@ namespace HMX.HASSActronQue
 	public class Que
 	{
 		private static string _strBaseURL = "https://que.actronair.com.au";
-		private static string _strBaseUserAgent = "nxgen-ios/1214 CFNetwork/976 Darwin/18.2.0";
+		//private static string _strBaseUserAgent = "nxgen-ios/1.1.2 (iPhone; iOS 12.1.4; Scale/3.00)";
 		private static string _strDeviceName = "HASSActronQue";
 		private static string _strAirConditionerName = "Air Conditioner";
 		private static string _strDeviceIdFile = "/data/deviceid.json";
@@ -23,21 +23,27 @@ namespace HMX.HASSActronQue
 		private static string _strDeviceUniqueIdentifier = "";
 		private static string _strQueUser, _strQuePassword, _strSerialNumber;
 		private static string _strNextEventURL = "";
+		private static bool _bPerZoneControls = false;
 		private static Queue<QueueCommand> _queueCommands = new Queue<QueueCommand>();
-		private static HttpClient _httpClient = null, _httpClientAuth = null;
+		private static HttpClient _httpClient = null, _httpClientAuth = null, _httpClientCommands = null;
 		private static int _iCancellationTime = 15; // Seconds
 		private static int _iPollInterval = 15; // Seconds
+		private static int _iPollIntervalUpdate = 5; // Seconds
 		private static int _iAuthenticationInterval = 60; // Seconds
 		private static int _iQueueInterval = 10; // Seconds
 		private static int _iCommandExpiry = 10; // Seconds
+		private static int _iPostCommandSleepTimer = 2; // Seconds
+		private static int _iCommandAckRetryCounter = 2;
 		private static ManualResetEvent _eventStop;
 		private static AutoResetEvent _eventAuthenticationFailure = new AutoResetEvent(false);
 		private static AutoResetEvent _eventQueue = new AutoResetEvent(false);
+		private static AutoResetEvent _eventUpdate = new AutoResetEvent(false);
 		private static PairingToken _pairingToken;
 		private static QueToken _queToken = null;
 		private static AirConditionerData _airConditionerData = new AirConditionerData();
 		private static Dictionary<int, AirConditionerZone> _airConditionerZones = new Dictionary<int, AirConditionerZone>();
 		private static object _oLockData = new object(), _oLockQueue = new object();
+		private static bool _bCommandAckPending = false;
 
 		public static DateTime LastUpdate
 		{
@@ -55,16 +61,23 @@ namespace HMX.HASSActronQue
 
 			_httpClientAuth = new HttpClient(httpClientHandler);
 
-			_httpClientAuth.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
+			//_httpClientAuth.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
 			_httpClientAuth.BaseAddress = new Uri(_strBaseURL);
 
 			_httpClient = new HttpClient(httpClientHandler);
 
-			_httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
+			//_httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-AU;q=1");
+			//_httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
 			_httpClient.BaseAddress = new Uri(_strBaseURL);
+
+			_httpClientCommands = new HttpClient(httpClientHandler);
+
+			//_httpClientCommands.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-AU;q=1");
+			//_httpClientCommands.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
+			_httpClientCommands.BaseAddress = new Uri(_strBaseURL);
 		}
 
-		public static void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, int iPollInterval, ManualResetEvent eventStop)
+		public static void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, int iPollInterval, bool bPerZoneControls, ManualResetEvent eventStop)
 		{
 			Thread threadMonitor;
 
@@ -73,6 +86,7 @@ namespace HMX.HASSActronQue
 			_strQueUser = strQueUser;
 			_strQuePassword = strQuePassword;
 			_strSerialNumber = strSerialNumber;
+			_bPerZoneControls = bPerZoneControls;
 			_iPollInterval = iPollInterval;
 			_eventStop = eventStop;
 
@@ -254,6 +268,7 @@ namespace HMX.HASSActronQue
 					_queToken = queToken;
 
 					_httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _queToken.BearerToken);
+					_httpClientCommands.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _queToken.BearerToken);
 
 					// Update Token File
 					try
@@ -622,6 +637,13 @@ namespace HMX.HASSActronQue
 
 						switch (strEventType)
 						{
+							case "cmd-acked":
+								// Clear Command Pending Flag
+								if (_bCommandAckPending)
+									_bCommandAckPending = false;
+
+								break;
+
 							case "status-change-broadcast":
 								foreach (JProperty change in jsonResponse.events[iEvent].data)
 								{
@@ -852,6 +874,7 @@ namespace HMX.HASSActronQue
 								{
 									for (int iZoneIndex = 0; iZoneIndex < 8; iZoneIndex++)
 									{
+										// Enabled
 										if (!bool.TryParse(aEnabledZones[iZoneIndex].ToString(), out bTemp))
 											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read zone information: {1}", lRequestId.ToString("X8"), "UserAirconSettings.EnabledZones");
 										else
@@ -863,6 +886,7 @@ namespace HMX.HASSActronQue
 											}
 										}
 
+										// Temperature
 										if (!double.TryParse(jsonResponse.events[iEvent].data.RemoteZoneInfo[iZoneIndex].LiveTemp_oC.ToString(), out dblTemp))
 											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), string.Format("RemoteZoneInfo[{0}].LiveTemp_oC", iZoneIndex));
 										else
@@ -871,6 +895,29 @@ namespace HMX.HASSActronQue
 											{
 												if (_airConditionerZones.ContainsKey(iZoneIndex + 1))
 													_airConditionerZones[iZoneIndex + 1].Temperature = dblTemp;
+											}
+										}
+
+										// Cooling Set Temperature
+										if (!double.TryParse(jsonResponse.events[iEvent].data.RemoteZoneInfo[iZoneIndex].TemperatureSetpoint_Cool_oC.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Cool_oC", iZoneIndex));
+										else
+										{
+											lock (_oLockData)
+											{
+												if (_airConditionerZones.ContainsKey(iZoneIndex + 1))
+													_airConditionerZones[iZoneIndex + 1].SetTemperatureCooling = dblTemp;
+											}											
+										}
+										// Heating Set Temperature
+										if (!double.TryParse(jsonResponse.events[iEvent].data.RemoteZoneInfo[iZoneIndex].TemperatureSetpoint_Heat_oC.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Heat_oC", iZoneIndex));
+										else
+										{
+											lock (_oLockData)
+											{
+												if (_airConditionerZones.ContainsKey(iZoneIndex + 1))
+													_airConditionerZones[iZoneIndex + 1].SetTemperatureHeating = dblTemp;
 											}
 										}
 									}
@@ -927,8 +974,8 @@ namespace HMX.HASSActronQue
 
 		private async static void AirConditionerMonitor()
 		{
-			WaitHandle[] waitHandles = new WaitHandle[] { _eventStop };
-			int iWaitHandle = 0, iWaitInterval = 5;
+			WaitHandle[] waitHandles = new WaitHandle[] { _eventStop , _eventUpdate };
+			int iWaitHandle = 0, iWaitInterval = 5, iCommandAckRetries = 0;
 			bool bExit = false;
 
 			Logging.WriteDebugLog("Que.AirConditionerMonitor()");
@@ -941,6 +988,22 @@ namespace HMX.HASSActronQue
 				{
 					case 0: // Stop
 						bExit = true;
+
+						break;
+
+					case 1: // Pull Update
+						Logging.WriteDebugLog("Que.AirConditionerMonitor() Quick Update");
+
+						_bCommandAckPending = true;
+						iCommandAckRetries = _iCommandAckRetryCounter;
+
+						Thread.Sleep(_iPostCommandSleepTimer * 1000);
+
+						if (await GetAirConditionerEvents())
+						{
+							MQTTUpdateData();
+							MQTT.Update(null);
+						}
 
 						break;
 
@@ -957,12 +1020,26 @@ namespace HMX.HASSActronQue
 								MQTTRegister();
 						}
 						if (await GetAirConditionerEvents())
+						{
 							MQTTUpdateData();
+							MQTT.Update(null);
+						}
 
 						break;
 				}
 
-				iWaitInterval = _iPollInterval;
+				if (_bCommandAckPending && iCommandAckRetries > 0)
+				{
+					iWaitInterval = _iPollIntervalUpdate;
+
+					if (iCommandAckRetries-- == 0)
+					{
+						Logging.WriteDebugLog("Que.AirConditionerMonitor() Clearing Update Flag");
+						_bCommandAckPending = false;
+					}
+				}
+				else
+					iWaitInterval = _iPollInterval;
 			}
 
 			Logging.WriteDebugLog("Que.AirConditionerMonitor() Complete");
@@ -991,7 +1068,8 @@ namespace HMX.HASSActronQue
 						if (!IsTokenValid())
 							continue;
 
-						await ProcessQueue();
+						if (await ProcessQueue())
+							_eventUpdate.Set();
 
 						break;
 
@@ -999,7 +1077,8 @@ namespace HMX.HASSActronQue
 						if (!IsTokenValid())
 							continue;
 
-						await ProcessQueue();
+						if (await ProcessQueue())
+							_eventUpdate.Set();
 
 						break;
 				}
@@ -1008,9 +1087,10 @@ namespace HMX.HASSActronQue
 			Logging.WriteDebugLog("Que.QueueMonitor() Complete");
 		}
 
-		private static async Task ProcessQueue()
+		private static async Task<bool> ProcessQueue()
 		{
 			QueueCommand command;
+			bool bRetVal = false;
 
 			Logging.WriteDebugLog("Que.ProcessQueue()");
 
@@ -1043,11 +1123,15 @@ namespace HMX.HASSActronQue
 					{
 						Logging.WriteDebugLog("Que.ProcessQueue() Command Complete: 0x{0}", command.RequestId.ToString("X8"));
 						_queueCommands.Dequeue();
+
+						bRetVal = true;
 					}
 				}
 			}
 
 			Logging.WriteDebugLog("Que.ProcessQueue() Complete");
+
+			return bRetVal;
 		}
 
 		private static bool IsTokenValid()
@@ -1070,6 +1154,15 @@ namespace HMX.HASSActronQue
 				MQTT.Subscribe("actronque/zone{0}/set", iZone);
 
 				MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/airconzone{0}/config", iZone), "{{\"name\":\"{0}\",\"state_topic\":\"actronque/zone{1}/temperature\",\"unit_of_measurement\":\"\u00B0C\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Name, iZone, Service.ServiceName.ToLower());
+
+				if (_bPerZoneControls)
+				{
+					MQTT.SendMessage(string.Format("homeassistant/climate/actronque/zone{0}/config", iZone), "{{\"name\":\"{0} {3}\",\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"mode_command_topic\":\"actronque/zone{1}/mode/set\",\"temperature_command_topic\":\"actronque/zone{1}/temperature/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"temperature_state_topic\":\"actronque/zone{1}/settemperature\",\"mode_state_topic\":\"actronque/zone{1}/mode\",\"current_temperature_topic\":\"actronque/zone{1}/temperature\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Name, iZone, Service.ServiceName.ToLower(), _strAirConditionerName);
+					MQTT.Subscribe("actronque/zone{0}/temperature/set", iZone);
+					MQTT.Subscribe("actronque/zone{0}/mode/set", iZone);
+				}
+				else
+					MQTT.SendMessage(string.Format("homeassistant/climate/actronque/zone{0}/config", iZone), "");
 			}
 
 			MQTT.Subscribe("actronque/mode/set");
@@ -1112,7 +1205,7 @@ namespace HMX.HASSActronQue
 			if (!_airConditionerData.On)
 			{
 				MQTT.SendMessage("actronque/mode", "off");
-				MQTT.SendMessage("actronque/settemperature", "");
+				MQTT.SendMessage("actronque/settemperature", GetSetTemperature(_airConditionerData.SetTemperatureHeating, _airConditionerData.SetTemperatureCooling).ToString("N1"));
 			}
 			else
 			{
@@ -1120,7 +1213,7 @@ namespace HMX.HASSActronQue
 				{
 					case "AUTO":
 						MQTT.SendMessage("actronque/mode", "auto");
-						MQTT.SendMessage("actronque/settemperature", GetSetTemperature().ToString("N1"));
+						MQTT.SendMessage("actronque/settemperature", GetSetTemperature(_airConditionerData.SetTemperatureHeating, _airConditionerData.SetTemperatureCooling).ToString("N1"));
 						break;
 
 					case "COOL":
@@ -1149,6 +1242,45 @@ namespace HMX.HASSActronQue
 			{
 				MQTT.SendMessage(string.Format("actronque/zone{0}", iIndex), _airConditionerZones[iIndex].State ? "ON" : "OFF");
 				MQTT.SendMessage(string.Format("actronque/zone{0}/temperature", iIndex), _airConditionerZones[iIndex].Temperature.ToString());
+
+				// Per Zone Controls
+				if (_bPerZoneControls)
+				{
+					if (!_airConditionerData.On || !_airConditionerZones[iIndex].State)
+					{
+						MQTT.SendMessage(string.Format("actronque/zone{0}/mode", iIndex), "off");
+						MQTT.SendMessage(string.Format("actronque/zone{0}/settemperature", iIndex), GetSetTemperature(_airConditionerZones[iIndex].SetTemperatureHeating, _airConditionerZones[iIndex].SetTemperatureCooling).ToString("N1"));
+					}
+					else
+					{
+						switch (_airConditionerData.Mode)
+						{
+							case "AUTO":
+								MQTT.SendMessage(string.Format("actronque/zone{0}/mode", iIndex), "auto");
+								MQTT.SendMessage(string.Format("actronque/zone{0}/settemperature", iIndex), GetSetTemperature(_airConditionerZones[iIndex].SetTemperatureHeating, _airConditionerZones[iIndex].SetTemperatureCooling).ToString("N1"));
+								break;
+
+							case "COOL":
+								MQTT.SendMessage(string.Format("actronque/zone{0}/mode", iIndex), "cool");
+								MQTT.SendMessage(string.Format("actronque/zone{0}/settemperature", iIndex), _airConditionerZones[iIndex].SetTemperatureCooling.ToString("N1"));
+								break;
+
+							case "HEAT":
+								MQTT.SendMessage(string.Format("actronque/zone{0}/mode", iIndex), "heat");
+								MQTT.SendMessage(string.Format("actronque/zone{0}/settemperature", iIndex), _airConditionerZones[iIndex].SetTemperatureHeating.ToString("N1"));
+								break;
+
+							case "FAN":
+								MQTT.SendMessage(string.Format("actronque/zone{0}/mode", iIndex), "fan_only");
+								MQTT.SendMessage(string.Format("actronque/zone{0}/settemperature", iIndex), GetSetTemperature(_airConditionerZones[iIndex].SetTemperatureHeating, _airConditionerZones[iIndex].SetTemperatureCooling).ToString("N1"));
+								break;
+
+							default:
+								Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Mode: {0}", _airConditionerData.Mode);
+								break;
+						}
+					}
+				}
 			}
 
 			// Compressor
@@ -1176,11 +1308,12 @@ namespace HMX.HASSActronQue
 
 				default:
 					Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Compressor State: {0}", _airConditionerData.CompressorState);
+					
 					break;
 			}
 		}
 
-		private static double GetSetTemperature()
+		private static double GetSetTemperature(double dblHeating, double dblCooling)
 		{
 			double dblSetTemperature = 0.0;
 
@@ -1188,7 +1321,7 @@ namespace HMX.HASSActronQue
 
 			try
 			{
-				dblSetTemperature = _airConditionerData.SetTemperatureHeating + ((_airConditionerData.SetTemperatureCooling - _airConditionerData.SetTemperatureHeating) / 2);
+				dblSetTemperature = dblHeating + ((dblCooling - dblHeating) / 2);
 
 				dblSetTemperature = Math.Round(dblSetTemperature * 2, MidpointRounding.AwayFromZero) / 2;
 			}
@@ -1301,35 +1434,65 @@ namespace HMX.HASSActronQue
 			AddCommandToQueue(command);
 		}
 
-		public static void ChangeTemperature(long lRequestId, double dblTemperature)
+		public static void ChangeTemperature(long lRequestId, double dblTemperature, int iZone)
 		{
 			QueueCommand command = new QueueCommand(lRequestId, DateTime.Now.AddSeconds(_iCommandExpiry));
 
-			Logging.WriteDebugLog("Que.ChangeTemperature() [0x{0}] Temperature: {1}", lRequestId.ToString("X8"), dblTemperature);
+			Logging.WriteDebugLog("Que.ChangeTemperature() [0x{0}] Zone: {1}, Temperature: {2}", lRequestId.ToString("X8"), iZone, dblTemperature);
 
-			switch (_airConditionerData.Mode)
+			if (iZone == 0)
 			{
-				case "OFF":
-					return;
+				switch (_airConditionerData.Mode)
+				{
+					case "OFF":
+						return;
 
-				case "FAN":
-					return;
+					case "FAN":
+						return;
+						
+					case "COOL":
+						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Cool_oC", dblTemperature);
 
-				case "COOL":
-					command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Cool_oC", dblTemperature);
+						break;
 
-					break;
+					case "HEAT":
+						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Heat_oC", dblTemperature);
 
-				case "HEAT":
-					command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Heat_oC", dblTemperature);
+						break;
 
-					break;
+					case "AUTO":
+						// TBA
+						return;
 
-				case "AUTO":
-					// TBA
-					return;
+						// break;
+				}
+			}
+			else
+			{
+				switch (_airConditionerData.Mode)
+				{
+					case "OFF":
+						return;
 
-					// break;
+					case "FAN":
+						return;
+
+					case "COOL":
+						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Cool_oC", iZone - 1), dblTemperature);
+
+						break;
+
+					case "HEAT":
+						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Heat_oC", iZone - 1), dblTemperature);
+
+						break;
+						
+					case "AUTO":
+						// TBA
+						return;
+
+						// break;
+				}
 			}
 
 			command.Data.command.Add("type", "set-settings");
@@ -1369,7 +1532,7 @@ namespace HMX.HASSActronQue
 				cancellationToken = new CancellationTokenSource();
 				cancellationToken.CancelAfter(TimeSpan.FromSeconds(_iCancellationTime));
 
-				httpResponse = await _httpClient.PostAsync(strPageURL + _strSerialNumber, content, cancellationToken.Token);
+				httpResponse = await _httpClientCommands.PostAsync(strPageURL + _strSerialNumber, content, cancellationToken.Token);
 
 				if (httpResponse.IsSuccessStatusCode)
 					Logging.WriteDebugLog("Que.SendCommand() [0x{0}] Response {1}/{2}", lRequestId.ToString("X8"), httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
@@ -1386,6 +1549,8 @@ namespace HMX.HASSActronQue
 					else
 						Logging.WriteDebugLogError("Que.SendCommand()", lRequestId, "Unable to process API response: {0}/{1}", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
 
+					bRetVal = false;
+					goto Cleanup;
 				}
 			}
 			catch (OperationCanceledException eException)
@@ -1409,9 +1574,6 @@ namespace HMX.HASSActronQue
 		Cleanup:
 			cancellationToken?.Dispose();
 			httpResponse?.Dispose();
-
-			if (!bRetVal)
-				_queToken = null;
 
 			return bRetVal;
 		}

@@ -1,10 +1,8 @@
-﻿Persist pairing token in file between app restarts - done
-randomly generate device id on first start, and persist it across app restarts - done
-
+﻿
 Look for event driven notification/http long poll options for AC state change notifications.
-
-trigger event retrieval after successful command push.
 
 enable set temperature to adjust temp range when in auto mode
 
-learn serial number automatically but provide override option for users with multiple Ques??
+auth interval faster if miss initial auth
+
+suppress updates post change?
