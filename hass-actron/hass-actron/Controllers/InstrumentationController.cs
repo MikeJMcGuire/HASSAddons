@@ -8,16 +8,32 @@ namespace HMX.HASSActron.Controllers
 	public class InstrumentationController : Controller
 	{
 		[Route("/")]
-		public IActionResult Test()
+		public IActionResult Status()
 		{
 			ContentResult result = new ContentResult();
 
-			Logging.WriteDebugLog("Instrumentation.Test() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+			Logging.WriteDebugLog("Instrumentation.Status() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
 			result.ContentType = "text/html";
 			result.StatusCode = 200;
 
 			result.Content = "Last Update from Air Conditioner: " + AirConditioner.LastUpdate;
+
+			return result;
+		}
+
+		[Route("/status")]
+		public IActionResult DetailedStatus()
+		{
+			ContentResult result = new ContentResult();
+
+			Logging.WriteDebugLog("Instrumentation.Status() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
+			result.ContentType = "text/html";
+			result.StatusCode = 200;
+
+			result.Content = "Last Post from Air Conditioner: " + AirConditioner.LastUpdate + "<br/>";
+			result.Content += "Last Request from Air Conditioner: " + AirConditioner.LastRequest;
 
 			return result;
 		}

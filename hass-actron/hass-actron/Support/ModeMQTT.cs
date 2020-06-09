@@ -7,7 +7,7 @@ namespace HMX.HASSActron
 {
 	public enum ModeMQTT
 	{
-		Automatic = 0,
+		Auto = 0,
 		Heat = 1,
 		Cool = 2,
 		Fan_Only = 3
