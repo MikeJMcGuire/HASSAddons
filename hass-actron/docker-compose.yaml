@@ -8,3 +8,5 @@ services:
       - "80:80" 
     volumes:
       - /pathtoconfigfile:/data
+    environment:
+      TZ: Australia/Sydney
