@@ -33,5 +33,6 @@ namespace HMX.HASSActron
 		public double dblZone7Temperature;
 		public double dblZone8Temperature;
 		public DateTime dtLastUpdate;
+		public DateTime dtLastRequest;
 	}
 }

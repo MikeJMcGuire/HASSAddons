@@ -29,6 +29,11 @@ namespace HMX.HASSActron
 			get { return _airConditionerData.dtLastUpdate; }
 		}
 
+		public static DateTime LastRequest
+		{
+			get { return _airConditionerData.dtLastRequest; }
+		}
+
 		public static ManualResetEvent EventCommand
 		{
 			get { return _eventCommand; }
@@ -77,7 +82,8 @@ namespace HMX.HASSActron
 		public static void PostData(AirConditionerData data)
 		{
 			string strZones;
-			
+			DateTime dtLastRequest;
+
 			if (!_bDataReceived)
 			{
 				Logging.WriteDebugLog("AirConditioner.PostData() First Data Received");
@@ -93,8 +99,12 @@ namespace HMX.HASSActron
 			{
 				lock (_oLockData)
 				{
+					dtLastRequest = _airConditionerData.dtLastRequest;
+
 					_airConditionerData = data;
+
 					_airConditionerData.dtLastUpdate = DateTime.Now;
+					_airConditionerData.dtLastRequest = dtLastRequest;
 
 					MQTT.SendMessage("actron/aircon/fanmode", Enum.GetName(typeof(FanSpeed), _airConditionerData.iFanSpeed).ToLower());
 					MQTT.SendMessage("actron/aircon/mode", (_airConditionerData.bOn ? Enum.GetName(typeof(ModeMQTT), _airConditionerData.iMode).ToLower() : "off"));
@@ -331,6 +341,14 @@ namespace HMX.HASSActron
 			MQTT.SendMessage("actron/aircon/settemperature", command.tempTarget.ToString());
 
 			PostCommand(lRequestId, "System", command);
-		}	
+		}
+		
+		public static void UpdateRequestTime()
+		{
+			lock (_oLockData)
+			{
+				_airConditionerData.dtLastRequest = DateTime.Now;
+			}
+		}
 	}
 }

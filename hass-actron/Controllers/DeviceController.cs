@@ -31,6 +31,8 @@ namespace HMX.HASSActron.Controllers
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
+			AirConditioner.UpdateRequestTime();
+
 			if (!await AirConditioner.EventCommand.WaitOneAsync(_iTimeout, cancellationToken))
 				return new EmptyResult();
 
