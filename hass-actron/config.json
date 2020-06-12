@@ -1,6 +1,6 @@
 {
   "name": "Actron Air Conditioner",
-  "version": "0.93",
+  "version": "0.94",
   "slug": "hass-actron",
   "description": "An add-on for Actron Air Conditioners using the Actron Connect Wi-Fi module.",
   "url": "https://github.com/MikeJMcGuire/hass-actron",
@@ -17,6 +17,8 @@
     "MQTTUser": "mqttuser",
     "MQTTPassword": "mqttpassword",
     "MQTTBroker": "core-mosquitto",
+    "ForwardToOriginalWebService": false,
+    "RegisterZoneTemperatures": false,
     "Zones": [
       {
         "Name": "Zone 1",
@@ -33,6 +35,7 @@
     "MQTTPassword": "str?",
     "MQTTBroker": "str",
     "RegisterZoneTemperatures": "bool?",
+    "ForwardToOriginalWebService": "bool?",
     "Zones": [
       {
         "Name": "str",
