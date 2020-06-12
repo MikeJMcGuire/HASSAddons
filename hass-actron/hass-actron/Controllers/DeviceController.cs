@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace HMX.HASSActron.Controllers
 {
 	[Route("rest/{version:required}/block/{device:required}")]
-    public class DeviceController : Controller
+	public class DeviceController : Controller
 	{
 		private static int _iTimeout = 10000;
 
@@ -120,7 +120,7 @@ namespace HMX.HASSActron.Controllers
 						data.dblRoomTemperature = double.Parse(dDataField["roomTemp_oC"].ToString());
 						data.dblSetTemperature = double.Parse(dDataField["setPoint"].ToString());
 
-						aZones = (Newtonsoft.Json.Linq.JArray) dDataField["enabledZones"];
+						aZones = (Newtonsoft.Json.Linq.JArray)dDataField["enabledZones"];
 						data.bZone1 = (aZones[0].ToString() == "1");
 						data.bZone2 = (aZones[1].ToString() == "1");
 						data.bZone3 = (aZones[2].ToString() == "1");
@@ -138,7 +138,7 @@ namespace HMX.HASSActron.Controllers
 						if (aZones[4].ToString() != "null") double.TryParse(aZoneTemperatures[4].ToString(), out data.dblZone5Temperature);
 						if (aZones[5].ToString() != "null") double.TryParse(aZoneTemperatures[5].ToString(), out data.dblZone6Temperature);
 						if (aZones[6].ToString() != "null") double.TryParse(aZoneTemperatures[6].ToString(), out data.dblZone7Temperature);
-						if (aZones[7].ToString() != "null") double.TryParse(aZoneTemperatures[7].ToString(), out data.dblZone8Temperature);							
+						if (aZones[7].ToString() != "null") double.TryParse(aZoneTemperatures[7].ToString(), out data.dblZone8Temperature);
 
 						AirConditioner.PostData(data);
 
@@ -154,7 +154,44 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
+			if (Service.ForwardToOriginalWebService)
+				ForwardDataToOriginalWebService(strData);
+
 			return new ObjectResult(response);
-		}		
+		}
+
+		private void ForwardDataToOriginalWebService(string strData)
+		{
+			string strUserAgent = "", strCnntentType = "", strNinjaToken = "";
+
+			Logging.WriteDebugLog("DeviceController.ForwardDataToOriginalWebService()");
+
+			foreach (string strHeader in HttpContext.Request.Headers.Keys)
+			{
+				try
+				{
+					switch (strHeader)
+					{
+						case "User-Agent":
+							strUserAgent = HttpContext.Request.Headers[strHeader].ToString();
+							break;
+
+						case "Content-Type":
+							strCnntentType = HttpContext.Request.Headers[strHeader].ToString();
+							break;
+
+						case "X-Ninja-Token":
+							strNinjaToken = HttpContext.Request.Headers[strHeader].ToString();
+							break;
+					}
+				}
+				catch (Exception eException)
+				{
+					Logging.WriteDebugLogError("DeviceController.ForwardDataToOriginalWebService()", eException, "Unable to add request header ({0}).", strHeader);
+				}
+			}
+
+			Proxy.ForwardDataToOriginalWebService(strUserAgent, strCnntentType, strNinjaToken, HttpContext.Request.Host.ToString(), HttpContext.Request.Path, strData);
+		}
 	}
 }

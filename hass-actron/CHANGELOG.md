@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.94] - 2020-06-12
+
+### Added
+- The ForwardToOriginalWebService option has been added enabling data from the Actron to be forwarded to the original web service. This will enable the Actron phone app to see (but not control) the state of the air conditioner.
+
 ## [v0.93] - 2020-06-09
 
 ### Added

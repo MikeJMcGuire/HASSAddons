@@ -12,6 +12,13 @@ namespace HMX.HASSActron
 		private static string _strDeviceNameMQTT = "Actron Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
 		private static bool _bRegisterZoneTemperatures = false;
+		private static bool _bForwardToOriginalWebService = false;
+
+		public static bool ForwardToOriginalWebService
+		{
+			get { return _bForwardToOriginalWebService; }
+		}
+
 
 		public static bool RegisterZoneTemperatures
 		{
@@ -36,9 +43,11 @@ namespace HMX.HASSActron
 			}
 
 			bool.TryParse(configuration["RegisterZoneTemperatures"] ?? "false", out _bRegisterZoneTemperatures);
+			bool.TryParse(configuration["ForwardToOriginalWebService"] ?? "false", out _bForwardToOriginalWebService);
 
 			Logging.WriteDebugLog("Service.Start() RegisterZoneTemperatures: {0}", _bRegisterZoneTemperatures);
-		
+			Logging.WriteDebugLog("Service.Start() ForwardToOriginalWebService: {0}", _bForwardToOriginalWebService);
+
 			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
 			AirConditioner.Configure(configuration);
@@ -192,7 +201,6 @@ namespace HMX.HASSActron
 
 					break;
 			}
-		}
-    }
-
+		}		
+	}
 }
