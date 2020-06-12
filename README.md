@@ -19,23 +19,9 @@ The add-on will need to maintain the TCP port 80 binding, as the air conditioner
 
 If you add the local DNS entry for updates.lx-cloud.com, it will prevent the ActronConnect module from auto-updating. Feel free to use auto-updating, but there is a risk that an update will prevent the ActronConnect from working with Home Assistant. If this happens though, let me know and we can investigate the changes.
 
-New Features/Bug Fixes (v0.93)
-- MQTT entities will now appear linked to a single device under the MQTT integration.
-- Bug Fix: Automatic mode for the Actron is now working.
+## Configuration
+### RegisterZoneTemperatures: true/false
+If you Actron has temperature sensors per zone, setting this option to true will create a sensor in HA for each zone.
 
-New Features (v0.91)
-- MQTT devices will now appear online/offline depending on the connection status of the Actron Connect (i.e. if the Actron Connect is not sending data to the add-on, the MQTT devices will appear as unavailable).
-
-New Features (v0.9)
-- Command changes are reflected back to HA immediately to prevent the appearance of changes not taking effect.
-- Compressor state reflected in HA climate entity.
-
-New Features (v0.7)
-- Introduced a short delay to suppress incoming data from the actron connect after sending it new commands, as the actron connect has some delay between accepting a command, and reflecting that in updates that it sends back to HA.
-
-New Features (v0.6)
-- Supports newer firmware versions of the Actron Connect that use HTTP long polling (still in testing).
-
-New Features (v0.5)
-- For air conditioners with per-zone temperatures, set 'RegisterZoneTemperatures' to true in the options.json (add-on options). This will create per-zone sensor elements in Home Assistant.
-
+### ForwardToOriginalWebService: true/false
+If you set this option to true, any data/status received from the Actron will be forwarded to the original cloud service used by the phone app. This will let the phone see (but not control) the state of the Actron.
