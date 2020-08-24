@@ -9,6 +9,7 @@ namespace HMX.HASSActronQue
     internal class Service
     {
 		private static string _strServiceName = "hass-actronque";
+		private static string _strDeviceNameMQTT = "Actron Que Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
 		private static ManualResetEvent _eventStop = new ManualResetEvent(false);
 
@@ -16,6 +17,12 @@ namespace HMX.HASSActronQue
 		{
 			get { return _strServiceName; }
 		}
+
+		public static string DeviceNameMQTT
+		{
+			get { return _strDeviceNameMQTT; }
+		}
+
 
 		public static void Start()
         {

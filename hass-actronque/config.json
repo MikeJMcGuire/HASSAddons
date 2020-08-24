@@ -1,6 +1,6 @@
 {
   "name": "Actron Que Air Conditioner",
-  "version": "0.17",
+  "version": "0.18",
   "slug": "hass-actronque",
   "description": "An add-on for Actron Air Conditioners using the Actron Que module.",
   "url": "https://github.com/MikeJMcGuire/hass-actronque",
