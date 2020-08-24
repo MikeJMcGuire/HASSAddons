@@ -559,9 +559,9 @@ namespace HMX.HASSActronQue
 			catch (Exception eException)
 			{
 				if (eException.InnerException != null)
-					Logging.WriteDebugLogError("Que.GetAirConditionerZones()", lRequestId, eException.InnerException, "Unable to process API HTTP response.");
+					Logging.WriteDebugLogError("Que.GetAirConditionerZones()", lRequestId, eException.InnerException, "Unable to process API HTTP response. Is the serial number correct?");
 				else
-					Logging.WriteDebugLogError("Que.GetAirConditionerZones()", lRequestId, eException, "Unable to process API HTTP response.");
+					Logging.WriteDebugLogError("Que.GetAirConditionerZones()", lRequestId, eException, "Unable to process API HTTP response. Is the serial number correct?");
 
 				bRetVal = false;
 				goto Cleanup;

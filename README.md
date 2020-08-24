@@ -13,4 +13,4 @@ If you Actron has controllers in each zone, setting this option to true will cre
 By default, the add-on will poll the Que API system every 30 seconds for updates. This can be set to between 10 and 300 seconds inclusive.
 
 ### QueSerial: string
-If you have multiple Que units on your account, you can add this optional configuration to specify the serial number you want the add-on to use. The serial numbers are case sensitive and appear to be lower case. The Que wall unit will incorrectly report the serial number with upper case. You can also find the discovered serial numbers in the log for the add-on when the add-on is starting.
+If you have multiple Que units on your account, you can add this optional configuration to specify the serial number you want the add-on to use. You can find the discovered serial numbers in the log for the add-on when the add-on is starting.
