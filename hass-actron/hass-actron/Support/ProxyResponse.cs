@@ -11,6 +11,5 @@ namespace HMX.HASSActron
 		public string ContentType { get; set; }
 		public HttpStatusCode ResponseCode { get; set; }
 		public bool ProxySuccessful { get; set; }
-		public Dictionary<string, string> Headers { get; set; }
 	}
 }
