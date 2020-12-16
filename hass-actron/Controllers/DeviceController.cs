@@ -77,7 +77,7 @@ namespace HMX.HASSActron.Controllers
 		}
 
 		[Route("data")]
-		public IActionResult Data(string version, string device)
+		public async Task<IActionResult> Data(string version, string device)
 		{
 			AirConditionerData data = new AirConditionerData();
 			AirConditionerDataHeader header;
@@ -95,7 +95,7 @@ namespace HMX.HASSActron.Controllers
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
 			reader = new StreamReader(HttpContext.Request.Body);
-			strData = reader.ReadToEnd();
+			strData = await reader.ReadToEndAsync();
 			reader.Dispose();
 
 			try
