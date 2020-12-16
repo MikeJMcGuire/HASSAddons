@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace HMX.HASSActron.Controllers
 {
@@ -8,7 +9,7 @@ namespace HMX.HASSActron.Controllers
 	public class UsageController : Controller
 	{
 		[Route("log")]
-		public IActionResult Log()
+		public async Task<IActionResult> Log()
 		{
 			UsageResponse response = new UsageResponse();
 			string[] strElements, strSubElements;
@@ -26,7 +27,7 @@ namespace HMX.HASSActron.Controllers
 
 			try
 			{
-				strData = new StreamReader(Request.Body).ReadToEnd();
+				strData = await new StreamReader(Request.Body).ReadToEndAsync();
 			}
 			catch (Exception eException)
 			{

@@ -24,6 +24,11 @@ namespace HMX.HASSActron
 			get { return _dZones; }
 		}
 
+		public static bool DataReceived
+		{
+			get { return _bDataReceived; }
+		}
+
 		public static DateTime LastUpdate
 		{
 			get { return _airConditionerData.dtLastUpdate; }

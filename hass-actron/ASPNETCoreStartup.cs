@@ -1,14 +1,18 @@
 ﻿using HMX.HASSActron;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using Microsoft.Extensions.Hosting;
 
 namespace HMX.HASSActron
 {
 	public class ASPNETCoreStartup
 	{
-		public void Configure(IApplicationBuilder applicationBuilder, IApplicationLifetime applicationLifetime)
+		public void Configure(IApplicationBuilder applicationBuilder, IWebHostEnvironment environment, IHostApplicationLifetime applicationLifetime)
 		{
 			Logging.WriteDebugLog("ASPNETCoreStartup.Configure()");
 
@@ -19,7 +23,10 @@ namespace HMX.HASSActron
 			try
 			{
 				applicationBuilder.UseResponseBuffering();
-				applicationBuilder.UseMvc();
+				applicationBuilder.UseRouting();
+				applicationBuilder.UseEndpoints(endpoints => {
+					endpoints.MapControllers();
+				});
 			}
 			catch (Exception eException)
 			{
@@ -33,7 +40,9 @@ namespace HMX.HASSActron
 
 			try
 			{
-				services.AddMvc();
+				services.AddControllers();
+				services.AddHttpContextAccessor();
+				services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 			}
 			catch (Exception eException)
 			{
