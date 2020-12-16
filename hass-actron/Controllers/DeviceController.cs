@@ -191,9 +191,6 @@ namespace HMX.HASSActron.Controllers
 				contentResult.ContentType = "application/json; charset=utf-8";
 				contentResult.StatusCode = (int)response.ResponseCode;
 				contentResult.Content = response.Response;
-
-				//if (response.Headers.ContainsKey("X-NxGen-Version"))
-				//	HttpContext.Response.Headers.Add("X-NxGen-Version", new Microsoft.Extensions.Primitives.StringValues(response.Headers["X-NxGen-Version"]));
 			}
 			else
 			{

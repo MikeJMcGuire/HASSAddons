@@ -9,6 +9,7 @@
   "image": "mikejmcguire/hass-actron-{arch}",
   "arch": [
     "amd64",
+    "aarch64",
     "armhf",
     "armv7",
     "i386"
