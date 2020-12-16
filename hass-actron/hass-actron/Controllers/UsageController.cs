@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace HMX.HASSActron.Controllers
 {
@@ -8,12 +10,13 @@ namespace HMX.HASSActron.Controllers
 	public class UsageController : Controller
 	{
 		[Route("log")]
-		public IActionResult Log()
+		public async Task<IActionResult> Log()
 		{
 			UsageResponse response = new UsageResponse();
 			string[] strElements, strSubElements;
 			string strData, strEvent;
 			bool bMode = false, bWall = false;
+			ContentResult content = new ContentResult();
 
 			Logging.WriteDebugLog("UsageController.Log() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
@@ -24,9 +27,13 @@ namespace HMX.HASSActron.Controllers
 			response.message = "Usage tracked";
 			response.value = null;
 
+			content.Content = JsonConvert.SerializeObject(response);
+			content.ContentType = "application/json";
+			content.StatusCode = 200;
+
 			try
 			{
-				strData = new StreamReader(Request.Body).ReadToEnd();
+				strData = await new StreamReader(Request.Body).ReadToEndAsync();
 			}
 			catch (Exception eException)
 			{
@@ -60,7 +67,7 @@ namespace HMX.HASSActron.Controllers
 			}
 
 		Cleanup:
-			return new ObjectResult(response);
+			return content;
 		}
 	}
 }

@@ -77,7 +77,7 @@ namespace HMX.HASSActron.Controllers
 		}
 
 		[Route("data")]
-		public IActionResult Data(string version, string device)
+		public async Task<IActionResult> Data(string version, string device)
 		{
 			AirConditionerData data = new AirConditionerData();
 			AirConditionerDataHeader header;
@@ -85,6 +85,7 @@ namespace HMX.HASSActron.Controllers
 			Dictionary<string, object> dDataField;
 			DataResponse response = new DataResponse();
 			StreamReader reader;
+			ContentResult result = new ContentResult();
 			string strData;
 			Newtonsoft.Json.Linq.JArray aZones, aZoneTemperatures;
 
@@ -95,7 +96,7 @@ namespace HMX.HASSActron.Controllers
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
 			reader = new StreamReader(HttpContext.Request.Body);
-			strData = reader.ReadToEnd();
+			strData = await reader.ReadToEndAsync();
 			reader.Dispose();
 
 			try
@@ -154,15 +155,92 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
+			result.Content = JsonConvert.SerializeObject(response);
+			result.ContentType = "application/json";
+			result.StatusCode = 200;
+
 			if (Service.ForwardToOriginalWebService)
 				ForwardDataToOriginalWebService(strData);
 
-			return new ObjectResult(response);
+			return result;
+		}
+
+		[Route("activate")]
+		public async Task<IActionResult> Activate(string version, string device, string user_access_token)
+		{
+			ContentResult contentResult;
+			string strUserAgent, strHost, strPage;
+			ProxyResponse response;
+
+			Logging.WriteDebugLog("DeviceController.Activate() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
+			strUserAgent = HttpContext.Request.Headers["User-Agent"];
+			strHost = Request.Host.Host;
+			strPage = string.Format("/rest/{0}/block/{1}/activate?user_access_token={2}", version, device, user_access_token);
+
+			Logging.WriteDebugLog("DeviceController.Activate() Client: {0}:{1} GET http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
+
+			HttpContext.Response.Headers.Add("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
+
+			response = await Proxy.ForwardRequestToOriginalWebService("GET", strUserAgent, strHost, strPage);
+			if (response.ProxySuccessful)
+			{
+				contentResult = new ContentResult();
+				contentResult.ContentType = "application/json; charset=utf-8";
+				contentResult.StatusCode = (int)response.ResponseCode;
+				contentResult.Content = response.Response;
+			}
+			else
+			{
+				contentResult = new ContentResult();
+				contentResult.StatusCode = 500;
+			}
+
+			return contentResult;
+		}
+
+		[Route("")]
+		[HttpDelete]
+		public async Task<IActionResult> ActivateDelete(string version, string device, string user_access_token)
+		{
+			ContentResult contentResult;
+			string strUserAgent, strHost, strPage;
+			ProxyResponse response;
+
+			Logging.WriteDebugLog("DeviceController.ActivateDelete() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
+			strUserAgent = HttpContext.Request.Headers["User-Agent"];
+			strHost = Request.Host.Host;
+			strPage = string.Format("/rest/{0}/block/{1}?user_access_token={2}", version, device, user_access_token);
+
+			Logging.WriteDebugLog("DeviceController.ActivateDelete() Client: {0}:{1} DELETE http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
+
+			HttpContext.Response.Headers.Add("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
+
+			response = await Proxy.ForwardRequestToOriginalWebService("DELETE", strUserAgent, strHost, strPage);
+			if (response.ProxySuccessful)
+			{
+				contentResult = new ContentResult();
+				contentResult.ContentType = "application/json; charset=utf-8";
+				contentResult.StatusCode = (int)response.ResponseCode;
+				contentResult.Content = response.Response;
+			}
+			else
+			{
+				contentResult = new ContentResult();
+				contentResult.StatusCode = 500;
+			}
+
+			return contentResult;
 		}
 
 		private void ForwardDataToOriginalWebService(string strData)
 		{
-			string strUserAgent = "", strCnntentType = "", strNinjaToken = "";
+			string strUserAgent = "", strContentType = "", strNinjaToken = "";
 
 			Logging.WriteDebugLog("DeviceController.ForwardDataToOriginalWebService()");
 
@@ -177,7 +255,7 @@ namespace HMX.HASSActron.Controllers
 							break;
 
 						case "Content-Type":
-							strCnntentType = HttpContext.Request.Headers[strHeader].ToString();
+							strContentType = HttpContext.Request.Headers[strHeader].ToString();
 							break;
 
 						case "X-Ninja-Token":
@@ -191,7 +269,7 @@ namespace HMX.HASSActron.Controllers
 				}
 			}
 
-			Proxy.ForwardDataToOriginalWebService(strUserAgent, strCnntentType, strNinjaToken, HttpContext.Request.Host.ToString(), HttpContext.Request.Path, strData);
+			Proxy.ForwardDataToOriginalWebService(strUserAgent, strContentType, strNinjaToken, HttpContext.Request.Host.ToString(), HttpContext.Request.Path, strData);
 		}
 	}
 }
