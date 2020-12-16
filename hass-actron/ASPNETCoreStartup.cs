@@ -40,7 +40,7 @@ namespace HMX.HASSActron
 
 			try
 			{
-				services.AddControllers();
+				services.AddControllers().AddNewtonsoftJson();
 				services.AddHttpContextAccessor();
 				services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 			}

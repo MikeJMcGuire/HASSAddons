@@ -85,6 +85,7 @@ namespace HMX.HASSActron.Controllers
 			Dictionary<string, object> dDataField;
 			DataResponse response = new DataResponse();
 			StreamReader reader;
+			ContentResult result = new ContentResult();
 			string strData;
 			Newtonsoft.Json.Linq.JArray aZones, aZoneTemperatures;
 
@@ -154,10 +155,14 @@ namespace HMX.HASSActron.Controllers
 			response.error = null;
 			response.id = 0;
 
+			result.Content = JsonConvert.SerializeObject(response);
+			result.ContentType = "application/json";
+			result.StatusCode = 200;
+
 			if (Service.ForwardToOriginalWebService)
 				ForwardDataToOriginalWebService(strData);
 
-			return new ObjectResult(response);
+			return result;
 		}
 
 		[Route("activate")]
