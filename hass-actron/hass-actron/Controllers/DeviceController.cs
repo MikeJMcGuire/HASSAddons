@@ -160,6 +160,71 @@ namespace HMX.HASSActron.Controllers
 			return new ObjectResult(response);
 		}
 
+		[Route("activate")]
+		public async Task<IActionResult> Activate(string version, string device, string user_access_token)
+		{
+			ContentResult contentResult;
+			string strUserAgent, strHost, strPage;
+			ProxyResponse response;
+
+			Logging.WriteDebugLog("DeviceController.Activate() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
+			strUserAgent = HttpContext.Request.Headers["User-Agent"];
+			strHost = Request.Host.Host;
+			strPage = string.Format("/rest/{0}/block/{1}/activate?user_access_token={2}", version, device, user_access_token);
+
+			Logging.WriteDebugLog("DeviceController.Activate() Client: {0}:{1} GET http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
+
+			response = await Proxy.ForwardRequestToOriginalWebService("GET", strUserAgent, strHost, strPage);
+			if (response.ProxySuccessful)
+			{
+				contentResult = new ContentResult();
+				contentResult.ContentType = "application/json";
+				contentResult.StatusCode = (int)response.ResponseCode;
+				contentResult.Content = response.Response;
+			}
+			else
+			{
+				contentResult = new ContentResult();
+				contentResult.StatusCode = 500;
+			}
+
+			return contentResult;
+		}
+
+		[Route("activate")]
+		[HttpDelete]
+		public async Task<IActionResult> ActivateDelete(string version, string device, string user_access_token)
+		{
+			ContentResult contentResult;
+			string strUserAgent, strHost, strPage;
+			ProxyResponse response;
+
+			Logging.WriteDebugLog("DeviceController.ActivateDelete() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
+
+			strUserAgent = HttpContext.Request.Headers["User-Agent"];
+			strHost = Request.Host.Host;
+			strPage = string.Format("/rest/{0}/block/{1}/activate?user_access_token={2}", version, device, user_access_token);
+
+			Logging.WriteDebugLog("DeviceController.ActivateDelete() Client: {0}:{1} DELETE http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
+
+			response = await Proxy.ForwardRequestToOriginalWebService("DELETE", strUserAgent, strHost, strPage);
+			if (response.ProxySuccessful)
+			{
+				contentResult = new ContentResult();
+				contentResult.ContentType = "application/json";
+				contentResult.StatusCode = (int)response.ResponseCode;
+				contentResult.Content = response.Response;
+			}
+			else
+			{
+				contentResult = new ContentResult();
+				contentResult.StatusCode = 500;
+			}
+
+			return contentResult;
+		}
+
 		private void ForwardDataToOriginalWebService(string strData)
 		{
 			string strUserAgent = "", strCnntentType = "", strNinjaToken = "";

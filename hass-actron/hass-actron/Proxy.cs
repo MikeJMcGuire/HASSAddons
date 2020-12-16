@@ -164,5 +164,83 @@ namespace HMX.HASSActron
 			httpResponse?.Dispose();
 			httpClient?.Dispose();
 		}
+
+		public static async Task<ProxyResponse> ForwardRequestToOriginalWebService(string strMethod, string strUserAgent, string strHost, string strPath)
+		{
+			ProxyResponse response = new ProxyResponse();
+			HttpClient httpClient = null;
+			HttpClientHandler httpClientHandler;
+			HttpResponseMessage httpResponse = null;
+			CancellationTokenSource cancellationToken = null;
+			IPAddress ipProxy;
+			string strURL = string.Format("http://{0}{1}", strHost, strPath);
+
+			Logging.WriteDebugLog("Proxy.ForwardRequestToOriginalWebService() URL: " + strURL);
+
+			response.ProxySuccessful = true;
+
+			ipProxy = await GetTargetAddress(strHost);
+			if (ipProxy == null)
+			{
+				Logging.WriteDebugLog("Proxy.ForwardRequestToOriginalWebService() Abort (no proxy)");
+				response.ProxySuccessful = false;
+				goto Cleanup;
+			}
+
+			httpClientHandler = new HttpClientHandler();
+			httpClientHandler.Proxy = new WebProxy(string.Format("http://{0}:80", ipProxy.ToString()));
+			httpClientHandler.UseProxy = true;
+
+			httpClient = new HttpClient(httpClientHandler);
+
+			httpClient.DefaultRequestHeaders.Connection.Add("close");
+			httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(strUserAgent);
+			
+			try
+			{
+				cancellationToken = new CancellationTokenSource();
+				cancellationToken.CancelAfter(_iWaitTime);
+
+				switch (strMethod)
+				{
+					case "DELETE":
+						httpResponse = await httpClient.DeleteAsync(strURL, cancellationToken.Token);
+
+						break;
+
+					case "GET":
+						httpResponse = await httpClient.GetAsync(strURL, cancellationToken.Token);
+
+						break;
+
+					default:
+						response.ProxySuccessful = false;
+						goto Cleanup;						
+				}				
+
+				if (httpResponse.IsSuccessStatusCode)
+				{
+					response.ResponseCode = httpResponse.StatusCode;
+					response.Response = await httpResponse.Content.ReadAsStringAsync();
+					Logging.WriteDebugLog("Response: " + response.Response);
+				}
+				else
+				{
+					response.ResponseCode = httpResponse.StatusCode;
+					Logging.WriteDebugLog("Response: " + httpResponse.StatusCode);
+				}
+			}
+			catch (Exception eException)
+			{
+				Logging.WriteDebugLogError("Proxy.ForwardRequestToOriginalWebService()", eException, "Unable to process API HTTP response.");
+			}
+
+		Cleanup:
+			cancellationToken?.Dispose();
+			httpResponse?.Dispose();
+			httpClient?.Dispose();
+
+			return response;
+		}
 	}
 }
