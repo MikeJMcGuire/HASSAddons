@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace HMX.HASSActron.Controllers
 			string[] strElements, strSubElements;
 			string strData, strEvent;
 			bool bMode = false, bWall = false;
+			ContentResult content = new ContentResult();
 
 			Logging.WriteDebugLog("UsageController.Log() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
@@ -24,6 +26,10 @@ namespace HMX.HASSActron.Controllers
 			response.status = 200;
 			response.message = "Usage tracked";
 			response.value = null;
+
+			content.Content = JsonConvert.SerializeObject(response);
+			content.ContentType = "application/json";
+			content.StatusCode = 200;
 
 			try
 			{
@@ -61,7 +67,7 @@ namespace HMX.HASSActron.Controllers
 			}
 
 		Cleanup:
-			return new ObjectResult(response);
+			return content;
 		}
 	}
 }
