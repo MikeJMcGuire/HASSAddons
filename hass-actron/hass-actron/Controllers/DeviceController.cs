@@ -180,13 +180,20 @@ namespace HMX.HASSActron.Controllers
 
 			Logging.WriteDebugLog("DeviceController.Activate() Client: {0}:{1} GET http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
 
+			HttpContext.Response.Headers.Add("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
+
 			response = await Proxy.ForwardRequestToOriginalWebService("GET", strUserAgent, strHost, strPage);
 			if (response.ProxySuccessful)
 			{
 				contentResult = new ContentResult();
-				contentResult.ContentType = "application/json";
+				contentResult.ContentType = "application/json; charset=utf-8";
 				contentResult.StatusCode = (int)response.ResponseCode;
 				contentResult.Content = response.Response;
+
+				//if (response.Headers.ContainsKey("X-NxGen-Version"))
+				//	HttpContext.Response.Headers.Add("X-NxGen-Version", new Microsoft.Extensions.Primitives.StringValues(response.Headers["X-NxGen-Version"]));
 			}
 			else
 			{
@@ -197,7 +204,7 @@ namespace HMX.HASSActron.Controllers
 			return contentResult;
 		}
 
-		[Route("activate")]
+		[Route("")]
 		[HttpDelete]
 		public async Task<IActionResult> ActivateDelete(string version, string device, string user_access_token)
 		{
@@ -209,15 +216,19 @@ namespace HMX.HASSActron.Controllers
 
 			strUserAgent = HttpContext.Request.Headers["User-Agent"];
 			strHost = Request.Host.Host;
-			strPage = string.Format("/rest/{0}/block/{1}/activate?user_access_token={2}", version, device, user_access_token);
+			strPage = string.Format("/rest/{0}/block/{1}?user_access_token={2}", version, device, user_access_token);
 
 			Logging.WriteDebugLog("DeviceController.ActivateDelete() Client: {0}:{1} DELETE http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
+
+			HttpContext.Response.Headers.Add("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Add("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
 
 			response = await Proxy.ForwardRequestToOriginalWebService("DELETE", strUserAgent, strHost, strPage);
 			if (response.ProxySuccessful)
 			{
 				contentResult = new ContentResult();
-				contentResult.ContentType = "application/json";
+				contentResult.ContentType = "application/json; charset=utf-8";
 				contentResult.StatusCode = (int)response.ResponseCode;
 				contentResult.Content = response.Response;
 			}
@@ -232,7 +243,7 @@ namespace HMX.HASSActron.Controllers
 
 		private void ForwardDataToOriginalWebService(string strData)
 		{
-			string strUserAgent = "", strCnntentType = "", strNinjaToken = "";
+			string strUserAgent = "", strContentType = "", strNinjaToken = "";
 
 			Logging.WriteDebugLog("DeviceController.ForwardDataToOriginalWebService()");
 
@@ -247,7 +258,7 @@ namespace HMX.HASSActron.Controllers
 							break;
 
 						case "Content-Type":
-							strCnntentType = HttpContext.Request.Headers[strHeader].ToString();
+							strContentType = HttpContext.Request.Headers[strHeader].ToString();
 							break;
 
 						case "X-Ninja-Token":
@@ -261,7 +272,7 @@ namespace HMX.HASSActron.Controllers
 				}
 			}
 
-			Proxy.ForwardDataToOriginalWebService(strUserAgent, strCnntentType, strNinjaToken, HttpContext.Request.Host.ToString(), HttpContext.Request.Path, strData);
+			Proxy.ForwardDataToOriginalWebService(strUserAgent, strContentType, strNinjaToken, HttpContext.Request.Host.ToString(), HttpContext.Request.Path, strData);
 		}
 	}
 }
