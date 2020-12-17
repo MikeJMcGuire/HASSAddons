@@ -77,7 +77,7 @@ namespace HMX.HASSActronQue
 			_httpClientCommands.BaseAddress = new Uri(_strBaseURL);
 		}
 
-		public static void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, int iPollInterval, bool bPerZoneControls, ManualResetEvent eventStop)
+		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, int iPollInterval, bool bPerZoneControls, ManualResetEvent eventStop)
 		{
 			Thread threadMonitor;
 
@@ -95,7 +95,7 @@ namespace HMX.HASSActronQue
 			{
 				if (File.Exists(_strDeviceIdFile))
 				{
-					_strDeviceUniqueIdentifier = JsonConvert.DeserializeObject<string>(File.ReadAllText(_strDeviceIdFile));
+					_strDeviceUniqueIdentifier = JsonConvert.DeserializeObject<string>(await File.ReadAllTextAsync(_strDeviceIdFile));
 
 					Logging.WriteDebugLog("Que.Initialise() Device Id: {0}", _strDeviceUniqueIdentifier);
 				}
@@ -110,7 +110,7 @@ namespace HMX.HASSActronQue
 			{
 				if (File.Exists(_strPairingTokenFile))
 				{
-					_pairingToken = JsonConvert.DeserializeObject<PairingToken>(File.ReadAllText(_strPairingTokenFile));
+					_pairingToken = JsonConvert.DeserializeObject<PairingToken>(await File.ReadAllTextAsync(_strPairingTokenFile));
 
 					Logging.WriteDebugLog("Que.Initialise() Restored Pairing Token");
 				}
@@ -152,7 +152,7 @@ namespace HMX.HASSActronQue
 				// Update Device Id File
 				try
 				{
-					File.WriteAllText(_strDeviceIdFile, JsonConvert.SerializeObject(_strDeviceUniqueIdentifier));
+					await File.WriteAllTextAsync(_strDeviceIdFile, JsonConvert.SerializeObject(_strDeviceUniqueIdentifier));
 				}
 				catch (Exception eException)
 				{
@@ -186,7 +186,7 @@ namespace HMX.HASSActronQue
 					// Update Token File
 					try
 					{
-						File.WriteAllText(_strPairingTokenFile, JsonConvert.SerializeObject(_pairingToken));
+						await File.WriteAllTextAsync(_strPairingTokenFile, JsonConvert.SerializeObject(_pairingToken));
 					}
 					catch (Exception eException)
 					{
@@ -273,7 +273,7 @@ namespace HMX.HASSActronQue
 					// Update Token File
 					try
 					{
-						File.WriteAllText(_strBearerTokenFile, JsonConvert.SerializeObject(_queToken));
+						await File.WriteAllTextAsync(_strBearerTokenFile, JsonConvert.SerializeObject(_queToken));
 					}
 					catch (Exception eException)
 					{
