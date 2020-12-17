@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.19] - 2020-12-17
+
+### Changed
+- Updated to .NET 5.0 Framework.
+- Updated Device Registration MQTT information.
+
 ## [v0.18] - 2020-08-24
 
 ### Added

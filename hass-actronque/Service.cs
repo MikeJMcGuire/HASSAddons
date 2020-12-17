@@ -33,7 +33,7 @@ namespace HMX.HASSActronQue
 			int iPollInterval;
 			bool bPerZoneControls;
 
-			Logging.WriteDebugLog("Service.Start()");
+			Logging.WriteDebugLog("Service.Start() Build Date: {0}", Properties.Resources.BuildDate);
 
 			// Load Configuration
 			try
