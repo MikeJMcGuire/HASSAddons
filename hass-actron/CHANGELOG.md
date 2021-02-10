@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.96] - 2021-02-10
+
+### Changed
+- Updated add-on configuration based on schema changes from HA. This should remove the warning appearing in the supervisor logs.
+
 ## [v0.95] - 2020-10-18
 
 ### Changed
