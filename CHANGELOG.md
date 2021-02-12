@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.21] - 2021-02-12
+
+### Added
+- Initial support for the Actron Neo module.
+- New configuration item SystemType for specifying que or neo system types - defaulting to que for backward compatibility.
+
 ## [v0.20] - 2021-02-10
 
 ### Changed
