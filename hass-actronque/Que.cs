@@ -730,6 +730,32 @@ namespace HMX.HASSActronQue
 											}
 										}
 									}
+									// Set Temperature Cooling
+									else if (change.Name == "UserAirconSettings.TemperatureSetpoint_Cool_oC")
+									{
+										if (!double.TryParse(change.Value.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "UserAirconSettings.TemperatureSetpoint_Cool_oC");
+										else
+										{
+											lock (_oLockData)
+											{
+												_airConditionerData.SetTemperatureCooling = dblTemp;
+											}
+										}
+									}
+									// Set Temperature Heating
+									else if (change.Name == "UserAirconSettings.TemperatureSetpoint_Heat_oC")
+									{
+										if (!double.TryParse(change.Value.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "UserAirconSettings.TemperatureSetpoint_Heat_oC");
+										else
+										{
+											lock (_oLockData)
+											{
+												_airConditionerData.SetTemperatureHeating = dblTemp;
+											}
+										}
+									}
 									// Remote Zone
 									else if (change.Name.StartsWith("RemoteZoneInfo["))
 									{
