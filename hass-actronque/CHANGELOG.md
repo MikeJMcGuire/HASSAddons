@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.22] - 2021-02-13
+
+### Changed
+- Fixed a bug with temperature updates for the Neo system.
+
 ## [v0.21] - 2021-02-12
 
 ### Added
