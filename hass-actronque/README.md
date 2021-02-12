@@ -1,7 +1,7 @@
 # hass-actronque
-Actron Que Air Conditioner Add-On for Home Assistant (https://blog.mikejmcguire.com/2020/02/04/actron-que-and-home-assistant/)
+Actron Que Air Conditioner Add-On for Home Assistant (https://blog.mikejmcguire.com/2021/02/11/actron-neo-and-home-assistant/)
 
-This add-on for Home Assistant enables you to control an Actron Air Conditioner equipped with the Actron Que module. 
+This add-on for Home Assistant enables you to control an Actron Air Conditioner equipped with the Actron Que or Actron Neo modules. 
 
 The add-on requires you to use the Mosquitto MQTT broker on your Home Assistant device, with authentication enabled and a valid credential supplied. You'll also need to ensure that MQTT discovery is enabled with the default prefix 'homeassistant' for HA to discover the climate device and zone switches.
 
@@ -14,3 +14,6 @@ By default, the add-on will poll the Que API system every 30 seconds for updates
 
 ### QueSerial: string
 If you have multiple Que units on your account, you can add this optional configuration to specify the serial number you want the add-on to use. You can find the discovered serial numbers in the log for the add-on when the add-on is starting.
+
+### SystemType: string
+This option specifies if you have a "que" or "neo" control system. If not specified, this defaults to "que". 
