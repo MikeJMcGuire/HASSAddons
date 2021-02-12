@@ -29,7 +29,7 @@ namespace HMX.HASSActronQue
 			IConfigurationRoot configuration;
 			IWebHost webHost;
 			string strMQTTUser, strMQTTPassword, strMQTTBroker;
-			string strQueUser, strQuePassword, strQueSerial;
+			string strQueUser, strQuePassword, strQueSerial, strSystemType;
 			int iPollInterval;
 			bool bPerZoneControls;
 
@@ -64,11 +64,27 @@ namespace HMX.HASSActronQue
 				return;
 			if (!Configuration.GetPrivateConfiguration(configuration, "QuePassword", out strQuePassword))
 				return;
-			Configuration.GetOptionalConfiguration(configuration, "QueSerial", out strQueSerial);			
-	
+			Configuration.GetOptionalConfiguration(configuration, "QueSerial", out strQueSerial);
+			
+			Configuration.GetOptionalConfiguration(configuration, "SystemType", out strSystemType);
+			if (strSystemType == "")
+			{
+				Logging.WriteDebugLog("Service.Start() System Type not specified, defaulting to que.");
+				strSystemType = "que";
+			}
+			else
+			{
+				strSystemType = strSystemType.ToLower().Trim();
+				if (strSystemType != "que" && strSystemType != "neo")
+				{
+					Logging.WriteDebugLog("Service.Start() System Type must be que or neo.");
+					return;
+				}
+			}
+
 			MQTT.StartMQTT(strMQTTBroker, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
 
-			Que.Initialise(strQueUser, strQuePassword, strQueSerial, iPollInterval, bPerZoneControls, _eventStop);
+			Que.Initialise(strQueUser, strQuePassword, strQueSerial, strSystemType, iPollInterval, bPerZoneControls, _eventStop);
 
 			try
 			{
