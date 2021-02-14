@@ -209,7 +209,7 @@ namespace HMX.HASSActronQue
 					case "actronque/fan/set":
 						switch (strPayload)
 						{
-							case "hiautogh":
+							case "auto":
 								Que.ChangeFanMode(lRequestId, FanMode.Automatic);
 
 								break;

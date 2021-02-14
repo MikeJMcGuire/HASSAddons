@@ -701,6 +701,7 @@ namespace HMX.HASSActronQue
 											lock (_oLockData)
 											{
 												_airConditionerData.FanMode = strInput;
+												_airConditionerData.Continuous = strInput.EndsWith("CONT");
 											}
 										}
 									}
@@ -869,6 +870,7 @@ namespace HMX.HASSActronQue
 									lock (_oLockData)
 									{
 										_airConditionerData.FanMode = strInput;
+										_airConditionerData.Continuous = strInput.EndsWith("CONT");
 									}
 								}
 
@@ -1226,7 +1228,15 @@ namespace HMX.HASSActronQue
 					MQTT.SendMessage("actronque/fanmode", "auto");
 					break;
 
+				case "AUTO+CONT":
+					MQTT.SendMessage("actronque/fanmode", "auto");
+					break;
+
 				case "LOW":
+					MQTT.SendMessage("actronque/fanmode", "low");
+					break;
+
+				case "LOW+CONT":
 					MQTT.SendMessage("actronque/fanmode", "low");
 					break;
 
@@ -1234,7 +1244,15 @@ namespace HMX.HASSActronQue
 					MQTT.SendMessage("actronque/fanmode", "medium");
 					break;
 
+				case "MED+CONT":
+					MQTT.SendMessage("actronque/fanmode", "medium");
+					break;
+
 				case "HIGH":
+					MQTT.SendMessage("actronque/fanmode", "high");
+					break;
+					
+				case "HIGH+CONT":
 					MQTT.SendMessage("actronque/fanmode", "high");
 					break;
 
@@ -1479,22 +1497,22 @@ namespace HMX.HASSActronQue
 			switch (fanMode)
 			{
 				case FanMode.Automatic:
-					command.Data.command.Add("UserAirconSettings.FanMode", "AUTO");
+					command.Data.command.Add("UserAirconSettings.FanMode", _airConditionerData.Continuous ? "AUTO+CONT" : "AUTO");
 
 					break;
 
 				case FanMode.Low:
-					command.Data.command.Add("UserAirconSettings.FanMode", "LOW");
+					command.Data.command.Add("UserAirconSettings.FanMode", _airConditionerData.Continuous ? "LOW+CONT" : "LOW");
 
 					break;
 
 				case FanMode.Medium:
-					command.Data.command.Add("UserAirconSettings.FanMode", "MED");
+					command.Data.command.Add("UserAirconSettings.FanMode", _airConditionerData.Continuous ? "MED+CONT" : "MED");
 
 					break;
 
 				case FanMode.High:
-					command.Data.command.Add("UserAirconSettings.FanMode", "HIGH");
+					command.Data.command.Add("UserAirconSettings.FanMode", _airConditionerData.Continuous ? "HIGH+CONT" : "HIGH");
 
 					break;
 			}
