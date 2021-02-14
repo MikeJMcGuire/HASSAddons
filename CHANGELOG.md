@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.23] - 2021-02-14
+
+### Added
+- Support for fan continuous mode. If you change speed whilst in continuous mode, continuous mode will be preserved. 
+
 ## [v0.22] - 2021-02-13
 
 ### Changed
