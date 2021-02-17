@@ -1,0 +1,20 @@
+{
+  "arch": [
+    "amd64"
+  ],
+  "description": "Container management made easy",
+  "docker_api": true,
+  "image": "mikejmcguire/hass-portainer-{arch}",
+  "ingress": true,
+  "ingress_port": 9000,
+  "init": false,
+  "map": [
+    "ssl"
+  ],
+  "name": "Portainer",
+  "panel_icon": "mdi:docker",
+  "slug": "portainer",
+  "startup": "services",
+  "url": "https://github.com/MikeJMcGuire/hass-portainer",
+  "version": "0.1"
+}
