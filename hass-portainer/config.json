@@ -1,6 +1,9 @@
 {
   "arch": [
-    "amd64"
+    "amd64",
+    "armv7",
+    "armhf",
+    "aarch64"
   ],
   "description": "Container management made easy",
   "docker_api": true,
