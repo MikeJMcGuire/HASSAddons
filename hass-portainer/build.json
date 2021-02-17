@@ -1,8 +1,8 @@
 {
   "build_from": {
-    "aarch64": "alpine:latest",
-    "amd64": "alpine:latest",
-    "armhf": "alpine:latest",
-    "armv7": "alpine:latest"
+    "aarch64": "alpine:latest@sha256:019c59128325536e838a5f36028db214335129f9aa83214cc2c60c10dc1797ac",
+    "amd64": "alpine:latest@sha256:3747d4eb5e7f0825d54c8e80452f1e245e24bd715972c919d189a62da97af2ae",
+    "armhf": "alpine:latest@sha256:817f5bc4194eccd71ad9afe9c2eb7e73a5841180a88a385229bd38ab6daf005b",
+    "armv7": "alpine:latest@sha256:817f5bc4194eccd71ad9afe9c2eb7e73a5841180a88a385229bd38ab6daf005b"
   }
 }
