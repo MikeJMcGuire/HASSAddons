@@ -14,10 +14,18 @@
   "map": [
     "ssl"
   ],
+  "ports": {
+    "8000/tcp": null,
+    "9000/tcp": null
+  },
+  "ports_description": {
+    "8000/tcp": "Port for exposing Portainer to edge agents",
+    "9000/tcp": "Port for exposing Portainer UI directly"
+  },
   "name": "Portainer",
   "panel_icon": "mdi:docker",
   "slug": "portainer",
   "startup": "services",
   "url": "https://github.com/MikeJMcGuire/hass-portainer",
-  "version": "0.1"
+  "version": "0.2"
 }

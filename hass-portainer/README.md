@@ -4,3 +4,5 @@ Portainer v2.1.1 Add-On for Home Assistant (https://blog.mikejmcguire.com/2021/0
 This add-on provides a 2.x version of Portainer-CE, as the standard add-on is based on Portainer 1.x.
 
 The initial credentials for the add-on are admin/portainer - strongly suggest changing the password upon first login.
+
+Port options are available for exposing ports 8000 and 9000 as required.
