@@ -20,7 +20,6 @@ namespace HMX.HASSActronQue
 
 			try
 			{
-				applicationBuilder.UseResponseBuffering();
 				applicationBuilder.UseRouting();
 				applicationBuilder.UseEndpoints(endpoints =>
 				{
