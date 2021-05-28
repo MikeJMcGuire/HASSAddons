@@ -1,6 +1,6 @@
 {
   "name": "Actron Que/Neo Air Conditioner",
-  "version": "0.23",
+  "version": "0.24",
   "slug": "hass-actronque",
   "description": "An add-on for Actron Air Conditioners using the Actron Que or Neo modules.",
   "url": "https://github.com/MikeJMcGuire/hass-actronque",
@@ -18,6 +18,7 @@
     "MQTTUser": "",
     "MQTTPassword": "",
     "MQTTBroker": "core-mosquitto",
+    "MQTTTLS":  false,
     "PerZoneControls": false,
     "PollInterval": 30,
     "QueUser": "queuser",
@@ -28,6 +29,7 @@
     "MQTTUser": "str?",
     "MQTTPassword": "str?",
     "MQTTBroker": "str",
+    "MQTTTLS": "bool?",
     "PerZoneControls": "bool",
     "PollInterval": "int(10,300)",
     "QueUser": "str",

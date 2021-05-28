@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -27,11 +28,11 @@ namespace HMX.HASSActronQue
 		public static void Start()
         {
 			IConfigurationRoot configuration;
-			IWebHost webHost;
+			IHost webHost;
 			string strMQTTUser, strMQTTPassword, strMQTTBroker;
 			string strQueUser, strQuePassword, strQueSerial, strSystemType;
 			int iPollInterval;
-			bool bPerZoneControls;
+			bool bPerZoneControls, bMQTTTLS;
 
 			Logging.WriteDebugLog("Service.Start() Build Date: {0}", Properties.Resources.BuildDate);
 
@@ -49,6 +50,8 @@ namespace HMX.HASSActronQue
 			Configuration.GetOptionalConfiguration(configuration, "MQTTUser", out strMQTTUser);
 			Configuration.GetPrivateOptionalConfiguration(configuration, "MQTTPassword", out strMQTTPassword);
 			if (!Configuration.GetConfiguration(configuration, "MQTTBroker", out strMQTTBroker))
+				return;
+			if (!Configuration.GetOptionalConfiguration(configuration, "MQTTTLS", out bMQTTTLS))
 				return;
 
 			if (!Configuration.GetConfiguration(configuration, "PerZoneControls", out bPerZoneControls))
@@ -82,13 +85,16 @@ namespace HMX.HASSActronQue
 				}
 			}
 
-			MQTT.StartMQTT(strMQTTBroker, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
+			MQTT.StartMQTT(strMQTTBroker, bMQTTTLS, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
 
 			Que.Initialise(strQueUser, strQuePassword, strQueSerial, strSystemType, iPollInterval, bPerZoneControls, _eventStop);
 
 			try
 			{
-				webHost = new WebHostBuilder().UseKestrel().UseStartup<ASPNETCoreStartup>().UseConfiguration(configuration).UseUrls($"http://*:80/").Build();
+				webHost = Host.CreateDefaultBuilder().ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<ASPNETCoreStartup>().UseConfiguration(configuration).UseUrls($"http://*:80/");
+				}).Build();
 			}
 			catch (Exception eException)
 			{

@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.24] - 2021-05-28
+
+### Added
+- Support for MQTT TLS (with associated configuration option).
+- Support for MQTT port specification (through host:port notation).
+
+### Changed
+- Moved to .NET 5.0 host model.
+
 ## [v0.23] - 2021-02-14
 
 ### Added

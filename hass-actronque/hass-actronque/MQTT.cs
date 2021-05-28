@@ -20,9 +20,14 @@ namespace HMX.HASSActronQue
 		private static MessageHandler _messageHandler = null;
 		private static int _iLastUpdateThreshold = 5; // Minutes
 		
-		public static async void StartMQTT(string strMQTTServer, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
+		public static async void StartMQTT(string strMQTTServer, bool bMQTTTLS, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{
 			IManagedMqttClientOptions options;
+			MqttClientOptionsBuilder clientOptions;
+			MqttClientOptionsBuilderTlsParameters optionsTLS;
+			int iPort = 0;
+			string[] strMQTTServerArray;
+			string strMQTTBroker;
 
 			Logging.WriteDebugLog("MQTT.StartMQTT()");
 
@@ -34,24 +39,57 @@ namespace HMX.HASSActronQue
 			_strClientId = strClientId;
 			_messageHandler = messageHandler;
 
-			if (strUser == "")
+			if (strMQTTServer.Contains(":"))
 			{
-				options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
-					.WithClientId(_strClientId)
-					.WithTcpServer(strMQTTServer)
-					.Build())
-				.Build();
+				strMQTTServerArray = strMQTTServer.Split(new char[] { ':' });
+				if (strMQTTServerArray.Length != 2)
+				{
+					Logging.WriteDebugLog("MQTT.StartMQTT() MQTTBroker field has incorrect syntax (host or host:port)");
+					return;
+				}
+
+				if (!int.TryParse(strMQTTServerArray[1], out iPort) || iPort == 0)
+				{
+					Logging.WriteDebugLog("MQTT.StartMQTT() MQTTBroker field has incorrect syntax - port not non-zero numeric (host or host:port)");
+					return;
+				}
+
+				if (strMQTTServerArray[0].Length == 0)
+				{
+					Logging.WriteDebugLog("MQTT.StartMQTT() MQTTBroker field has incorrect syntax - missing host (host or host:port)");
+					return;
+				}
+
+				strMQTTBroker = strMQTTServerArray[0];
+
+				Logging.WriteDebugLog("MQTT.StartMQTT() Host: {0}, Port: {1}", strMQTTBroker, iPort);
 			}
 			else
 			{
-				options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(new MqttClientOptionsBuilder()
-					.WithClientId(_strClientId)
-					.WithCredentials(strUser, strPassword)
-					.WithTcpServer(strMQTTServer)
-					.Build())
-				.Build();
+				strMQTTBroker = strMQTTServer;
+
+				Logging.WriteDebugLog("MQTT.StartMQTT() Host: {0}", strMQTTBroker);
 			}
 
+			clientOptions = new MqttClientOptionsBuilder().WithClientId(_strClientId).WithTcpServer(strMQTTBroker, (iPort == 0 ? null : iPort));
+			if (strUser != "")
+				clientOptions = clientOptions.WithCredentials(strUser, strPassword);
+			if (bMQTTTLS)
+			{
+				optionsTLS = new MqttClientOptionsBuilderTlsParameters
+				{
+					IgnoreCertificateChainErrors = true,
+					UseTls = true,
+					IgnoreCertificateRevocationErrors = true,
+					AllowUntrustedCertificates = true,
+					SslProtocol = System.Security.Authentication.SslProtocols.Tls12
+				};
+
+				clientOptions = clientOptions.WithTls(optionsTLS);
+			}
+
+			options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(clientOptions.Build()).Build();
+			
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
 			_mqtt.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(MessageProcessor);
