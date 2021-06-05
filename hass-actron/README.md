@@ -20,6 +20,12 @@ The add-on will need to maintain the TCP port 80 binding, as the air conditioner
 If you add the local DNS entry for updates.lx-cloud.com, it will prevent the ActronConnect module from auto-updating. Feel free to use auto-updating, but there is a risk that an update will prevent the ActronConnect from working with Home Assistant. If this happens though, let me know and we can investigate the changes.
 
 ## Configuration
+### MQTTBroker: string
+Set this field to core-mosquitto to use the HA Mosquitto MQTT add-on. Otherwise, specify a host or host:port for an alternative MQTT server.
+
+### MQTTTLS: true/false
+Setting this option to true will force the MQTT client to attempt a TLS connection to the MQTT broker.
+
 ### RegisterZoneTemperatures: true/false
 If you Actron has temperature sensors per zone, setting this option to true will create a sensor in HA for each zone.
 
