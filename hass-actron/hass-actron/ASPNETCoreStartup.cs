@@ -22,7 +22,6 @@ namespace HMX.HASSActron
 
 			try
 			{
-				applicationBuilder.UseResponseBuffering();
 				applicationBuilder.UseRouting();
 				applicationBuilder.UseEndpoints(endpoints => {
 					endpoints.MapControllers();

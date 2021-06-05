@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -28,7 +29,8 @@ namespace HMX.HASSActron
 		public static void Start()
         {
 			IConfigurationRoot configuration;
-			IWebHost webHost;
+			IHost webHost;
+			bool bMQTTTLS;
 
 			Logging.WriteDebugLog("Service.Start() Build Date: {0}", Properties.Resources.BuildDate);
 
@@ -44,11 +46,13 @@ namespace HMX.HASSActron
 
 			bool.TryParse(configuration["RegisterZoneTemperatures"] ?? "false", out _bRegisterZoneTemperatures);
 			bool.TryParse(configuration["ForwardToOriginalWebService"] ?? "false", out _bForwardToOriginalWebService);
+			bool.TryParse(configuration["MQTTTLS"] ?? "false", out bMQTTTLS);
 
 			Logging.WriteDebugLog("Service.Start() RegisterZoneTemperatures: {0}", _bRegisterZoneTemperatures);
 			Logging.WriteDebugLog("Service.Start() ForwardToOriginalWebService: {0}", _bForwardToOriginalWebService);
+			Logging.WriteDebugLog("Service.Start() MQTT TLS: {0}", bMQTTTLS);
 
-			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
+			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", bMQTTTLS, _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
 			AirConditioner.Configure(configuration);
 
@@ -56,7 +60,10 @@ namespace HMX.HASSActron
 
 			try
 			{
-				webHost = new WebHostBuilder().UseKestrel().UseStartup<ASPNETCoreStartup>().UseConfiguration(configuration).UseUrls($"http://*:80/").Build();
+				webHost = Host.CreateDefaultBuilder().ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<ASPNETCoreStartup>().UseConfiguration(configuration).UseUrls($"http://*:80/");
+				}).Build();
 			}
 			catch (Exception eException)
 			{
