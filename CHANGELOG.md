@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.98] - 2021-06-05
+
+### Changed
+- Updated package versions.
+- Support for MQTT TLS (with associated configuration option).
+- Support for MQTT port specification (through host:port notation).
+
 ## [v0.97] - 2021-02-13
 
 ### Changed
