@@ -50,6 +50,6 @@
     "80/tcp": 80
   },
   "ports_description": {
-    "80/tcp": "This port receives traffic from the Actron Connect unit"
+    "80/tcp": "This port receives traffic from the Actron Connect unit."
   }
 }
