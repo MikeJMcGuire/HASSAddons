@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.6] - 2021-07-16
+
+### Changed
+- Updated to Portainer CE v2.6.1.
+
 ## [v0.5] - 2021-07-02
 
 ### Changed
