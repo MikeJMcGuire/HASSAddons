@@ -51,8 +51,7 @@ namespace HMX.HASSActronQue
 			Configuration.GetPrivateOptionalConfiguration(configuration, "MQTTPassword", out strMQTTPassword);
 			if (!Configuration.GetConfiguration(configuration, "MQTTBroker", out strMQTTBroker))
 				return;
-			if (!Configuration.GetOptionalConfiguration(configuration, "MQTTTLS", out bMQTTTLS))
-				return;
+			Configuration.GetOptionalConfiguration(configuration, "MQTTTLS", out bMQTTTLS);
 
 			if (!Configuration.GetConfiguration(configuration, "PerZoneControls", out bPerZoneControls))
 				return;
