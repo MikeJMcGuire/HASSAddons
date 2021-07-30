@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.25] - 2021-07-31
+
+### Added
+- The humidity reading from the Master Controller is now presented as an entity.
+
 ## [v0.24] - 2021-05-28
 
 ### Added
