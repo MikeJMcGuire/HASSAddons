@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.26] - 2021-08-01
+
+### Updated
+- Decreased logging from .NET Framework.
+- Updated humidity entity to better support HomeKit.
+
 ## [v0.25] - 2021-07-31
 
 ### Added
