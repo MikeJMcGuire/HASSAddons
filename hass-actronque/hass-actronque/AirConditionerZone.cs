@@ -11,5 +11,6 @@ namespace HMX.HASSActronQue
 		public double SetTemperatureCooling; // TemperatureSetpoint_Cool_oC
 		public double SetTemperatureHeating; // TemperatureSetpoint_Heat_oC
 		public bool State;
+		public double Position; // ZonePosition
 	}
 }
