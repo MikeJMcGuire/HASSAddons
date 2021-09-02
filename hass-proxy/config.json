@@ -6,6 +6,7 @@
   "url": "https://github.com/MikeJMcGuire/hass-proxy",
   "startup": "application",
   "boot": "auto",
+  "stage": "deprecated",
   "image": "mikejmcguire/hass-proxy-{arch}",
   "arch": [
     "amd64",
