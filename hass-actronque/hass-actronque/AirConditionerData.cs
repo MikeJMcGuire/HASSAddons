@@ -17,6 +17,7 @@ namespace HMX.HASSActronQue
 		public double Humidity; // LiveHumidity_pc
 		public string CompressorState; // CompressorMode
 		public double CompressorCapacity; // CompressorCapacity
+		public double CompressorPower; // CompPower
 		public DateTime LastUpdated;
 	}
 }
