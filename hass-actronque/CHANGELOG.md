@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.28] - 2021-09-04
+
+### Added
+- The compressor power usage reading from the outdoor is now presented as an entity. This is an experimental entity until more data is gathered.
+
 ## [v0.27] - 2021-08-30
 
 ### Added

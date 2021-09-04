@@ -1,5 +1,5 @@
 # hass-actronque
-Actron Que Air Conditioner Add-On for Home Assistant (https://blog.mikejmcguire.com/2021/02/11/actron-neo-and-home-assistant/)
+Actron Que/Neo Air Conditioner Add-On for Home Assistant (https://blog.mikejmcguire.com/2021/02/11/actron-neo-and-home-assistant/)
 
 This add-on for Home Assistant enables you to control an Actron Air Conditioner equipped with the Actron Que or Actron Neo modules. 
 

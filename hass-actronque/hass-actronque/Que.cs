@@ -689,6 +689,19 @@ namespace HMX.HASSActronQue
 											}
 										}
 									}
+									// Compressor Power
+									else if (change.Name == "LiveAircon.OutdoorUnit.CompPower")
+									{
+										if (!double.TryParse(change.Value.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.OutdoorUnit.CompPower");
+										else
+										{
+											lock (_oLockData)
+											{
+												_airConditionerData.CompressorPower = dblTemp;
+											}
+										}
+									}
 									// Mode
 									else if (change.Name == "UserAirconSettings.Mode")
 									{
@@ -901,6 +914,17 @@ namespace HMX.HASSActronQue
 										_airConditionerData.CompressorCapacity = dblTemp;
 									}
 								}
+
+								// Compressor Power
+								if (!double.TryParse(jsonResponse.events[iEvent].data.LiveAircon.OutdoorUnit.CompPower.ToString(), out dblTemp))
+									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.OutdoorUnit.CompPower");
+								else
+								{
+									lock (_oLockData)
+									{
+										_airConditionerData.CompressorPower = dblTemp;
+									}
+								}								
 
 								// On
 								if (!bool.TryParse(jsonResponse.events[iEvent].data.UserAirconSettings.isOn.ToString(), out bTemp))
@@ -1294,6 +1318,7 @@ namespace HMX.HASSActronQue
 			MQTT.SendMessage("homeassistant/climate/actronque/config", "{{\"name\":\"{1}\",\"unique_id\":\"{0}-AC\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"fan_modes\":[\"high\",\"medium\",\"low\",\"auto\"],\"mode_command_topic\":\"actronque/mode/set\",\"temperature_command_topic\":\"actronque/temperature/set\",\"fan_mode_command_topic\":\"actronque/fan/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"fan_mode_state_topic\":\"actronque/fanmode\",\"action_topic\":\"actronque/compressor\",\"temperature_state_topic\":\"actronque/settemperature\",\"mode_state_topic\":\"actronque/mode\",\"current_temperature_topic\":\"actronque/temperature\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 			MQTT.SendMessage("homeassistant/sensor/actronquehumidity/config", "{{\"name\":\"{1} Humidity\",\"unique_id\":\"{0}-Humidity\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/humidity\",\"unit_of_measurement\":\"%\",\"device_class\":\"humidity\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 			MQTT.SendMessage("homeassistant/sensor/actronquecompressorcapacity/config", "{{\"name\":\"{1} Compressor Capacity\",\"unique_id\":\"{0}-CompressorCapacity\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/compressorcapacity\",\"unit_of_measurement\":\"%\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
+			MQTT.SendMessage("homeassistant/sensor/actronquecompressorpower/config", "{{\"name\":\"{1} Compressor Power\",\"unique_id\":\"{0}-CompressorPower\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/compressorpower\",\"unit_of_measurement\":\"W\",\"device_class\":\"power\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 			MQTT.SendMessage("homeassistant/sensor/actronqueoutdoortemperature/config", "{{\"name\":\"{1} Outdoor Temperature\",\"unique_id\":\"{0}-OutdoorTemperature\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/outdoortemperature\",\"unit_of_measurement\":\"\u00B0C\",\"device_class\":\"temperature\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 
 			foreach (int iZone in _airConditionerZones.Keys)
@@ -1484,6 +1509,9 @@ namespace HMX.HASSActronQue
 
 			// Compressor Capacity
 			MQTT.SendMessage("actronque/compressorcapacity", _airConditionerData.CompressorCapacity.ToString("N1"));
+
+			// Compressor Power
+			MQTT.SendMessage("actronque/compressorpower", _airConditionerData.CompressorPower.ToString("N2"));			
 		}
 
 		private static double GetSetTemperature(double dblHeating, double dblCooling)
