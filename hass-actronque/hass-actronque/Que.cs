@@ -97,6 +97,8 @@ namespace HMX.HASSActronQue
 			_httpClient.BaseAddress = new Uri(GetBaseURL());
 			_httpClientCommands.BaseAddress = new Uri(GetBaseURL());
 
+			_airConditionerData.LastUpdated = DateTime.MinValue;
+
 			// Get Device Id
 			try
 			{
@@ -1348,6 +1350,12 @@ namespace HMX.HASSActronQue
 		{
 			Logging.WriteDebugLog("Que.MQTTUpdateData()");
 
+			if (_airConditionerData.LastUpdated == DateTime.MinValue)
+			{
+				Logging.WriteDebugLog("Que.MQTTUpdateData() Skipping update, No data received");
+				return;
+			}
+
 			// Fan Mode
 			switch (_airConditionerData.FanMode)
 			{
@@ -1687,10 +1695,10 @@ namespace HMX.HASSActronQue
 						break;
 
 					case "AUTO":
-						// TBA
-						return;
-
-						// break;
+						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Heat_oC", dblTemperature);
+						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Cool_oC", dblTemperature);
+						
+						break;
 				}
 			}
 			else
@@ -1714,10 +1722,10 @@ namespace HMX.HASSActronQue
 						break;
 						
 					case "AUTO":
-						// TBA
-						return;
-
-						// break;
+						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Heat_oC", iZone - 1), dblTemperature);
+						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Cool_oC", iZone - 1), dblTemperature);
+						
+						break;
 				}
 			}
 
