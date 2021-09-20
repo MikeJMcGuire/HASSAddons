@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.29] - 2021-09-20
+
+### Added
+- Setting the AC to auto mode will now set the heating and cooling temperatures to the single desired temperature.
+
 ## [v0.28] - 2021-09-04
 
 ### Added
