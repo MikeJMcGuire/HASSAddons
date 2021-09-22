@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v0.30] - 2021-09-22
+
+### Changed
+- New entities for power, outdoor temperature and compressor capacity removed in Neo mode.
+
 ## [v0.29] - 2021-09-20
 
 ### Added
