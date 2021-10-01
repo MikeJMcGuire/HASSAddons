@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2021.10.0] - 2021-10-01
+
+### Changed
+- Updated package versions.
+- Updated version number scheme.
+
 ## [v0.98] - 2021-06-05
 
 ### Changed
