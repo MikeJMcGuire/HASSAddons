@@ -18,6 +18,7 @@ namespace HMX.HASSActron
 		private static ManualResetEvent _eventCommand;
 		private static DateTime _dtLastCommand = DateTime.MinValue;
 		private static int _iSuppressTimer = 8; // Seconds
+		private static Timer _timerPoll;
 
 		public static Dictionary<int, Zone> Zones
 		{
@@ -81,7 +82,17 @@ namespace HMX.HASSActron
 				return false;
 			}
 
+			_timerPoll = new Timer(CheckLastUpdate, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+
 			return true;
+		}
+
+		public static void CheckLastUpdate(object oState)
+		{
+			int iWaitTime = 5; // Minutes
+
+			if (_airConditionerData.dtLastUpdate < DateTime.Now.Subtract(TimeSpan.FromMinutes(iWaitTime)))
+				Logging.WriteDebugLog("AirConditioner.CheckLastUpdate() No communication with Actron unit for at least {0} minutes. Check Actron Connect unit can connect to the network and locate the add-on.", iWaitTime);
 		}
 
 		public static void PostData(AirConditionerData data)
