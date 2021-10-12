@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2021.10.1] - 2021-10-10
+
+### Added
+- Updated logging to highlight when the Actron Connect has stopped communicating with the add-on.
+
 ## [v2021.10.0] - 2021-10-01
 
 ### Changed
