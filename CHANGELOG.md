@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2021.12.0] - 2021-12-01
+
+### Added
+- Additional logic added to the suppression code that suppresses old data received from the AC after a change has been made. This should result in faster updates in HA after changing the AC settings.
+
+### Changed
+- Updated package versions.
+- Migrated from .NET 5.0 to .NET 6.0.
+
 ## [v2021.10.1] - 2021-10-10
 
 ### Added
