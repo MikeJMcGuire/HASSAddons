@@ -3,7 +3,7 @@ ARG BUILD_FROM
 FROM $BUILD_FROM AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:latest AS build
 WORKDIR /src
 COPY hass-actronque/hass-actronque.csproj hass-actronque/
 RUN dotnet restore hass-actronque/hass-actronque.csproj

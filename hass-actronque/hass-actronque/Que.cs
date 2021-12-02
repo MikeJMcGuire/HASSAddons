@@ -36,6 +36,8 @@ namespace HMX.HASSActronQue
 		private static int _iCommandExpiry = 10; // Seconds
 		private static int _iPostCommandSleepTimer = 2; // Seconds
 		private static int _iCommandAckRetryCounter = 3;
+		private static int _iFailedBearerRequests = 0;
+		private static int _iFailedBearerRequestMaximum = 10; // Retries
 		private static ManualResetEvent _eventStop;
 		private static AutoResetEvent _eventAuthenticationFailure = new AutoResetEvent(false);
 		private static AutoResetEvent _eventQueue = new AutoResetEvent(false);
@@ -63,20 +65,9 @@ namespace HMX.HASSActronQue
 
 			_httpClientAuth = new HttpClient(httpClientHandler);
 
-			//_httpClientAuth.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
-			//_httpClientAuth.BaseAddress = new Uri(GetBaseURL());
-
 			_httpClient = new HttpClient(httpClientHandler);
 
-			//_httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-AU;q=1");
-			//_httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
-			//_httpClient.BaseAddress = new Uri(GetBaseURL());
-
-			_httpClientCommands = new HttpClient(httpClientHandler);
-
-			//_httpClientCommands.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-AU;q=1");
-			//_httpClientCommands.DefaultRequestHeaders.UserAgent.ParseAdd(_strBaseUserAgent);
-			
+			_httpClientCommands = new HttpClient(httpClientHandler);		
 		}
 
 		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, string strSystemType, int iPollInterval, bool bPerZoneControls, ManualResetEvent eventStop)
@@ -297,6 +288,21 @@ namespace HMX.HASSActronQue
 
 						_pairingToken = null;
 					}
+					else if (httpResponse.StatusCode == System.Net.HttpStatusCode.BadRequest)
+					{
+						// Increment Failed Request Counter
+						_iFailedBearerRequests++;
+
+						// Reset Pairing Token when Failed Request Counter reaches maximum.
+						if (_iFailedBearerRequests == _iFailedBearerRequestMaximum)
+						{
+							Logging.WriteDebugLogError("Que.GenerateBearerToken()", lRequestId, "Unable to process API response: {0}/{1}. Attempt: {2} of {3} - refreshing pairing token.", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase, _iFailedBearerRequests, _iFailedBearerRequestMaximum);
+
+							_pairingToken = null;
+						}
+						else
+							Logging.WriteDebugLogError("Que.GenerateBearerToken()", lRequestId, "Unable to process API response: {0}/{1}. Attempt: {2} of {3}", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase, _iFailedBearerRequests, _iFailedBearerRequestMaximum);
+					}
 					else
 						Logging.WriteDebugLogError("Que.GenerateBearerToken()", lRequestId, "Unable to process API response: {0}/{1}", httpResponse.StatusCode.ToString(), httpResponse.ReasonPhrase);
 
@@ -321,6 +327,9 @@ namespace HMX.HASSActronQue
 				bRetVal = false;
 				goto Cleanup;
 			}
+
+			// Reset Failed Request Counter
+			_iFailedBearerRequests = 0;
 
 		Cleanup:
 			cancellationToken?.Dispose();
