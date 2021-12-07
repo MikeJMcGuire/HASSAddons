@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2021.12.1] - 2021-12-07
+
+### Added
+- Added logic to support Neo Air Conditioners that do not record change events. In this mode, the add-on will pull a full status update every 30 seconds as there aren't incremental updates available.
+
 ## [v2021.12.0] - 2021-12-02
 
 ### Changed
