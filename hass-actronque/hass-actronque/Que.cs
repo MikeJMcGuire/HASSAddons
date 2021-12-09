@@ -1860,10 +1860,10 @@ namespace HMX.HASSActronQue
 			if (_strSystemType == "que")
 			{
 				// Compressor Capacity
-				MQTT.SendMessage("actronque/compressorcapacity", _airConditionerData.CompressorCapacity.ToString("N1"));
+				MQTT.SendMessage("actronque/compressorcapacity", _airConditionerData.CompressorCapacity.ToString("F1"));
 
 				// Compressor Power
-				MQTT.SendMessage("actronque/compressorpower", _airConditionerData.CompressorPower.ToString("N2"));
+				MQTT.SendMessage("actronque/compressorpower", _airConditionerData.CompressorPower.ToString("F2"));
 			}
 		}
 
