@@ -3,6 +3,7 @@
 ################################################################################
 
 /.vs
+/hass-blueriiot/.vs
 /hass-blueriiot/obj
 /hass-blueriiot/bin
 

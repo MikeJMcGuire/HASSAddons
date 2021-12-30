@@ -17,12 +17,10 @@
   ],
   "options": {
     "BlueriiotUser": "",
-    "BlueriiotPassword": "",
-    "HAKey": ""
+    "BlueriiotPassword": ""
   },
   "schema": {
     "BlueriiotUser": "str",
-    "BlueriiotPassword": "str",
-    "HAKey": "str"
+    "BlueriiotPassword": "str"
   }
 }
