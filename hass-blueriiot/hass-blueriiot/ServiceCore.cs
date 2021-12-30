@@ -13,13 +13,17 @@ namespace HMX.HASSBlueriiot
 {
     public class ServiceCore
     {
+		private static string _strServiceName = "hass-blueriiot";
+		private static string _strServiceDescription = "Blueriiot Pool Sensor";
 		private static string _strConfigFile = "/data/options.json";
 
 		public static void Start()
         {
 			IHost webHost;
 			IConfigurationRoot configuration;
-			string strHAServer, strHAKey, strUser, strPassword;
+			string strMQTTUser, strMQTTPassword, strMQTTBroker;
+			string strUser, strPassword;
+			bool bMQTTTLS;
 
 			Logging.WriteLog("ServiceCore.Start() Built: {0}", Properties.Resources.BuildDate);
 
@@ -34,21 +38,23 @@ namespace HMX.HASSBlueriiot
 				return;
 			}
 
-			if (!Configuration.GetOptionalConfiguration("HAServer", out strHAServer))
-				return;
-
 			if (!Configuration.GetConfiguration(configuration, "BlueriiotUser", out strUser))
 				return;
 
 			if (!Configuration.GetPrivateConfiguration(configuration, "BlueriiotPassword", out strPassword))
 				return;
 
-			if (!Configuration.GetPrivateConfiguration("SUPERVISOR_TOKEN", out strHAKey))
+			Configuration.GetOptionalConfiguration(configuration, "MQTTUser", out strMQTTUser);
+			Configuration.GetPrivateOptionalConfiguration(configuration, "MQTTPassword", out strMQTTPassword);
+			if (!Configuration.GetConfiguration(configuration, "MQTTBroker", out strMQTTBroker))
 				return;
+			Configuration.GetOptionalConfiguration(configuration, "MQTTTLS", out bMQTTTLS);
 
-			HomeAssistant.Initialise(strHAServer, strHAKey); 
-			BlueRiiot.Start(strUser, strPassword);			
-					
+			MQTT.StartMQTT(strMQTTBroker, bMQTTTLS, _strServiceName, strMQTTUser, strMQTTPassword);
+			BlueRiiot.Start(strUser, strPassword);
+
+			MQTTRegister();
+
 			try
 			{
 				webHost = Host.CreateDefaultBuilder().ConfigureWebHostDefaults(webBuilder =>
@@ -67,9 +73,31 @@ namespace HMX.HASSBlueriiot
 			Logging.WriteLog("ServiceCore.Start() Started");
 		}
 
+		public static void MQTTRegister()
+		{
+			Logging.WriteLog("ServiceCore.MQTTRegister()");
+
+			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_temperature_c/config",
+				"{{\"name\":\"Pool Temperature\",\"unique_id\":\"{1}-0c\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature_c\",\"unit_of_measurement\":\"°C\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+
+			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_temperature_f/config",
+				"{{\"name\":\"Pool Temperature\",\"unique_id\":\"{1}-0f\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature_f\",\"unit_of_measurement\":\"°F\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+
+			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_ph/config",
+				"{{\"name\":\"Pool pH\",\"unique_id\":\"{1}-1\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/ph\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+
+			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_orp/config",
+				 "{{\"name\":\"Pool Orp\",\"unique_id\":\"{1}-2\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/orp\",\"unit_of_measurement\":\"mV\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+
+			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_salinity/config",
+				"{{\"name\":\"Pool Salinity\",\"unique_id\":\"{1}-3\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/salinity\",\"unit_of_measurement\":\"ppm\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+		}
+
 		public static void Stop()
         {
-            Logging.WriteLog("ServiceCore.Stop()");		
+            Logging.WriteLog("ServiceCore.Stop()");
+
+			MQTT.StopMQTT();
 
 			Logging.WriteLog("ServiceCore.Stop() Stopped");
 		}
