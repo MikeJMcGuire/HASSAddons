@@ -4,86 +4,159 @@ using System.Text;
 
 namespace HMX.HASSBlueriiot
 {
-	public class Configuration
-	{
-		// String
-		public static bool GetOptionalConfiguration(string strVariable, out string strConfiguration)
-		{
-			return GetConfiguration(strVariable, out strConfiguration, false, true);
-		}
+    public class Configuration
+    {
+        // Boolean
+        public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out bConfiguration, false, false);
+        }
 
-		public static bool GetPrivateConfiguration(string strVariable, out string strConfiguration)
-		{
-			return GetConfiguration(strVariable, out strConfiguration, true, false);
-		}
+        public static bool GetOptionalConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out bConfiguration, false, true);
+        }
 
-		private static bool GetConfiguration(string strVariable, out string strConfiguration, bool bPrivate, bool bOptional)
-		{
-			Logging.WriteLog("Configuration.GetConfiguration() Read {0}", strVariable);
+        public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out bConfiguration, true, false);
+        }
 
-			strConfiguration = "";
+        private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out bool bConfiguration, bool bPrivate, bool bOptional)
+        {
+            string strTemp;
 
-			if ((Environment.GetEnvironmentVariable(strVariable) ?? "") != "")
-			{
-				strConfiguration = Environment.GetEnvironmentVariable(strVariable) ?? "";
+            Logging.WriteLog("Configuration.GetConfiguration() Read {0}", strVariable);
 
-				if (bPrivate)
-					Logging.WriteLog("{0}: *******", strVariable);
-				else
-					Logging.WriteLog("{0}: {1}", strVariable, strConfiguration);
+            bConfiguration = false;
 
-				return true;
-			}
-			else if (bOptional)
-			{
-				return true;
-			}
-			else
-			{
-				Logging.WriteLog("Configuration.GetConfiguration()", "Missing configuration: {0}.", strVariable);
+            if ((configuration[strVariable] ?? "") != "")
+            {
+                strTemp = configuration[strVariable];
 
-				return false;
-			}
-		}
-		
-		// String
-		public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
-		{
-			return GetConfiguration(configuration, strVariable, out strConfiguration, false, false);
-		}
+                if (!bool.TryParse(strTemp, out bConfiguration))
+                {
+                    bConfiguration = false;
 
-		public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
-		{
-			return GetConfiguration(configuration, strVariable, out strConfiguration, true, false);
-		}
+                    Logging.WriteLog("Service.Start()", "Missing configuration: {0}.", strVariable);
 
-		private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration, bool bPrivate, bool bOptional)
-		{
-			Logging.WriteLog("Configuration.GetConfiguration() Read {0}", strVariable);
+                    return false;
+                }
 
-			strConfiguration = "";
+                if (bPrivate)
+                    Logging.WriteLog("{0}: *******", strVariable);
+                else
+                    Logging.WriteLog("{0}: {1}", strVariable, bConfiguration);
 
-			if ((configuration[strVariable] ?? "") != "")
-			{
-				strConfiguration = configuration[strVariable];
+                return true;
+            }
+            else if (bOptional)
+            {
+                return true;
+            }
+            else
+            {
+                Logging.WriteLog("Service.Start()", "Missing configuration: {0}.", strVariable);
 
-				if (bPrivate)
-					Logging.WriteLog("{0}: *******", strVariable);
-				else
-					Logging.WriteLog("{0}: {1}", strVariable, strConfiguration);
+                return false;
+            }
+        }
 
-				return true;
-			}
-			else if (bOptional)
-			{
-				return true;
-			}
-			else
-			{
-				Logging.WriteLog("Configuration.GetConfiguration()", "Missing configuration: {0}.", strVariable);
+        // String
+        public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out strConfiguration, false, false);
+        }
 
-				return false;
-			}
-		}		
-	}
+        public static bool GetOptionalConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out strConfiguration, false, true);
+        }
+
+        public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out strConfiguration, true, false);
+        }
+
+        public static bool GetPrivateOptionalConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out strConfiguration, true, true);
+        }
+
+        private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out string strConfiguration, bool bPrivate, bool bOptional)
+        {
+            Logging.WriteLog("Configuration.GetConfiguration() Read {0}", strVariable);
+
+            strConfiguration = "";
+
+            if ((configuration[strVariable] ?? "") != "")
+            {
+                strConfiguration = configuration[strVariable];
+
+                if (bPrivate)
+                    Logging.WriteLog("{0}: *******", strVariable);
+                else
+                    Logging.WriteLog("{0}: {1}", strVariable, strConfiguration);
+
+                return true;
+            }
+            else if (bOptional)
+            {
+                return true;
+            }
+            else
+            {
+                Logging.WriteLog("Service.Start()", "Missing configuration: {0}.", strVariable);
+
+                return false;
+            }
+        }
+
+        // Integer
+        public static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out int iConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out iConfiguration, false);
+        }
+
+        public static bool GetPrivateConfiguration(IConfigurationRoot configuration, string strVariable, out int iConfiguration)
+        {
+            return GetConfiguration(configuration, strVariable, out iConfiguration, true);
+        }
+
+        private static bool GetConfiguration(IConfigurationRoot configuration, string strVariable, out int iConfiguration, bool bPrivate)
+        {
+            string strTemp;
+
+            Logging.WriteLog("Configuration.GetConfiguration() Read {0}", strVariable);
+
+            if ((configuration[strVariable] ?? "") != "")
+            {
+                strTemp = configuration[strVariable];
+
+                if (!int.TryParse(strTemp, out iConfiguration))
+                {
+                    iConfiguration = 0;
+
+                    Logging.WriteLog("Service.Start()", "Missing configuration: {0}.", strVariable);
+
+                    return false;
+                }
+
+                if (bPrivate)
+                    Logging.WriteLog("{0}: *******", strVariable);
+                else
+                    Logging.WriteLog("{0}: {1}", strVariable, iConfiguration);
+
+                return true;
+            }
+            else
+            {
+                iConfiguration = 0;
+
+                Logging.WriteLog("Service.Start()", "Missing configuration: {0}.", strVariable);
+
+                return false;
+            }
+        }
+    }
 }

@@ -149,17 +149,17 @@ namespace HMX.HASSBlueriiot
 
                     Logging.WriteLog("BlueRiiot.Run() [0x{0}] Current Latency: {1} minute(s)", lRequestId.ToString("X8"), tsLatency.TotalMinutes.ToString("N1"));
 
-                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_temperature_c", dblTemperatureCelsius.ToString(), "Pool Temperature", "mdi:coolant-temperature", "°C");
-
                     dblTemperatureFahrenheit = (dblTemperatureCelsius * 9) / 5 + 32;
 
-                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_temperature_f", dblTemperatureFahrenheit.ToString(), "Pool Temperature", "mdi:coolant-temperature", "°F");
+                    MQTT.SendMessage("sarah/sensor_pool/temperature_c", dblTemperatureCelsius.ToString());
 
-                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_ph", dblPh.ToString(), "Pool pH", "mdi:pool", null);
+                    MQTT.SendMessage("sarah/sensor_pool/temperature_f", dblTemperatureFahrenheit.ToString());
 
-                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_orp", dblOrp.ToString(), "Pool Orp", "mdi:pool", "mV");
+                    MQTT.SendMessage("sarah/sensor_pool/ph", dblPh.ToString());
 
-                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_salinity", dblSalinity.ToString(), "Pool Salinity", "mdi:pool", "ppm");
+                    MQTT.SendMessage("sarah/sensor_pool/orp", dblOrp.ToString());
+
+                    MQTT.SendMessage("sarah/sensor_pool/salinity", dblSalinity.ToString());
                 }
             }
             catch (Exception eException)
