@@ -12,7 +12,7 @@ namespace HMX.HASSBlueriiot
 {
     public class BlueRiiot
     {
-        private static BlueClient _blueClient;
+        private static BlueClient? _blueClient = null;
         private static Timer? _timerPoll;
 
         public static void Start(string strUser, string strPassword)
@@ -34,7 +34,7 @@ namespace HMX.HASSBlueriiot
             string strPoolId, strDeviceId;
             DateTime dtLastUpdate;
             long lRequestId = RequestManager.GetRequestId();
-            double dblTemperatureCelsius = 0, dblPh = 0, dblOrp = 0, dblSalinity = 0;
+            double dblTemperatureCelsius = 0, dblTemperatureFahrenheit = 0, dblPh = 0, dblOrp = 0, dblSalinity = 0;
             int iValidMeasurements = 0;
             TimeSpan tsLatency;
 
@@ -149,8 +149,11 @@ namespace HMX.HASSBlueriiot
 
                     Logging.WriteLog("BlueRiiot.Run() [0x{0}] Current Latency: {1} minute(s)", lRequestId.ToString("X8"), tsLatency.TotalMinutes.ToString("N1"));
 
-                    // Add F support
-                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_temperature", dblTemperatureCelsius.ToString(), "Pool Temperature", "mdi:coolant-temperature", "°C");
+                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_temperature_c", dblTemperatureCelsius.ToString(), "Pool Temperature", "mdi:coolant-temperature", "°C");
+
+                    dblTemperatureFahrenheit = (dblTemperatureCelsius * 9) / 5 + 32;
+
+                    await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_temperature_f", dblTemperatureFahrenheit.ToString(), "Pool Temperature", "mdi:coolant-temperature", "°F");
 
                     await HomeAssistant.SetObjectState(lRequestId, "sensor.blueriiot_pool_ph", dblPh.ToString(), "Pool pH", "mdi:pool", null);
 
