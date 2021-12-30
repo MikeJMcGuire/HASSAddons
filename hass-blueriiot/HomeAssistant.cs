@@ -14,9 +14,7 @@ namespace HMX.HASSBlueriiot
 	{
 		public delegate void HAEventHandler(dynamic haEvent);
 
-		private static int _iRepeatDelay = 10000; // Milliseconds
 		private static int _iCancellationTime = 10000; // Milliseconds
-		private static int _iInactivityTime = 300000; // Milliseconds
 		private static HttpClient _httpClient = null;
 		private static string _strAPIKey = "";
 		private static string _strHAServer = "";
@@ -29,7 +27,7 @@ namespace HMX.HASSBlueriiot
 
 		static HomeAssistant()
 		{
-			HttpClientHandler httpClientHandler = null;
+			HttpClientHandler? httpClientHandler = null;
 
 			Logging.WriteLog("HomeAssistant.HomeAssistant()");
 
@@ -54,24 +52,6 @@ namespace HMX.HASSBlueriiot
 
 			_httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _strAPIKey);
 		}
-
-		/*public async static Task<bool> SetObjectState(long lRequestId, string strObject, string strState)
-		{
-			JObject jRequest = new JObject();
-			string strPageURI;
-			GenericResponse response;
-
-			Logging.WriteLog("HomeAssistant.SetObjectState() [0x{0}]", lRequestId.ToString("X8"));
-
-			jRequest.Add("entity_id", strObject);
-			jRequest.Add("value", strState);
-
-			strPageURI = string.Format("/api/services/{0}/set_value", strObject.Substring(0, strObject.IndexOf(".")));
-
-			response = await SendAPIRequest(lRequestId, strPageURI, jRequest.ToString());
-
-			return response.Successful;
-		}*/
 
 		public async static Task<bool> SetObjectState(long lRequestId, string strObject, string strState, string strFriendlyName, string? strIcon, string? strUnitOfMeasurement)
 		{
@@ -112,8 +92,8 @@ namespace HMX.HASSBlueriiot
 		private async static Task<GenericResponse> SendAPIRequest(long lRequestId, Method method, string strPageURI, string strContent)
 		{
 			GenericResponse response = new GenericResponse(true, "");
-			HttpResponseMessage httpResponse = null;
-			CancellationTokenSource cancellationToken = null;
+			HttpResponseMessage? httpResponse = null;
+			CancellationTokenSource? cancellationToken = null;
 
 			Logging.WriteLog("HomeAssistant.SendAPIRequest() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _strHAServer, strPageURI);
 
