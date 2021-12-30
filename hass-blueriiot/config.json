@@ -1,13 +1,12 @@
 {
   "name": "Blueriiot Blue Connect",
-  "version": "2021.12.2",
+  "version": "2021.12.3",
   "slug": "hass-blueriiot",
   "description": "An add-on for Blueriiot Blue Connect pool sensors.",
   "url": "https://github.com/MikeJMcGuire/hass-blueriiot",
   "startup": "application",
   "boot": "auto",
   "image": "mikejmcguire/hass-blueriiot-{arch}",
-  "homeassistant_api": true,
   "arch": [
     "amd64",
     "aarch64",
@@ -17,10 +16,18 @@
   ],
   "options": {
     "BlueriiotUser": "",
-    "BlueriiotPassword": ""
+    "BlueriiotPassword": "",
+    "MQTTUser": "",
+    "MQTTPassword": "",
+    "MQTTBroker": "core-mosquitto",
+    "MQTTTLS": false
   },
   "schema": {
     "BlueriiotUser": "str",
-    "BlueriiotPassword": "str"
+    "BlueriiotPassword": "str",
+    "MQTTUser": "str?",
+    "MQTTPassword": "str?",
+    "MQTTBroker": "str",
+    "MQTTTLS": "bool?"
   }
 }
