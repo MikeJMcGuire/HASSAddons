@@ -42,12 +42,12 @@ namespace HMX.HASSBlueriiot
 			_httpClient.DefaultRequestHeaders.Connection.Add("close");
 		}
 
-		public static void Initialise(string? strHAServer, string strAPIKey)
+		public static void Initialise(string strHAServer, string strAPIKey)
 		{
 			Logging.WriteLog("HomeAssistant.Initialise()");
 
 			_strAPIKey = strAPIKey;
-			if (strHAServer != null)
+			if (strHAServer != "")
 				_strHAServer = strHAServer;
 			else
 				_strHAServer = "http://supervisor/core";

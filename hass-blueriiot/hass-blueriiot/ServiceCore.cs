@@ -13,20 +13,34 @@ namespace HMX.HASSBlueriiot
 {
     public class ServiceCore
     {
-        public static void Start()
+		private static string _strConfigFile = "/data/options.json";
+
+		public static void Start()
         {
 			IHost webHost;
+			IConfigurationRoot configuration;
 			string strHAServer, strHAKey, strUser, strPassword;
 
 			Logging.WriteLog("ServiceCore.Start() Built: {0}", Properties.Resources.BuildDate);
 
+			// Load Configuration
+			try
+			{
+				configuration = new ConfigurationBuilder().AddJsonFile(_strConfigFile, false, true).Build();
+			}
+			catch (Exception eException)
+			{
+				Logging.WriteLogError("Service.Start()", eException, "Unable to build configuration instance.");
+				return;
+			}
+
 			if (!Configuration.GetOptionalConfiguration("HAServer", out strHAServer))
 				return;
 
-			if (!Configuration.GetConfiguration("BlueRiiotUser", out strUser))
+			if (!Configuration.GetConfiguration(configuration, "BlueriiotUser", out strUser))
 				return;
 
-			if (!Configuration.GetPrivateConfiguration("BlueRiiotPassword", out strPassword))
+			if (!Configuration.GetPrivateConfiguration(configuration, "BlueriiotPassword", out strPassword))
 				return;
 
 			if (!Configuration.GetPrivateConfiguration("SUPERVISOR_TOKEN", out strHAKey))
