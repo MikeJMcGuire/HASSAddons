@@ -30,7 +30,7 @@ namespace HMX.HASSBlueriiot
 			if (strMQTTServer == null || strMQTTServer == "")
 				return;
 
-			_timerMQTT = new Timer(Update, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30));
+			_timerMQTT = new Timer(Update, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
 
 			_strClientId = strClientId;
 

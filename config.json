@@ -1,6 +1,6 @@
 {
   "name": "Blueriiot Blue Connect",
-  "version": "2021.12.3",
+  "version": "2021.12.4",
   "slug": "hass-blueriiot",
   "description": "An add-on for Blueriiot Blue Connect pool sensors.",
   "url": "https://github.com/MikeJMcGuire/hass-blueriiot",
