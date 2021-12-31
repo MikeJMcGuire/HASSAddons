@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2021.12.4] - 2021-12-31
+
+### Changed
+- Minor performance updates.
+
 ## [v2021.12.3] - 2021-12-30
 
 ### Added
