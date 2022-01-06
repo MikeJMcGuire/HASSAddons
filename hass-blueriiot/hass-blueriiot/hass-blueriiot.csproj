@@ -30,4 +30,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="echo %25date%25 &gt; &quot;$(ProjectDir)\Resources\BuildDate.txt&quot;" />
+  </Target>
+
 </Project>
