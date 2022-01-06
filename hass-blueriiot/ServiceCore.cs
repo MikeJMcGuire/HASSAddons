@@ -78,10 +78,10 @@ namespace HMX.HASSBlueriiot
 			Logging.WriteLog("ServiceCore.MQTTRegister()");
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_temperature_c/config",
-				"{{\"name\":\"Pool Temperature C\",\"unique_id\":\"{1}-0c\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature_c\",\"unit_of_measurement\":\"°C\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+				"{{\"name\":\"Pool Temperature C\",\"unique_id\":\"{1}-0c\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature_c\",\"device_class\":\"temperature\",\"unit_of_measurement\":\"°C\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_temperature_f/config",
-				"{{\"name\":\"Pool Temperature F\",\"unique_id\":\"{1}-0f\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature_f\",\"unit_of_measurement\":\"°F\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+				"{{\"name\":\"Pool Temperature F\",\"unique_id\":\"{1}-0f\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature_f\",\"device_class\":\"temperature\",\"unit_of_measurement\":\"°F\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_ph/config",
 				"{{\"name\":\"Pool pH\",\"unique_id\":\"{1}-1\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/ph\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);

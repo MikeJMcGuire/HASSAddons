@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.1.0] - 2022-01-06
+
+### Changed
+- Added device class to temperature sensor entities.
+
 ## [v2021.12.4] - 2021-12-31
 
 ### Changed
