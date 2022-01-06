@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.1.1] - 2022-01-06
+
+### Removed
+- Removed Fahrenheit entity - now using HA's automatic converstion on a single temperature entity.
+
 ## [v2022.1.0] - 2022-01-06
 
 ### Changed
