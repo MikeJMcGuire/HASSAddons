@@ -34,7 +34,7 @@ namespace HMX.HASSBlueriiot
             string strPoolId, strDeviceId;
             DateTime dtLastUpdate;
             long lRequestId = RequestManager.GetRequestId();
-            double dblTemperatureCelsius = 0, dblTemperatureFahrenheit = 0, dblPh = 0, dblOrp = 0, dblSalinity = 0;
+            double dblTemperatureCelsius = 0, dblPh = 0, dblOrp = 0, dblSalinity = 0;
             int iValidMeasurements = 0;
             TimeSpan tsLatency;
 
@@ -149,11 +149,7 @@ namespace HMX.HASSBlueriiot
 
                     Logging.WriteLog("BlueRiiot.Run() [0x{0}] Current Latency: {1} minute(s)", lRequestId.ToString("X8"), tsLatency.TotalMinutes.ToString("N1"));
 
-                    dblTemperatureFahrenheit = (dblTemperatureCelsius * 9) / 5 + 32;
-
-                    MQTT.SendMessage("sarah/sensor_pool/temperature_c", dblTemperatureCelsius.ToString());
-
-                    MQTT.SendMessage("sarah/sensor_pool/temperature_f", dblTemperatureFahrenheit.ToString());
+                    MQTT.SendMessage("sarah/sensor_pool/temperature", dblTemperatureCelsius.ToString());
 
                     MQTT.SendMessage("sarah/sensor_pool/ph", dblPh.ToString());
 
