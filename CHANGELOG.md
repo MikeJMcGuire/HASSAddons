@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.1.0] - 2022-01-17
+
+### Changed
+- Check for missing outdoor unit.
+
 ## [v2021.12.2] - 2021-12-10
 
 ### Changed
