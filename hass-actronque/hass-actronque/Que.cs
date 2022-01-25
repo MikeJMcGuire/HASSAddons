@@ -71,7 +71,7 @@ namespace HMX.HASSActronQue
 
 			_httpClient = new HttpClient(httpClientHandler);
 
-			_httpClientCommands = new HttpClient(httpClientHandler);		
+			_httpClientCommands = new HttpClient(httpClientHandler);
 		}
 
 		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, string strSystemType, int iPollInterval, bool bPerZoneControls, ManualResetEvent eventStop)
@@ -452,7 +452,7 @@ namespace HMX.HASSActronQue
 						{
 							Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Defaulting to AC: {1} - {2} ({3})", lRequestId.ToString("X8"), strSerial, strDescription, strType);
 							_strSerialNumber = strSerial;
-						}						
+						}
 					}
 				}
 				else
@@ -764,6 +764,39 @@ namespace HMX.HASSActronQue
 						lock (_oLockData)
 						{
 							_airConditionerData.Humidity = dblTemp;
+						}
+					}
+
+					// Coil Inlet Temperature
+					if (!double.TryParse(jsonResponse.lastKnownState.LiveAircon.CoilInlet.ToString(), out dblTemp))
+						Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.CoilInlet");
+					else
+					{
+						lock (_oLockData)
+						{
+							_airConditionerData.CoilInletTemperature = dblTemp;
+						}
+					}
+
+					// Fan PWM
+					if (!double.TryParse(jsonResponse.lastKnownState.LiveAircon.FanPWM.ToString(), out dblTemp))
+						Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.FanPWM");
+					else
+					{
+						lock (_oLockData)
+						{
+							_airConditionerData.FanPWM = dblTemp;
+						}
+					}
+
+					// Fan RPM
+					if (!double.TryParse(jsonResponse.lastKnownState.LiveAircon.FanRPM.ToString(), out dblTemp))
+						Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "MasterInfo.FanRPM");
+					else
+					{
+						lock (_oLockData)
+						{
+							_airConditionerData.FanRPM = dblTemp;
 						}
 					}
 
@@ -1106,6 +1139,45 @@ namespace HMX.HASSActronQue
 											}
 										}
 									}
+									// Coil Inlet Temperature
+									else if (change.Name == "LiveAircon.CoilInlet")
+									{
+										if (!double.TryParse(change.Value.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.CoilInlet");
+										else
+										{
+											lock (_oLockData)
+											{
+												_airConditionerData.CoilInletTemperature = dblTemp;
+											}
+										}
+									}
+									// Fan PWM
+									else if (change.Name == "LiveAircon.FanPWM")
+									{
+										if (!double.TryParse(change.Value.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.FanPWM");
+										else
+										{
+											lock (_oLockData)
+											{
+												_airConditionerData.FanPWM = dblTemp;
+											}
+										}
+									}
+									// Fan RPM
+									else if (change.Name == "LiveAircon.FanRPM")
+									{
+										if (!double.TryParse(change.Value.ToString(), out dblTemp))
+											Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.FanRPM");
+										else
+										{
+											lock (_oLockData)
+											{
+												_airConditionerData.FanRPM = dblTemp;
+											}
+										}
+									}
 									// Remote Zone
 									else if (change.Name.StartsWith("RemoteZoneInfo["))
 									{
@@ -1304,8 +1376,8 @@ namespace HMX.HASSActronQue
 									{
 										_airConditionerData.OutdoorTemperature = dblTemp;
 									}
-								}			
-								
+								}
+
 								// Live Humidity
 								if (!double.TryParse(jsonResponse.events[iEvent].data.MasterInfo.LiveHumidity_pc.ToString(), out dblTemp))
 									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "MasterInfo.LiveHumidity_pc");
@@ -1314,6 +1386,39 @@ namespace HMX.HASSActronQue
 									lock (_oLockData)
 									{
 										_airConditionerData.Humidity = dblTemp;
+									}
+								}
+
+								// Coil Inlet Temperature
+								if (!double.TryParse(jsonResponse.events[iEvent].data.LiveAircon.CoilInlet.ToString(), out dblTemp))
+									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.CoilInlet");
+								else
+								{
+									lock (_oLockData)
+									{
+										_airConditionerData.CoilInletTemperature = dblTemp;
+									}
+								}
+
+								// Fan PWM
+								if (!double.TryParse(jsonResponse.events[iEvent].data.LiveAircon.FanPWM.ToString(), out dblTemp))
+									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.FanPWM");
+								else
+								{
+									lock (_oLockData)
+									{
+										_airConditionerData.FanPWM = dblTemp;
+									}
+								}
+
+								// Fan RPM
+								if (!double.TryParse(jsonResponse.events[iEvent].data.LiveAircon.FanRPM.ToString(), out dblTemp))
+									Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "LiveAircon.FanRPM");
+								else
+								{
+									lock (_oLockData)
+									{
+										_airConditionerData.FanRPM = dblTemp;
 									}
 								}
 
@@ -1358,7 +1463,7 @@ namespace HMX.HASSActronQue
 											{
 												if (_airConditionerZones.ContainsKey(iZoneIndex + 1))
 													_airConditionerZones[iZoneIndex + 1].SetTemperatureCooling = dblTemp;
-											}											
+											}
 										}
 										// Heating Set Temperature
 										if (!double.TryParse(jsonResponse.events[iEvent].data.RemoteZoneInfo[iZoneIndex].TemperatureSetpoint_Heat_oC.ToString(), out dblTemp))
@@ -1437,7 +1542,7 @@ namespace HMX.HASSActronQue
 
 		private async static void AirConditionerMonitor()
 		{
-			WaitHandle[] waitHandles = new WaitHandle[] { _eventStop , _eventUpdate };
+			WaitHandle[] waitHandles = new WaitHandle[] { _eventStop, _eventUpdate };
 			int iWaitHandle = 0, iWaitInterval = 5, iCommandAckRetries = 0;
 			bool bExit = false;
 
@@ -1515,7 +1620,7 @@ namespace HMX.HASSActronQue
 								}
 							}
 						}
-						
+
 						// Neo No Events Mode
 						if (_bNeoNoEventMode)
 						{
@@ -1661,12 +1766,15 @@ namespace HMX.HASSActronQue
 				MQTT.SendMessage("homeassistant/sensor/actronquecompressorcapacity/config", "{{\"name\":\"{1} Compressor Capacity\",\"unique_id\":\"{0}-CompressorCapacity\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/compressorcapacity\",\"unit_of_measurement\":\"%\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 				MQTT.SendMessage("homeassistant/sensor/actronquecompressorpower/config", "{{\"name\":\"{1} Compressor Power\",\"unique_id\":\"{0}-CompressorPower\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/compressorpower\",\"unit_of_measurement\":\"W\",\"device_class\":\"power\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 				MQTT.SendMessage("homeassistant/sensor/actronqueoutdoortemperature/config", "{{\"name\":\"{1} Outdoor Temperature\",\"unique_id\":\"{0}-OutdoorTemperature\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/outdoortemperature\",\"unit_of_measurement\":\"\u00B0C\",\"device_class\":\"temperature\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
+				MQTT.SendMessage("homeassistant/sensor/actronquecoilinlettemperature/config", "{{\"name\":\"{1} Coil Inlet Temperature\",\"unique_id\":\"{0}-CoilInletTemperature\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/coilinlettemperature\",\"unit_of_measurement\":\"\u00B0C\",\"device_class\":\"temperature\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
+				MQTT.SendMessage("homeassistant/sensor/actronquefanpwm/config", "{{\"name\":\"{1} Fan PWM\",\"unique_id\":\"{0}-FanPWM\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/fanpwm\",\"unit_of_measurement\":\"%\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
+				MQTT.SendMessage("homeassistant/sensor/actronquefanrpm/config", "{{\"name\":\"{1} Fan RPM\",\"unique_id\":\"{0}-FanRPM\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/fanrpm\",\"unit_of_measurement\":\"RPM\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 			}
 			else
 			{
 				MQTT.SendMessage("homeassistant/sensor/actronquecompressorcapacity/config", "");
-				MQTT.SendMessage("homeassistant/sensor/actronquecompressorpower/config", ""); 
-				MQTT.SendMessage("homeassistant/sensor/actronqueoutdoortemperature/config", ""); 
+				MQTT.SendMessage("homeassistant/sensor/actronquecompressorpower/config", "");
+				MQTT.SendMessage("homeassistant/sensor/actronqueoutdoortemperature/config", "");
 			}
 
 			foreach (int iZone in _airConditionerZones.Keys)
@@ -1732,7 +1840,7 @@ namespace HMX.HASSActronQue
 				case "HIGH":
 					MQTT.SendMessage("actronque/fanmode", "high");
 					break;
-					
+
 				case "HIGH+CONT":
 					MQTT.SendMessage("actronque/fanmode", "high");
 					break;
@@ -1859,7 +1967,7 @@ namespace HMX.HASSActronQue
 
 				default:
 					Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Compressor State: {0}", _airConditionerData.CompressorState);
-					
+
 					break;
 			}
 
@@ -1870,6 +1978,15 @@ namespace HMX.HASSActronQue
 
 				// Compressor Power
 				MQTT.SendMessage("actronque/compressorpower", _airConditionerData.CompressorPower.ToString("F2"));
+
+				// Coil Inlet Temperature
+				MQTT.SendMessage("actronque/coilinlettemperature", _airConditionerData.CoilInletTemperature.ToString("F2"));
+
+				// Fan PWM
+				MQTT.SendMessage("actronque/fanpwm", _airConditionerData.FanPWM.ToString("F0"));
+
+				// Fan RPM
+				MQTT.SendMessage("actronque/fanrpm", _airConditionerData.FanRPM.ToString("F0"));
 			}
 		}
 
@@ -1929,8 +2046,8 @@ namespace HMX.HASSActronQue
 							_airConditionerZones[iZone].State = bState;
 
 						MQTT.SendMessage(string.Format("actronque/zone{0}", iZone), _airConditionerZones[iZone].State ? "ON" : "OFF");
-					}					
-					 
+					}
+
 					for (int iIndex = 0; iIndex < bZones.Length; iIndex++)
 					{
 						if ((iIndex + 1) == iZone)
@@ -2042,7 +2159,7 @@ namespace HMX.HASSActronQue
 
 					case "FAN":
 						return;
-						
+
 					case "COOL":
 						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Cool_oC", dblTemperature);
 
@@ -2056,7 +2173,7 @@ namespace HMX.HASSActronQue
 					case "AUTO":
 						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Heat_oC", dblTemperature);
 						command.Data.command.Add("UserAirconSettings.TemperatureSetpoint_Cool_oC", dblTemperature);
-						
+
 						break;
 				}
 			}
@@ -2079,11 +2196,11 @@ namespace HMX.HASSActronQue
 						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Heat_oC", iZone - 1), dblTemperature);
 
 						break;
-						
+
 					case "AUTO":
 						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Heat_oC", iZone - 1), dblTemperature);
 						command.Data.command.Add(string.Format("RemoteZoneInfo[{0}].TemperatureSetpoint_Cool_oC", iZone - 1), dblTemperature);
-						
+
 						break;
 				}
 			}
