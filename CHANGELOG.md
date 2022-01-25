@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.1.1] - 2022-01-25
+
+### Added
+
+- Added entities for Coil Inlet, Fan PWM, Fan RPM.
+
 ## [v2022.1.0] - 2022-01-17
 
 ### Changed
