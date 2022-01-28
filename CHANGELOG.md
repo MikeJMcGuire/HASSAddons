@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.1.2] - 2022-01-27
+
+### Added
+
+- Added entities for room/zone humidity and battery.
+
 ## [v2022.1.1] - 2022-01-25
 
 ### Added
