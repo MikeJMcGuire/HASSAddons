@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.1.4] - 2022-01-29
+
+### Changed
+
+- Fix for systems with less than 8 zones.
+
 ## [v2022.1.3] - 2022-01-28
 
 ### Changed
