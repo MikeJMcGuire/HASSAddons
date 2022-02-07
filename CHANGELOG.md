@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.2.2] - 2022-02-08
+
+### Changed
+
+- Fixed per sensor temperature entity being incorrectly shown as a percentage.
+
 ## [v2022.2.1] - 2022-02-07
 
 ### Added
