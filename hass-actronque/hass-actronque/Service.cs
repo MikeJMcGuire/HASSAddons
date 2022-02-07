@@ -2,17 +2,22 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.IO;
 using System.Threading;
 
 namespace HMX.HASSActronQue
 {
-    internal class Service
-    {
+	internal class Service
+	{
 		private static string _strServiceName = "hass-actronque";
 		private static string _strDeviceNameMQTT = "Actron Que Air Conditioner";
 		private static string _strConfigFile = "/data/options.json";
 		private static ManualResetEvent _eventStop = new ManualResetEvent(false);
+		private static bool _bDevelopment = false;
+
+		public static bool IsDevelopment
+		{
+			get { return _bDevelopment; }
+		}
 
 		public static string ServiceName
 		{
@@ -32,9 +37,16 @@ namespace HMX.HASSActronQue
 			string strMQTTUser, strMQTTPassword, strMQTTBroker;
 			string strQueUser, strQuePassword, strQueSerial, strSystemType;
 			int iPollInterval;
-			bool bPerZoneControls, bMQTTTLS;
+			bool bPerZoneControls, bPerZoneSensors, bMQTTTLS;
 
 			Logging.WriteDebugLog("Service.Start() Build Date: {0}", Properties.Resources.BuildDate);
+
+			// Environment Check
+			if ((Environment.GetEnvironmentVariable("Development") ?? "").ToLower() == "true")
+			{
+				_bDevelopment = true;
+				Logging.WriteDebugLog("Service.Start() Development Mode");
+			}
 
 			// Load Configuration
 			try
@@ -55,6 +67,8 @@ namespace HMX.HASSActronQue
 
 			if (!Configuration.GetConfiguration(configuration, "PerZoneControls", out bPerZoneControls))
 				return;
+
+			Configuration.GetOptionalConfiguration(configuration, "PerZoneSensors", out bPerZoneSensors);		
 
 			if (!Configuration.GetConfiguration(configuration, "PollInterval", out iPollInterval) || iPollInterval < 10 || iPollInterval > 300)
 			{
@@ -84,10 +98,6 @@ namespace HMX.HASSActronQue
 				}
 			}
 
-			MQTT.StartMQTT(strMQTTBroker, bMQTTTLS, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
-
-			Que.Initialise(strQueUser, strQuePassword, strQueSerial, strSystemType, iPollInterval, bPerZoneControls, _eventStop);
-
 			try
 			{
 				webHost = Host.CreateDefaultBuilder().ConfigureWebHostDefaults(webBuilder =>
@@ -97,9 +107,13 @@ namespace HMX.HASSActronQue
 			}
 			catch (Exception eException)
 			{
-				Logging.WriteDebugLogError("Service.Start()", eException, "Unable to build Kestrel instance.");
+				Logging.WriteDebugLogError("Service.Start()", eException, "Unable to build web server instance.");
 				return;
 			}
+
+			MQTT.StartMQTT(strMQTTBroker, bMQTTTLS, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
+
+			Que.Initialise(strQueUser, strQuePassword, strQueSerial, strSystemType, iPollInterval, bPerZoneControls, bPerZoneSensors, _eventStop);
 
 			webHost.Run();
 		}
