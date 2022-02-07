@@ -17,6 +17,9 @@ Setting this option to true will force the MQTT client to attempt a TLS connecti
 ### PerZoneControls: true/false
 If you Actron has controllers in each zone, setting this option to true will create an air conditioner controller in HA for each zone.
 
+### PerZoneSensors: true/false
+If you Actron has sensors in each zone, setting this option to true will create battery and temperature entities in HA for each sensor even if there are multiple sensors in a zone.
+
 ### PollInterval: integer
 By default, the add-on will poll the Que API system every 30 seconds for updates. This can be set to between 10 and 300 seconds inclusive.
 
