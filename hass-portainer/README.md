@@ -8,3 +8,5 @@ The initial credentials for the add-on are admin/portainer - strongly suggest ch
 Port options are available for exposing ports 8000 and 9000 as required.
 
 Portainer requires Home Assistant protection mode to be disabled, as it requires administrative access to the docker platform. As a result, care must be taken when using the portainer tool.
+
+Home Assistant AddOn Repository: https://github.com/MikeJMcGuire/HASSAddons.
