@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.2.1] - 2022-2-23
+
+### Changed
+- Fixed issue with zone switches when using multiple AC units.
+
 ## [v2022.2.0] - 2022-2-22
 
 ### Added
