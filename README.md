@@ -35,3 +35,21 @@ If you Actron has temperature sensors per zone, setting this option to true will
 
 ### ForwardToOriginalWebService: true/false
 If you set this option to true, any data/status received from the Actron will be forwarded to the original cloud service used by the phone app. This will let the phone see (but not control) the state of the Actron.
+
+### MultipleUnits: string list
+If you have multiple Actron Connect units, you can use this option to specify the Unit/Block Id of each of the Actron Connect units. You can determine the Id by browsing to the IP address of each of the units. You will then need to update your zone configuration to specify which zones belong to each unit. Example:
+```
+Zones:
+  - Name: Bedrooms
+    Id: 1
+    Unit: ACONNECT12345
+  - Name: Living Room
+    Id: 2
+    Unit: ACONNECT12345
+  - Name: Lounge Room
+    Id: 1
+    Unit: ACONNECT67890
+MultipleUnits:
+  - ACONNECT12345
+  - ACONNECT67890
+```
