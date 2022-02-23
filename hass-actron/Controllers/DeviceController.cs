@@ -31,12 +31,12 @@ namespace HMX.HASSActron.Controllers
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
 			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
-			AirConditioner.UpdateRequestTime();
+			AirConditioner.UpdateRequestTime(device);
 
-			if (!await AirConditioner.EventCommand.WaitOneAsync(_iTimeout, cancellationToken))
+			if (!await AirConditioner.GetEventCommand(device).WaitOneAsync(_iTimeout, cancellationToken))
 				return new EmptyResult();
 
-			command = AirConditioner.GetCommand(out strCommandType);
+			command = AirConditioner.GetCommand(device, out strCommandType);
 
 			if (strCommandType != "4" & strCommandType != "5")
 				result = new EmptyResult();
@@ -141,7 +141,7 @@ namespace HMX.HASSActron.Controllers
 						if (aZones[6].ToString() != "null") double.TryParse(aZoneTemperatures[6].ToString(), out data.dblZone7Temperature);
 						if (aZones[7].ToString() != "null") double.TryParse(aZoneTemperatures[7].ToString(), out data.dblZone8Temperature);
 
-						AirConditioner.PostData(data);
+						AirConditioner.PostData(device, data);
 
 						break;
 				}

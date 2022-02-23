@@ -8,9 +8,7 @@ namespace HMX.HASSActron
 {
     internal class Service
     {
-		private static string _strServiceName = "hass-actron";
-		private static string _strDeviceName = "Air Conditioner";
-		private static string _strDeviceNameMQTT = "Actron Air Conditioner";
+		private static string _strServiceName = "hass-actron";		
 		private static string _strConfigFile = "/data/options.json";
 		private static bool _bRegisterZoneTemperatures = false;
 		private static bool _bForwardToOriginalWebService = false;
@@ -20,10 +18,14 @@ namespace HMX.HASSActron
 			get { return _bForwardToOriginalWebService; }
 		}
 
-
 		public static bool RegisterZoneTemperatures
 		{
 			get { return _bRegisterZoneTemperatures; }
+		}
+
+		public static string ServiceName
+		{
+			get { return _strServiceName; }
 		}
 
 		public static void Start()
@@ -56,8 +58,6 @@ namespace HMX.HASSActron
 
 			AirConditioner.Configure(configuration);
 
-			MQTTRegister();
-
 			try
 			{
 				webHost = Host.CreateDefaultBuilder().ConfigureWebHostDefaults(webBuilder =>
@@ -81,67 +81,66 @@ namespace HMX.HASSActron
 			MQTT.StopMQTT();
 		}
 
-		private static void MQTTRegister()
-		{
-			Logging.WriteDebugLog("Service.MQTTRegister()");
-
-			MQTT.SendMessage("homeassistant/climate/actronaircon/config", "{{\"name\":\"{1}\",\"unique_id\":\"{0}-AC\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"fan_modes\":[\"high\",\"medium\",\"low\"],\"mode_command_topic\":\"actron/aircon/mode/set\",\"temperature_command_topic\":\"actron/aircon/temperature/set\",\"fan_mode_command_topic\":\"actron/aircon/fan/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"fan_mode_state_topic\":\"actron/aircon/fanmode\",\"action_topic\":\"actron/aircon/compressor\",\"temperature_state_topic\":\"actron/aircon/settemperature\",\"mode_state_topic\":\"actron/aircon/mode\",\"current_temperature_topic\":\"actron/aircon/temperature\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strDeviceName, _strDeviceNameMQTT);
-
-			foreach (int iZone in AirConditioner.Zones.Keys)
-			{
-				MQTT.SendMessage(string.Format("homeassistant/switch/actron/airconzone{0}/config", iZone), "{{\"name\":\"{0} Zone\",\"unique_id\":\"{2}-z{1}s\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{3}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/zone{1}\",\"command_topic\":\"actron/aircon/zone{1}/set\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"state_on\":\"ON\",\"state_off\":\"OFF\",\"availability_topic\":\"{2}/status\"}}", AirConditioner.Zones[iZone].Name, iZone, _strServiceName.ToLower(), _strDeviceNameMQTT);
-				MQTT.Subscribe("actron/aircon/zone{0}/set", iZone);
-
-				if (_bRegisterZoneTemperatures)
-					MQTT.SendMessage(string.Format("homeassistant/sensor/actron/airconzone{0}/config", iZone), "{{\"name\":\"{0}\",\"unique_id\":\"{2}-z{1}t\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{3}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/zone{1}/temperature\",\"unit_of_measurement\":\"\u00B0C\",\"availability_topic\":\"{2}/status\"}}", AirConditioner.Zones[iZone].Name, iZone, _strServiceName.ToLower(), _strDeviceNameMQTT);
-				else
-					MQTT.SendMessage(string.Format("homeassistant/sensor/actron/airconzone{0}/config", iZone), "{{}}"); // Clear existing devices
-			}
-			
-			MQTT.Subscribe("actron/aircon/mode/set");
-			MQTT.Subscribe("actron/aircon/fan/set");
-			MQTT.Subscribe("actron/aircon/temperature/set");
-		}
-
 		private static void MQTTProcessor(string strTopic, string strPayload)
 		{
 			long lRequestId = 0;
 			double dblTemperature = 0;
+			string[] strTokens;
+			string strUnit, strNewTopic;
 
 			Logging.WriteDebugLog("Service.MQTTProcessor() {0}", strTopic);
 
-			switch (strTopic)
+			try
+			{
+				strTokens = strTopic.Split(new char[] { '/' });
+
+				if (strTokens.Length == 5)
+				{
+					strUnit = strTokens[2];
+
+					strNewTopic = strTopic.Replace(strTokens[2] + "/", "");
+				}
+				else
+					return;
+			}
+			catch (Exception eException)
+			{
+				Logging.WriteDebugLogError("Service.MQTTProcessor()", eException, "Unable to determine unit.");
+				return;
+			}
+
+			switch (strNewTopic)
 			{
 				case "actron/aircon/zone1/set":
-					AirConditioner.ChangeZone(lRequestId, 1, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 1, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone2/set":
-					AirConditioner.ChangeZone(lRequestId, 2, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 2, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone3/set":
-					AirConditioner.ChangeZone(lRequestId, 3, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 3, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone4/set":
-					AirConditioner.ChangeZone(lRequestId, 4, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 4, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone5/set":
-					AirConditioner.ChangeZone(lRequestId, 5, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 5, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone6/set":
-					AirConditioner.ChangeZone(lRequestId, 6, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 6, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone7/set":
-					AirConditioner.ChangeZone(lRequestId, 7, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 7, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/zone8/set":
-					AirConditioner.ChangeZone(lRequestId, 8, strPayload == "ON" ? true : false);
+					AirConditioner.ChangeZone(strUnit, lRequestId, 8, strPayload == "ON" ? true : false);
 					break;
 
 				case "actron/aircon/mode/set":
@@ -150,27 +149,27 @@ namespace HMX.HASSActron
 					switch (strPayload)
 					{
 						case "off":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.None);
+							AirConditioner.ChangeMode(strUnit, lRequestId, AirConditionerMode.None);
 
 							break;
 
 						case "auto":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.Automatic);
+							AirConditioner.ChangeMode(strUnit, lRequestId, AirConditionerMode.Automatic);
 
 							break;
 
 						case "cool":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.Cooling);
+							AirConditioner.ChangeMode(strUnit, lRequestId, AirConditionerMode.Cooling);
 
 							break;
 
 						case "heat":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.Heating);
+							AirConditioner.ChangeMode(strUnit, lRequestId, AirConditionerMode.Heating);
 
 							break;
 
 						case "fan_only":
-							AirConditioner.ChangeMode(lRequestId, AirConditionerMode.FanOnly);
+							AirConditioner.ChangeMode(strUnit, lRequestId, AirConditionerMode.FanOnly);
 
 							break;
 					}
@@ -183,17 +182,17 @@ namespace HMX.HASSActron
 					switch (strPayload)
 					{
 						case "low":
-							AirConditioner.ChangeFanSpeed(lRequestId, FanSpeed.Low);
+							AirConditioner.ChangeFanSpeed(strUnit, lRequestId, FanSpeed.Low);
 
 							break;
 
 						case "medium":
-							AirConditioner.ChangeFanSpeed(lRequestId, FanSpeed.Medium);
+							AirConditioner.ChangeFanSpeed(strUnit, lRequestId, FanSpeed.Medium);
 
 							break;
 
 						case "high":
-							AirConditioner.ChangeFanSpeed(lRequestId, FanSpeed.High);
+							AirConditioner.ChangeFanSpeed(strUnit, lRequestId, FanSpeed.High);
 
 							break;
 					}
@@ -204,7 +203,7 @@ namespace HMX.HASSActron
 					Logging.WriteDebugLog("Service.MQTTProcessor() {0}: {1}", strTopic, strPayload);
 
 					if (double.TryParse(strPayload, out dblTemperature))
-						AirConditioner.ChangeTemperature(lRequestId, dblTemperature);
+						AirConditioner.ChangeTemperature(strUnit, lRequestId, dblTemperature);
 
 					break;
 			}
