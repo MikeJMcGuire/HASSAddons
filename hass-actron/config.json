@@ -1,6 +1,6 @@
 {
   "name": "Actron Air Conditioner",
-  "version": "2022.2.0",
+  "version": "2022.2.1",
   "slug": "hass-actron",
   "description": "An add-on for Actron Air Conditioners using the Actron Connect Wi-Fi module.",
   "url": "https://github.com/MikeJMcGuire/hass-actron",
