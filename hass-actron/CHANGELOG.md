@@ -1,12 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [v2022.2.1] - 2022-2-23
+## [v2022.5.0] - 2022-05-30
+
+### Added
+- Added sensors for ESP and Continuous Fan.
+
+## [v2022.2.1] - 2022-02-23
 
 ### Changed
 - Fixed issue with zone switches when using multiple AC units.
 
-## [v2022.2.0] - 2022-2-22
+## [v2022.2.0] - 2022-02-22
 
 ### Added
 - Added support for multiple ActronConnect units.
