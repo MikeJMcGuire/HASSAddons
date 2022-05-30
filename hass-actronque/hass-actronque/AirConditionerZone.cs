@@ -13,6 +13,6 @@ namespace HMX.HASSActronQue
 		public bool State;
 		public double Position; // ZonePosition
 		public Dictionary<string, AirConditionerSensor> Sensors;
-
+		public bool Exists;
 	}
 }
