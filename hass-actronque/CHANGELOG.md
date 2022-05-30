@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.5.0] - 2022-05-30
+
+### Changed
+
+- Added additional logic to support non-contiguous zones.
+
 ## [v2022.2.3] - 2022-02-09
 
 ### Changed
