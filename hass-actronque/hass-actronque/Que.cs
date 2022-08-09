@@ -1211,18 +1211,18 @@ namespace HMX.HASSActronQue
 						if (!_bNeoNoEventMode)
 						{
 							updateItems = await GetAirConditionerEvents();
-							if (updateItems != UpdateItems.None)
+							if (_bEventsReceived)
 							{
-								if (_bEventsReceived)
-								{
+								if (updateItems != UpdateItems.None)
+								{								
 									MQTTUpdateData(updateItems);
 									MQTT.Update(null);
 								}
-								else if (_strSystemType == "neo")
-								{
-									Logging.WriteDebugLog("Que.AirConditionerMonitor() No Neo Events Received - Switching to Full Status Polling");
-									_bNeoNoEventMode = true;
-								}
+							}
+							else if (_strSystemType == "neo")
+							{
+								Logging.WriteDebugLog("Que.AirConditionerMonitor() No Neo Events Received - Switching to Full Status Polling");
+								_bNeoNoEventMode = true;
 							}
 						}
 
@@ -1385,6 +1385,7 @@ namespace HMX.HASSActronQue
 
 			foreach (int iZone in _airConditionerZones.Keys)
 			{
+				// Zone
 				if (_airConditionerZones[iZone].Exists)
 				{
 					MQTT.SendMessage(string.Format("homeassistant/switch/actronque/airconzone{0}/config", iZone), "{{\"name\":\"{0} Zone\",\"unique_id\":\"{2}-z{1}s\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{3}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}\",\"command_topic\":\"actronque/zone{1}/set\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"state_on\":\"ON\",\"state_off\":\"OFF\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Name, iZone, Service.ServiceName.ToLower(), Service.DeviceNameMQTT);
@@ -1393,48 +1394,48 @@ namespace HMX.HASSActronQue
 					MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/airconzone{0}/config", iZone), "{{\"name\":\"{0}\",\"unique_id\":\"{2}-z{1}t\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{3}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}/temperature\",\"unit_of_measurement\":\"\u00B0C\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Name, iZone, Service.ServiceName.ToLower(), Service.DeviceNameMQTT);
 					MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/airconzone{0}position/config", iZone), "{{\"name\":\"{0} Position\",\"unique_id\":\"{2}-z{1}p\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{3}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}/position\",\"unit_of_measurement\":\"%\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Name, iZone, Service.ServiceName.ToLower(), Service.DeviceNameMQTT);
 
+					// Per Zone Controls
 					if (_bPerZoneControls)
 					{
 						MQTT.SendMessage(string.Format("homeassistant/climate/actronque/zone{0}/config", iZone), "{{\"name\":\"{0} {3}\",\"unique_id\":\"{2}-z{1}ac\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"mode_command_topic\":\"actronque/zone{1}/mode/set\",\"temperature_command_topic\":\"actronque/zone{1}/temperature/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"temperature_state_topic\":\"actronque/zone{1}/settemperature\",\"mode_state_topic\":\"actronque/zone{1}/mode\",\"current_temperature_topic\":\"actronque/zone{1}/temperature\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Name, iZone, Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT);
 						MQTT.Subscribe("actronque/zone{0}/temperature/set", iZone);
 						MQTT.Subscribe("actronque/zone{0}/mode/set", iZone);
 
-						// Clear Old Entities
-						if (_strSystemType == "que")
+						foreach (string sensor in _airConditionerZones[iZone].Sensors.Keys)
 						{
-							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}humidity/config", iZone), "");
-							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}battery/config", iZone), "");
+							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}battery/config", iZone, sensor), "{{\"name\":\"{0} Battery\",\"unique_id\":\"{2}-z{1}s{5}battery\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}sensor{5}/battery\",\"state_class\":\"measurement\",\"unit_of_measurement\":\"%\",\"device_class\":\"battery\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Sensors[sensor].Name, iZone, Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT, sensor);
 						}
 					}
 					else
 					{
 						MQTT.SendMessage(string.Format("homeassistant/climate/actronque/zone{0}/config", iZone), "");
-
-						// Clear Old Entities
-						if (_strSystemType == "que")
-						{
-							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}humidity/config", iZone), "");
-							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}battery/config", iZone), "");
-						}
 					}
 
+					// Per Zone Sensors
 					if (_bPerZoneSensors && _strSystemType == "que")
 					{
 						foreach (string sensor in _airConditionerZones[iZone].Sensors.Keys)
 						{
 							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}temperature/config", iZone, sensor), "{{\"name\":\"{0} Temperature\",\"unique_id\":\"{2}-z{1}s{5}temperature\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}sensor{5}/temperature\",\"device_class\":\"temperature\",\"unit_of_measurement\":\"\u00B0C\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Sensors[sensor].Name, iZone, Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT, sensor);
-							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}battery/config", iZone, sensor), "{{\"name\":\"{0} Battery\",\"unique_id\":\"{2}-z{1}s{5}battery\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}sensor{5}/battery\",\"unit_of_measurement\":\"%\",\"device_class\":\"battery\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Sensors[sensor].Name, iZone, Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT, sensor);
+							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}battery/config", iZone, sensor), "{{\"name\":\"{0} Battery\",\"unique_id\":\"{2}-z{1}s{5}battery\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque/zone{1}sensor{5}/battery\",\"state_class\":\"measurement\",\"unit_of_measurement\":\"%\",\"device_class\":\"battery\",\"availability_topic\":\"{2}/status\"}}", _airConditionerZones[iZone].Sensors[sensor].Name, iZone, Service.ServiceName.ToLower(), _strAirConditionerName, Service.DeviceNameMQTT, sensor);
 						}
-
 					}
 					else if (_strSystemType == "que")
 					{
 						foreach (string sensor in _airConditionerZones[iZone].Sensors.Keys)
 						{
 							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}temperature/config", iZone, sensor), "");
-							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}battery/config", iZone, sensor), "");
 						}
 					}
+
+					// Clear Old Entities
+					if (!_bPerZoneSensors && !_bPerZoneControls && _strSystemType == "que")
+					{
+						foreach (string sensor in _airConditionerZones[iZone].Sensors.Keys)
+						{
+							MQTT.SendMessage(string.Format("homeassistant/sensor/actronque/zone{0}sensor{1}battery/config", iZone, sensor), "");
+						}
+					}				
 				}
 			}
 
@@ -1642,6 +1643,14 @@ namespace HMX.HASSActronQue
 						foreach (AirConditionerSensor sensor in _airConditionerZones[iIndex].Sensors.Values)
 						{
 							MQTT.SendMessage(string.Format("actronque/zone{0}sensor{1}/temperature", iIndex, sensor.Serial), sensor.Temperature.ToString("N1"));
+						}
+					}
+
+					// Per Zone Sensors/Controls
+					if ((_bPerZoneSensors | _bPerZoneControls) && _strSystemType == "que")
+					{
+						foreach (AirConditionerSensor sensor in _airConditionerZones[iIndex].Sensors.Values)
+						{
 							MQTT.SendMessage(string.Format("actronque/zone{0}sensor{1}/battery", iIndex, sensor.Serial), sensor.Battery.ToString("N1"));
 						}
 					}
