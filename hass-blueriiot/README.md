@@ -5,6 +5,8 @@ This add-on will periodically poll the Blueriiot API to retrieve sensor data fro
 
 This add-on is in development/testing at present.
 
+Home Assistant AddOn Repository: https://github.com/MikeJMcGuire/HASSAddons.
+
 ## Configuration
 ### BlueriiotUser: string
 Set this field to your Blueriiot user name.
