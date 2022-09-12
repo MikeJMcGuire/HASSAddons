@@ -34,7 +34,7 @@ namespace HMX.HASSBlueriiot
             string strPoolId, strDeviceId;
             DateTime dtLastUpdate;
             long lRequestId = RequestManager.GetRequestId();
-            double dblTemperatureCelsius = 0, dblPh = 0, dblOrp = 0, dblSalinity = 0;
+            double dblTemperatureCelsius = 0, dblPh = 0, dblOrp = 0, dblSalinity = 0, dblConductivity = 0;
             int iValidMeasurements = 0;
             TimeSpan tsLatency;
 
@@ -110,23 +110,32 @@ namespace HMX.HASSBlueriiot
                             if (!double.TryParse(measurement.Value.ToString(), out dblTemperatureCelsius))
                                 Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid temperature: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
                             else
-                                iValidMeasurements++;
+							{
+								MQTT.SendMessage("sensor_pool/temperature", dblTemperatureCelsius.ToString());
+								iValidMeasurements++;
+							}	                                
 
                             break;
 
                         case "orp":
-                            if (!double.TryParse(measurement.Value.ToString(), out dblOrp))
-                                Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid orp: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
-                            else
-                                iValidMeasurements++;
+							if (!double.TryParse(measurement.Value.ToString(), out dblOrp))
+								Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid orp: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
+							else
+							{
+								MQTT.SendMessage("sensor_pool/orp", dblOrp.ToString());
+								iValidMeasurements++;
+							}
 
                             break;
 
                         case "ph":
-                            if (!double.TryParse(measurement.Value.ToString(), out dblPh))
-                                Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid ph: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
-                            else
-                                iValidMeasurements++;
+							if (!double.TryParse(measurement.Value.ToString(), out dblPh))
+								Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid ph: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
+							else
+							{
+								MQTT.SendMessage("sensor_pool/ph", dblPh.ToString());
+								iValidMeasurements++;
+							}
 
                             break;
 
@@ -135,27 +144,31 @@ namespace HMX.HASSBlueriiot
                                 Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid salinity: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
                             else
                             {
-                                iValidMeasurements++;
-                                dblSalinity *= 1000;
+								dblSalinity *= 1000; 
+								MQTT.SendMessage("sensor_pool/salinity", dblSalinity.ToString());
+								iValidMeasurements++;                                
                             }
 
                             break;
-                     }
+
+						case "conductivity":
+							if (!double.TryParse(measurement.Value.ToString(), out dblConductivity))
+								Logging.WriteLog("BlueRiiot.Run() [0x{0}] Invalid conductivity: {1}", lRequestId.ToString("X8"), measurement.Value.ToString());
+							else
+							{
+								MQTT.SendMessage("sensor_pool/conductivity", dblConductivity.ToString());
+								iValidMeasurements++;
+							}
+
+							break;
+					}
 				}
 
-                if (iValidMeasurements == 4)
-                {
+                if (iValidMeasurements > 0)
+				{
                     tsLatency = DateTime.Now - dtLastUpdate;
 
-                    Logging.WriteLog("BlueRiiot.Run() [0x{0}] Current Latency: {1} minute(s)", lRequestId.ToString("X8"), tsLatency.TotalMinutes.ToString("N1"));
-
-                    MQTT.SendMessage("sarah/sensor_pool/temperature", dblTemperatureCelsius.ToString());
-
-                    MQTT.SendMessage("sarah/sensor_pool/ph", dblPh.ToString());
-
-                    MQTT.SendMessage("sarah/sensor_pool/orp", dblOrp.ToString());
-
-                    MQTT.SendMessage("sarah/sensor_pool/salinity", dblSalinity.ToString());
+                    Logging.WriteLog("BlueRiiot.Run() [0x{0}] Current Latency: {1} minute(s)", lRequestId.ToString("X8"), tsLatency.TotalMinutes.ToString("N1"));                    
                 }
             }
             catch (Exception eException)
