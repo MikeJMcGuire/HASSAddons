@@ -10,11 +10,10 @@
   "profiles": {
     "hass_blueriiot": {
       "commandName": "Project",
-      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5158",
+      "applicationUrl": "",
       "dotnetRunMessages": true
     },
     "IIS Express": {

@@ -78,16 +78,20 @@ namespace HMX.HASSBlueriiot
 			Logging.WriteLog("ServiceCore.MQTTRegister()");
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_temperature/config",
-				"{{\"name\":\"Pool Temperature\",\"unique_id\":\"{1}-0\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/temperature\",\"device_class\":\"temperature\",\"unit_of_measurement\":\"°C\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+				"{{\"name\":\"Pool Temperature\",\"unique_id\":\"{1}-0\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sensor_pool/temperature\",\"device_class\":\"temperature\",\"unit_of_measurement\":\"°C\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_ph/config",
-				"{{\"name\":\"Pool pH\",\"unique_id\":\"{1}-1\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/ph\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+				"{{\"name\":\"Pool pH\",\"unique_id\":\"{1}-1\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sensor_pool/ph\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_orp/config",
-				 "{{\"name\":\"Pool Orp\",\"unique_id\":\"{1}-2\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/orp\",\"unit_of_measurement\":\"mV\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+				 "{{\"name\":\"Pool Orp\",\"unique_id\":\"{1}-2\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sensor_pool/orp\",\"unit_of_measurement\":\"mV\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
 
 			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_salinity/config",
-				"{{\"name\":\"Pool Salinity\",\"unique_id\":\"{1}-3\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sarah/sensor_pool/salinity\",\"unit_of_measurement\":\"ppm\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+				"{{\"name\":\"Pool Salinity\",\"unique_id\":\"{1}-3\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sensor_pool/salinity\",\"unit_of_measurement\":\"ppm\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+
+			MQTT.SendMessage("homeassistant/sensor/blueriiot/sensor_pool_conductivity/config",
+				"{{\"name\":\"Pool Conductivity\",\"unique_id\":\"{1}-4\",\"device\":{{\"identifiers\":[\"{1}\"],\"name\":\"{2}\",\"model\":\"Container\",\"manufacturer\":\"Blueriiot\"}},\"state_topic\":\"sensor_pool/conductivity\",\"unit_of_measurement\":\"μS\",\"availability_topic\":\"{0}/status\"}}", _strServiceName.ToLower(), _strServiceName, _strServiceDescription);
+
 		}
 
 		public static void Stop()

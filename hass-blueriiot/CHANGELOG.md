@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.9.0] - 2022-09-12
+
+### Changed
+- Fixed issue with some Blue Connect measurements not being processed due to a conductivity measurement instead of a salinity measurement.
+- MQTT state topic names updated.
+
 ## [v2022.1.1] - 2022-01-06
 
 ### Removed
