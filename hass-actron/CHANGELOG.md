@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.9.0] - 2022-09-16
+
+### Added
+- Added configuration option to limit MQTT logging.
+
+### Changed
+- Updated package versions.
+
 ## [v2022.5.0] - 2022-05-30
 
 ### Added
