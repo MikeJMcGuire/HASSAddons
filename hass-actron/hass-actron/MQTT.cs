@@ -1,12 +1,11 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace HMX.HASSActron
 {
@@ -18,10 +17,11 @@ namespace HMX.HASSActron
 		private static string _strClientId = "";
 		private static Timer _timerMQTT = null;
 		private static MessageHandler _messageHandler = null;
+		private static bool _bMQTTLogging = true;
 
-		public static async void StartMQTT(string strMQTTServer, bool bMQTTTLS, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
+		public static async void StartMQTT(string strMQTTServer, bool bMQTTTLS, bool bMQTTLogging, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{
-			IManagedMqttClientOptions options;
+			ManagedMqttClientOptions options;
 			MqttClientOptionsBuilder clientOptions;
 			MqttClientOptionsBuilderTlsParameters optionsTLS;
 			int iPort = 0;
@@ -37,6 +37,7 @@ namespace HMX.HASSActron
 
 			_strClientId = strClientId;
 			_messageHandler = messageHandler;
+			_bMQTTLogging = bMQTTLogging;
 
 			if (strMQTTServer.Contains(":"))
 			{
@@ -77,11 +78,12 @@ namespace HMX.HASSActron
 			{
 				optionsTLS = new MqttClientOptionsBuilderTlsParameters
 				{
-					IgnoreCertificateChainErrors = true,
-					UseTls = true,
-					IgnoreCertificateRevocationErrors = true,
 					AllowUntrustedCertificates = true,
-					SslProtocol = System.Security.Authentication.SslProtocols.Tls12
+					CertificateValidationHandler = delegate { return true; },
+					IgnoreCertificateChainErrors = true,
+					IgnoreCertificateRevocationErrors = true,
+					UseTls = true,
+					SslProtocol = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13
 				};
 
 				clientOptions = clientOptions.WithTls(optionsTLS);
@@ -91,17 +93,20 @@ namespace HMX.HASSActron
 
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
-			_mqtt.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(MessageProcessor);
+			_mqtt.ApplicationMessageReceivedAsync += new Func<MqttApplicationMessageReceivedEventArgs, Task>(MessageProcessor);
 
 			await _mqtt.StartAsync(options);
 		}
 		
-		private static void MessageProcessor(MqttApplicationMessageReceivedEventArgs e)
+		private static Task MessageProcessor(MqttApplicationMessageReceivedEventArgs e)
 		{
-			Logging.WriteDebugLog("MQTT.MessageProcessor() {0}", e.ApplicationMessage.Topic);
+			if (_bMQTTLogging)
+				Logging.WriteDebugLog("MQTT.MessageProcessor() {0}", e.ApplicationMessage.Topic);
 
 			if (_messageHandler != null)
 				_messageHandler.Invoke(e.ApplicationMessage.Topic, ASCIIEncoding.ASCII.GetString(e.ApplicationMessage.Payload));
+
+			return Task.CompletedTask;
 		}
 
 		public static void Subscribe(string strTopicFormat, params object[] strParams)
@@ -125,6 +130,9 @@ namespace HMX.HASSActron
 
 			SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
 
+			// Add wait for outbound messages
+			Thread.Sleep(1500);
+
 			_mqtt.StopAsync();
 			_mqtt.Dispose();
 
@@ -133,18 +141,19 @@ namespace HMX.HASSActron
 		
 		public static async void SendMessage(string strTopic, string strPayloadFormat, params object[] strParams)
 		{
-			Logging.WriteDebugLog("MQTT.SendMessage() {0}", strTopic);
+			if (_bMQTTLogging)
+				Logging.WriteDebugLog("MQTT.SendMessage() {0}", strTopic);
 			
 			if (_mqtt != null)
 			{
 				MqttApplicationMessage message = new MqttApplicationMessageBuilder()
 				.WithTopic(strTopic)
 				.WithPayload(string.Format(strPayloadFormat, strParams))
-				.WithExactlyOnceQoS()
+				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
 				.WithRetainFlag()
 				.Build();
 
-				await _mqtt.PublishAsync(message);
+				await _mqtt.EnqueueAsync(message);
 			}
 		}
 	}

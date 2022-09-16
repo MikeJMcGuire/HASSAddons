@@ -32,7 +32,7 @@ namespace HMX.HASSActron
         {
 			IConfigurationRoot configuration;
 			IHost webHost;
-			bool bMQTTTLS;
+			bool bMQTTTLS, bMQTTLogging;
 
 			Logging.WriteDebugLog("Service.Start() Build Date: {0}", Properties.Resources.BuildDate);
 
@@ -48,13 +48,15 @@ namespace HMX.HASSActron
 
 			bool.TryParse(configuration["RegisterZoneTemperatures"] ?? "false", out _bRegisterZoneTemperatures);
 			bool.TryParse(configuration["ForwardToOriginalWebService"] ?? "false", out _bForwardToOriginalWebService);
+			bool.TryParse(configuration["MQTTLogs"] ?? "true", out bMQTTLogging);
 			bool.TryParse(configuration["MQTTTLS"] ?? "false", out bMQTTTLS);
 
 			Logging.WriteDebugLog("Service.Start() RegisterZoneTemperatures: {0}", _bRegisterZoneTemperatures);
 			Logging.WriteDebugLog("Service.Start() ForwardToOriginalWebService: {0}", _bForwardToOriginalWebService);
+			Logging.WriteDebugLog("Service.Start() MQTT Logging: {0}", bMQTTLogging);
 			Logging.WriteDebugLog("Service.Start() MQTT TLS: {0}", bMQTTTLS);
 
-			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", bMQTTTLS, _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
+			MQTT.StartMQTT(configuration["MQTTBroker"] ?? "core-mosquitto", bMQTTTLS, bMQTTLogging, _strServiceName, configuration["MQTTUser"] ?? "", configuration["MQTTPassword"] ?? "", MQTTProcessor);
 
 			AirConditioner.Configure(configuration);
 
