@@ -3,7 +3,7 @@ ARG BUILD_FROM
 FROM $BUILD_FROM AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:latest AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.100-bullseye-slim-amd64 AS build
 WORKDIR /src
 COPY hass-actron/hass-actron.csproj hass-actron/
 RUN dotnet restore hass-actron/hass-actron.csproj
