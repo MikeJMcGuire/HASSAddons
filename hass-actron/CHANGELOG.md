@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.9.1] - 2022-09-21
+
+### Changed
+
+- Updated dotnet sdk.
+
 ## [v2022.9.0] - 2022-09-16
 
 ### Added
