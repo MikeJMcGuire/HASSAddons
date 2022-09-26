@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.9.2] - 2022-09-26
+
+### Added
+
+- Added MQTT connection errors to the logs.
+
 ## [v2022.9.1] - 2022-09-21
 
 ### Changed
