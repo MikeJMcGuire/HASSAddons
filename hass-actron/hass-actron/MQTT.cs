@@ -94,6 +94,7 @@ namespace HMX.HASSActron
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
 			_mqtt.ApplicationMessageReceivedAsync += new Func<MqttApplicationMessageReceivedEventArgs, Task>(MessageProcessor);
+			_mqtt.ConnectingFailedAsync += new Func<ConnectingFailedEventArgs, Task>(ConnectionProcessor);
 
 			await _mqtt.StartAsync(options);
 		}
@@ -104,7 +105,24 @@ namespace HMX.HASSActron
 				Logging.WriteDebugLog("MQTT.MessageProcessor() {0}", e.ApplicationMessage.Topic);
 
 			if (_messageHandler != null)
-				_messageHandler.Invoke(e.ApplicationMessage.Topic, ASCIIEncoding.ASCII.GetString(e.ApplicationMessage.Payload));
+				_messageHandler.Invoke(e.ApplicationMessage.Topic, Encoding.ASCII.GetString(e.ApplicationMessage.Payload));
+
+			return Task.CompletedTask;
+		}
+
+		private static Task ConnectionProcessor(ConnectingFailedEventArgs e)
+		{
+			string strMessage = "MQTT.ConnectionProcessor() Unable to connect to MQTT broker: {0}";
+
+			if (e.Exception != null)
+			{
+				if (e.Exception.InnerException != null)
+					Logging.WriteDebugLog(strMessage, e.Exception.Message + " " + e.Exception.InnerException.Message);
+				else
+					Logging.WriteDebugLog(strMessage, e.Exception.Message);
+			}
+			else
+				Logging.WriteDebugLog(strMessage, "unspecified error");
 
 			return Task.CompletedTask;
 		}
@@ -130,8 +148,7 @@ namespace HMX.HASSActron
 
 			SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
 
-			// Add wait for outbound messages
-			Thread.Sleep(1500);
+			Thread.Sleep(500);
 
 			_mqtt.StopAsync();
 			_mqtt.Dispose();
