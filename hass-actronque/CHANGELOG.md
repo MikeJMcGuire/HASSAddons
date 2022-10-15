@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.10.0] - 2022-10-15
+
+### Added
+
+- Added logic to regenerate the pairing token and device identication files when the email address changes.
+- Added MQTT connection errors to the logs.
+
 ## [v2022.8.0] - 2022-08-09
 
 ### Added
