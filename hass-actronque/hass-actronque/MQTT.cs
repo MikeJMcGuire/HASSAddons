@@ -1,12 +1,11 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace HMX.HASSActronQue
 {
@@ -22,7 +21,7 @@ namespace HMX.HASSActronQue
 		
 		public static async void StartMQTT(string strMQTTServer, bool bMQTTTLS, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{
-			IManagedMqttClientOptions options;
+			ManagedMqttClientOptions options;
 			MqttClientOptionsBuilder clientOptions;
 			MqttClientOptionsBuilderTlsParameters optionsTLS;
 			int iPort = 0;
@@ -78,11 +77,12 @@ namespace HMX.HASSActronQue
 			{
 				optionsTLS = new MqttClientOptionsBuilderTlsParameters
 				{
-					IgnoreCertificateChainErrors = true,
-					UseTls = true,
-					IgnoreCertificateRevocationErrors = true,
 					AllowUntrustedCertificates = true,
-					SslProtocol = System.Security.Authentication.SslProtocols.Tls12
+					CertificateValidationHandler = delegate { return true; },
+					IgnoreCertificateChainErrors = true,
+					IgnoreCertificateRevocationErrors = true,
+					UseTls = true,
+					SslProtocol = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13
 				};
 
 				clientOptions = clientOptions.WithTls(optionsTLS);
@@ -92,17 +92,37 @@ namespace HMX.HASSActronQue
 			
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
-			_mqtt.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(MessageProcessor);
+			_mqtt.ApplicationMessageReceivedAsync += new Func<MqttApplicationMessageReceivedEventArgs, Task>(MessageProcessor);
+			_mqtt.ConnectingFailedAsync += new Func<ConnectingFailedEventArgs, Task>(ConnectionProcessor);
 
 			await _mqtt.StartAsync(options);
 		}
 
-		private static void MessageProcessor(MqttApplicationMessageReceivedEventArgs e)
+		private static Task MessageProcessor(MqttApplicationMessageReceivedEventArgs e)
 		{
 			Logging.WriteDebugLog("MQTT.MessageProcessor() {0}", e.ApplicationMessage.Topic);
 
 			if (_messageHandler != null)
 				_messageHandler.Invoke(e.ApplicationMessage.Topic, ASCIIEncoding.ASCII.GetString(e.ApplicationMessage.Payload));
+
+			return Task.CompletedTask;
+		}
+
+		private static Task ConnectionProcessor(ConnectingFailedEventArgs e)
+		{
+			string strMessage = "MQTT.ConnectionProcessor() Unable to connect to MQTT broker: {0}";
+
+			if (e.Exception != null)
+			{
+				if (e.Exception.InnerException != null)
+					Logging.WriteDebugLog(strMessage, e.Exception.Message + " " + e.Exception.InnerException.Message);
+				else
+					Logging.WriteDebugLog(strMessage, e.Exception.Message);
+			}
+			else
+				Logging.WriteDebugLog(strMessage, "unspecified error");
+
+			return Task.CompletedTask;
 		}
 
 		public static void Subscribe(string strTopicFormat, params object[] strParams)
@@ -129,6 +149,8 @@ namespace HMX.HASSActronQue
 
 			SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
 
+			Thread.Sleep(500);
+
 			_mqtt.StopAsync();
 			_mqtt.Dispose();
 
@@ -138,17 +160,17 @@ namespace HMX.HASSActronQue
 		public static async void SendMessage(string strTopic, string strPayloadFormat, params object[] strParams)
 		{
 			Logging.WriteDebugLog("MQTT.SendMessage() {0}", strTopic);
-			
+
 			if (_mqtt != null)
 			{
 				MqttApplicationMessage message = new MqttApplicationMessageBuilder()
 				.WithTopic(strTopic)
 				.WithPayload(string.Format(strPayloadFormat, strParams))
-				.WithExactlyOnceQoS()
+				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
 				.WithRetainFlag()
 				.Build();
 
-				await _mqtt.PublishAsync(message);
+				await _mqtt.EnqueueAsync(message);
 			}
 		}
 	}
