@@ -1,10 +1,9 @@
 ARG BUILD_FROM
-ARG BUILD_SDK
 
-FROM $BUILD_FROM AS base
+FROM mcr.microsoft.com/dotnet/aspnet:$BUILD_FROM AS base
 WORKDIR /app
 
-FROM $BUILD_SDK AS build
+FROM mcr.microsoft.com/dotnet/sdk:$BUILD_FROM AS build
 WORKDIR /src
 COPY hass-actronque/hass-actronque.csproj hass-actronque/
 RUN dotnet restore hass-actronque/hass-actronque.csproj
