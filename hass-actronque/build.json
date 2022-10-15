@@ -7,5 +7,12 @@
     "armv7": "mcr.microsoft.com/dotnet/aspnet:6.0.10-bullseye-slim-arm32v7",
     "i386": "mcr.microsoft.com/dotnet/aspnet:6.0.10-bullseye-slim"
   },
+  "build_sdk": {
+    "amd64": "mcr.microsoft.com/dotnet/sdk:6.0.10-bullseye-slim",
+    "aarch64": "mcr.microsoft.com/dotnet/sdk:6.0.10-bullseye-slim-arm64v8",
+    "armhf": "mcr.microsoft.com/dotnet/sdk:6.0.10-bullseye-slim-arm32v7",
+    "armv7": "mcr.microsoft.com/dotnet/sdk:6.0.10-bullseye-slim-arm32v7",
+    "i386": "mcr.microsoft.com/dotnet/sdk:6.0.10-bullseye-slim"
+  },  
   "args": {}
 }
