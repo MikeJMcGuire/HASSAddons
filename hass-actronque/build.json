@@ -1,7 +1,7 @@
 {
   "squash": false,
   "build_from": {
-    "amd64": "6.0.bullseye-slim",
+    "amd64": "6.0-bullseye-slim",
     "aarch64": "6.0-bullseye-slim-arm64v8",
     "armhf": "6.0-bullseye-slim-arm32v7",
     "armv7": "6.0-bullseye-slim-arm32v7",
