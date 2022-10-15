@@ -102,6 +102,8 @@ namespace HMX.HASSActronQue
 		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, string strSystemType, int iPollInterval, bool bPerZoneControls, bool bPerZoneSensors, ManualResetEvent eventStop)
 		{
 			Thread threadMonitor;
+			string strDeviceUniqueIdentifierInput;
+			string[] strTokens;
 
 			Logging.WriteDebugLog("Que.Initialise()");
 
@@ -125,9 +127,39 @@ namespace HMX.HASSActronQue
 			{
 				if (File.Exists(_strDeviceIdFile))
 				{
-					_strDeviceUniqueIdentifier = JsonConvert.DeserializeObject<string>(await File.ReadAllTextAsync(_strDeviceIdFile));
+					strDeviceUniqueIdentifierInput = JsonConvert.DeserializeObject<string>(await File.ReadAllTextAsync(_strDeviceIdFile));
 
-					Logging.WriteDebugLog("Que.Initialise() Device Id: {0}", _strDeviceUniqueIdentifier);
+					if (strDeviceUniqueIdentifierInput.Contains(","))
+					{
+						strTokens = strDeviceUniqueIdentifierInput.Split(new char[] { ',' });
+						if (strTokens.Length == 2)
+						{
+							if (strTokens[0].ToLower() == _strQueUser.ToLower())
+							{
+								_strDeviceUniqueIdentifier = strTokens[1];
+
+								Logging.WriteDebugLog("Que.Initialise() Device Id: {0}", _strDeviceUniqueIdentifier);
+							}
+							else
+							{
+								Logging.WriteDebugLog("Que.Initialise() Device Id: will regenerate (Que User changed)");
+							}
+						}
+					}
+					else
+					{
+						_strDeviceUniqueIdentifier = strDeviceUniqueIdentifierInput;
+
+						// Update Device Id File
+						try
+						{
+							await File.WriteAllTextAsync(_strDeviceIdFile, JsonConvert.SerializeObject(_strQueUser + "," + _strDeviceUniqueIdentifier));
+						}
+						catch (Exception eException)
+						{
+							Logging.WriteDebugLogError("Que.Initialise()", eException, "Unable to update json file.");
+						}
+					}					
 				}
 			}
 			catch (Exception eException)
@@ -138,7 +170,7 @@ namespace HMX.HASSActronQue
 			// Get Pairing Token
 			try
 			{
-				if (File.Exists(_strPairingTokenFile))
+				if (_strDeviceUniqueIdentifier != "" && File.Exists(_strPairingTokenFile))
 				{
 					_pairingToken = JsonConvert.DeserializeObject<PairingToken>(await File.ReadAllTextAsync(_strPairingTokenFile));
 
@@ -182,7 +214,7 @@ namespace HMX.HASSActronQue
 				// Update Device Id File
 				try
 				{
-					await File.WriteAllTextAsync(_strDeviceIdFile, JsonConvert.SerializeObject(_strDeviceUniqueIdentifier));
+					await File.WriteAllTextAsync(_strDeviceIdFile, JsonConvert.SerializeObject(_strQueUser + "," + _strDeviceUniqueIdentifier));
 				}
 				catch (Exception eException)
 				{
