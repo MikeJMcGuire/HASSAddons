@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2022.10.1] - 2022-10-17
+
+### Added
+
+- Added additional MQTT error checking.
+
 ## [v2022.10.0] - 2022-10-15
 
 ### Added
