@@ -141,7 +141,7 @@ namespace HMX.HASSActronQue
 				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "online");
 		}
 
-		public static void StopMQTT()
+		public static async void StopMQTT()
 		{
 			Logging.WriteDebugLog("MQTT.StopMQTT()");
 
@@ -151,7 +151,10 @@ namespace HMX.HASSActronQue
 
 			Thread.Sleep(500);
 
-			_mqtt.StopAsync();
+			await _mqtt.StopAsync();
+
+			Thread.Sleep(50);
+
 			_mqtt.Dispose();
 
 			_mqtt = null;
@@ -163,14 +166,21 @@ namespace HMX.HASSActronQue
 
 			if (_mqtt != null)
 			{
-				MqttApplicationMessage message = new MqttApplicationMessageBuilder()
-				.WithTopic(strTopic)
-				.WithPayload(string.Format(strPayloadFormat, strParams))
-				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
-				.WithRetainFlag()
-				.Build();
+				try
+				{
+					MqttApplicationMessage message = new MqttApplicationMessageBuilder()
+					.WithTopic(strTopic)
+					.WithPayload(string.Format(strPayloadFormat, strParams))
+					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+					.WithRetainFlag()
+					.Build();
 
-				await _mqtt.EnqueueAsync(message);
+					await _mqtt.EnqueueAsync(message);
+				}
+				catch (Exception eException)
+				{
+					Logging.WriteDebugLogError("MQTT.SendMessage()", eException, "Unable to send MQTT message.");
+				}
 			}
 		}
 	}
