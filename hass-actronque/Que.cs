@@ -494,7 +494,18 @@ namespace HMX.HASSActronQue
 
 					Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Responded (Encoding {1}, {2} bytes)", lRequestId.ToString("X8"), httpResponse.Content.Headers.ContentEncoding.ToString() == "" ? "N/A" : httpResponse.Content.Headers.ContentEncoding.ToString(), (httpResponse.Content.Headers.ContentLength ?? 0) == 0 ? "N/A" : httpResponse.Content.Headers.ContentLength.ToString());
 
+					if (Service.IsDevelopment)
+						Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Response: {1}", lRequestId.ToString("X8"), strResponse);
+
 					strResponse = strResponse.Replace("ac-system", "acsystem");
+
+					if (!strResponse.Contains("acsystem"))
+					{
+						Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] No data returned from Que service - check Que user name and password.");
+						
+						bRetVal = false;
+						goto Cleanup;
+					}
 
 					jsonResponse = JsonConvert.DeserializeObject(strResponse);
 
@@ -1486,6 +1497,7 @@ namespace HMX.HASSActronQue
 				return;
 			}
 
+			
 			if (items.HasFlag(UpdateItems.Main))
 			{
 				// Fan Mode
