@@ -89,7 +89,7 @@ namespace HMX.HASSActronQue
 			}
 
 			options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(clientOptions.Build()).Build();
-			
+
 			_mqtt = new MqttFactory().CreateManagedMqttClient();
 
 			_mqtt.ApplicationMessageReceivedAsync += new Func<MqttApplicationMessageReceivedEventArgs, Task>(MessageProcessor);
@@ -169,11 +169,11 @@ namespace HMX.HASSActronQue
 				try
 				{
 					MqttApplicationMessage message = new MqttApplicationMessageBuilder()
-					.WithTopic(strTopic)
-					.WithPayload(string.Format(strPayloadFormat, strParams))
-					.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
-					.WithRetainFlag()
-					.Build();
+						.WithTopic(strTopic)
+						.WithPayload(string.Format(strPayloadFormat, strParams))
+						.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+						.WithRetainFlag()
+						.Build();
 
 					await _mqtt.EnqueueAsync(message);
 				}
