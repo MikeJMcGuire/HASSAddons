@@ -21,5 +21,10 @@ namespace HMX.HASSActronQue
 		public double FanPWM; // FanPWM
 		public double FanRPM; // FanRPM
 		public DateTime LastUpdated;
+
+		public AirConditionerData()
+		{
+			LastUpdated = DateTime.MinValue;
+		}
 	}
 }
