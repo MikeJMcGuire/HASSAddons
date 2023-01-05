@@ -135,10 +135,13 @@ namespace HMX.HASSActronQue
 
 		public static void Update(object oState)
 		{
-			if (DateTime.Now >= Que.LastUpdate.AddMinutes(_iLastUpdateThreshold))
-				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
-			else
-				SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "online");
+			foreach (AirConditionerUnit unit in Que.Units.Values)
+			{
+				if (DateTime.Now >= unit.Data.LastUpdated.AddMinutes(_iLastUpdateThreshold))
+					SendMessage(string.Format("{0}{1}/status", _strClientId.ToLower(), unit.Serial), "offline");
+				else
+					SendMessage(string.Format("{0}{1}/status", _strClientId.ToLower(), unit.Serial), "online");
+			}
 		}
 
 		public static async void StopMQTT()
@@ -147,7 +150,8 @@ namespace HMX.HASSActronQue
 
 			_timerMQTT.Dispose();
 
-			SendMessage(string.Format("{0}/status", _strClientId.ToLower()), "offline");
+			foreach (AirConditionerUnit unit in Que.Units.Values)
+				SendMessage(string.Format("{0}{1}/status", _strClientId.ToLower(), unit.Serial), "offline");
 
 			Thread.Sleep(500);
 
