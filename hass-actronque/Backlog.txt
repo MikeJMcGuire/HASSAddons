@@ -6,3 +6,7 @@ enable set temperature to adjust temp range when in auto mode
 auth interval faster if miss initial auth
 
 suppress updates post change?
+
+
+
+command ack pending should be per unit
