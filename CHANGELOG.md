@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.1.1] - 2023-01-09
+
+### Changed
+
+- Downgraded the base image used for Armv8 (aarch64), as the latest image failed randomly on Raspberry Pi devices.
+
 ## [v2023.1.0] - 2023-01-04
 
 ### Added
