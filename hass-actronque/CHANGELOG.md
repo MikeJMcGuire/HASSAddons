@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Upgraded base images to support newer operating systems.
+- Upgraded base images.
 
 ## [v2023.1.1] - 2023-01-09
 
