@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.4.0] - 2023-04-30
+
+### Changed
+
+- Upgraded base images to support newer operating systems.
+
 ## [v2023.1.1] - 2023-01-09
 
 ### Changed
