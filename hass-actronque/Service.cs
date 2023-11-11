@@ -37,7 +37,7 @@ namespace HMX.HASSActronQue
 			string strMQTTUser, strMQTTPassword, strMQTTBroker;
 			string strQueUser, strQuePassword, strQueSerial, strSystemType;
 			int iPollInterval;
-			bool bPerZoneControls, bPerZoneSensors, bMQTTTLS;
+			bool bPerZoneControls, bPerZoneSensors, bMQTTTLS, bSeparateHeatCool;
 
 			Logging.WriteDebugLog("Service.Start() Build Date: {0}", Properties.Resources.BuildDate);
 
@@ -81,7 +81,9 @@ namespace HMX.HASSActronQue
 			if (!Configuration.GetPrivateConfiguration(configuration, "QuePassword", out strQuePassword))
 				return;
 			Configuration.GetOptionalConfiguration(configuration, "QueSerial", out strQueSerial);
-			
+
+			Configuration.GetOptionalConfiguration(configuration, "SeparateHeatCool", out bSeparateHeatCool);
+
 			Configuration.GetOptionalConfiguration(configuration, "SystemType", out strSystemType);
 			if (strSystemType == "")
 			{
@@ -113,7 +115,7 @@ namespace HMX.HASSActronQue
 
 			MQTT.StartMQTT(strMQTTBroker, bMQTTTLS, _strServiceName, strMQTTUser, strMQTTPassword, MQTTProcessor);
 
-			Que.Initialise(strQueUser, strQuePassword, strQueSerial, strSystemType, iPollInterval, bPerZoneControls, bPerZoneSensors, _eventStop);
+			Que.Initialise(strQueUser, strQuePassword, strQueSerial, strSystemType, iPollInterval, bPerZoneControls, bPerZoneSensors, bSeparateHeatCool, _eventStop);
 
 			webHost.Run();
 		}
@@ -147,12 +149,28 @@ namespace HMX.HASSActronQue
 			}
 
 			// Per Zone Temperature
-			if (strTopic.StartsWith(strUnitHeader + "/zone") && strTopic.EndsWith("/temperature/set"))
+			if (strTopic.StartsWith(strUnitHeader + "/zone") && strTopic.Contains("/temperature/"))
 			{
 				iZone = int.Parse(strTopic.Substring(strUnitHeader.Length + 5, 1));
 
-				if (double.TryParse(strPayload, out dblTemperature))
-					Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, iZone);
+				// Temperature
+				if (strTopic.EndsWith("/temperature/set"))
+				{
+					if (double.TryParse(strPayload, out dblTemperature))
+						Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, iZone, Que.TemperatureSetType.Default);
+				}
+				// Temperature High
+				else if (strTopic.EndsWith("/high/set"))
+				{
+					if (double.TryParse(strPayload, out dblTemperature))
+						Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, iZone, Que.TemperatureSetType.High);
+				}
+				// Temperature Low
+				else if (strTopic.EndsWith("/low/set"))
+				{
+					if (double.TryParse(strPayload, out dblTemperature))
+						Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, iZone, Que.TemperatureSetType.Low);
+				}
 			}
 			// Per Zone Mode
 			else if (strTopic.StartsWith(strUnitHeader + "/zone") && strTopic.EndsWith("/mode/set"))
@@ -256,10 +274,26 @@ namespace HMX.HASSActronQue
 				}
 			}
 			// Temperature
-			else if (strTopic.StartsWith(strUnitHeader + "/temperature/set"))
+			else if (strTopic.StartsWith(strUnitHeader + "/temperature"))
 			{
-				if (double.TryParse(strPayload, out dblTemperature))
-					Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, 0);
+				// Temperature
+				if (strTopic.EndsWith("/temperature/set"))
+				{
+					if (double.TryParse(strPayload, out dblTemperature))
+						Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, 0, Que.TemperatureSetType.Default);
+				}
+				// Temperature High
+				else if (strTopic.EndsWith("/high/set"))
+				{
+					if (double.TryParse(strPayload, out dblTemperature))
+						Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, 0, Que.TemperatureSetType.High);
+				}
+				// Temperature Low
+				else if (strTopic.EndsWith("/low/set"))
+				{
+					if (double.TryParse(strPayload, out dblTemperature))
+						Que.ChangeTemperature(lRequestId, Que.Units[strUnit], dblTemperature, 0, Que.TemperatureSetType.Low);
+				}
 			}
 		}
     }
