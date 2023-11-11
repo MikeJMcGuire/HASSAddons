@@ -82,7 +82,7 @@ namespace HMX.HASSActronQue
 				return;
 			Configuration.GetOptionalConfiguration(configuration, "QueSerial", out strQueSerial);
 
-			Configuration.GetOptionalConfiguration(configuration, "SeparateHeatCool", out bSeparateHeatCool);
+			Configuration.GetOptionalConfiguration(configuration, "SeparateHeatCoolTargets", out bSeparateHeatCool);
 
 			Configuration.GetOptionalConfiguration(configuration, "SystemType", out strSystemType);
 			if (strSystemType == "")

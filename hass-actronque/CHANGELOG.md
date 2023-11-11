@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [v2023.11.0] - 2023-11-10
+## [v2023.11.1] - 2023-11-10
 
 ### Added
 
