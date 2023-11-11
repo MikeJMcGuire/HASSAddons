@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.11.0] - 2023-11-10
+
+### Added
+
+- Added a new configuration option to enable the new HVAC/Climate options in HA 2023.9 (setting the target heating and cooling temperatures independently).
+
+### Changed
+
+- Changed base images to Alpine from Debian to match the HA base images.
+
 ## [v2023.4.0] - 2023-04-30
 
 ### Changed

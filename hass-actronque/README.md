@@ -26,5 +26,8 @@ By default, the add-on will poll the Que API system every 30 seconds for updates
 ### QueSerial: string
 If you have multiple AC units conencted to your Que, you can add this optional configuration to specify the serial number of the AC you want the add-on to use. You can find the discovered serial numbers in the log for the add-on when the add-on is starting. If you leave this field blank, the add-on will add all detected AC units.
 
+### SeparateHeatCoolTargets: bool
+This option specifies if you wish to use the new independently set target heating and cooling temperature settings introduced in HA 2023.9. This disables the single temperature set option that may impact existing automations.
+
 ### SystemType: string
 This option specifies if you have a "que" or "neo" control system. If not specified, this defaults to "que". 
