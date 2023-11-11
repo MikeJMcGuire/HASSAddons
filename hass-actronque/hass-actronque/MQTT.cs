@@ -3,6 +3,7 @@ using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using System;
 using System.Collections.Generic;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,6 @@ namespace HMX.HASSActronQue
 		{
 			ManagedMqttClientOptions options;
 			MqttClientOptionsBuilder clientOptions;
-			MqttClientOptionsBuilderTlsParameters optionsTLS;
 			int iPort = 0;
 			string[] strMQTTServerArray;
 			string strMQTTBroker;
@@ -75,17 +75,15 @@ namespace HMX.HASSActronQue
 				clientOptions = clientOptions.WithCredentials(strUser, strPassword);
 			if (bMQTTTLS)
 			{
-				optionsTLS = new MqttClientOptionsBuilderTlsParameters
-				{
-					AllowUntrustedCertificates = true,
-					CertificateValidationHandler = delegate { return true; },
-					IgnoreCertificateChainErrors = true,
-					IgnoreCertificateRevocationErrors = true,
-					UseTls = true,
-					SslProtocol = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13
-				};
-
-				clientOptions = clientOptions.WithTls(optionsTLS);
+				clientOptions = clientOptions.WithTlsOptions(
+					o =>
+					{
+						o.WithAllowUntrustedCertificates(true);
+						o.WithCertificateValidationHandler(_ => true);
+						o.WithIgnoreCertificateChainErrors(true);
+						o.WithIgnoreCertificateRevocationErrors(true);
+						o.WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13);
+					});
 			}
 
 			options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(clientOptions.Build()).Build();
@@ -102,8 +100,12 @@ namespace HMX.HASSActronQue
 		{
 			Logging.WriteDebugLog("MQTT.MessageProcessor() {0}", e.ApplicationMessage.Topic);
 
-			if (_messageHandler != null)
-				_messageHandler.Invoke(e.ApplicationMessage.Topic, ASCIIEncoding.ASCII.GetString(e.ApplicationMessage.Payload));
+			try
+			{
+				if (_messageHandler != null)
+					_messageHandler.Invoke(e.ApplicationMessage.Topic, Encoding.ASCII.GetString(e.ApplicationMessage.PayloadSegment.ToArray()));
+			}
+			catch { }
 
 			return Task.CompletedTask;
 		}
