@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.11.2] - 2023-11-12
+
+### Added
+
+- Added entities to support the Control All Zones setting on the Actron Que.
+
 ## [v2023.11.1] - 2023-11-10
 
 ### Added
