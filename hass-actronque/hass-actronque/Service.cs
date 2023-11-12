@@ -247,6 +247,11 @@ namespace HMX.HASSActronQue
 						break;
 				}
 			}
+			// Control All Zones
+			else if (strTopic.StartsWith(strUnitHeader + "/controlallzones/set"))
+			{
+				Que.ChangeControlAllZones(lRequestId, Que.Units[strUnit], strPayload == "ON" ? true : false);
+			}
 			// Fan Speed
 			else if (strTopic.StartsWith(strUnitHeader + "/fan/set"))
 			{
