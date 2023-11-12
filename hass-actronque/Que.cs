@@ -789,7 +789,7 @@ namespace HMX.HASSActronQue
 			JArray aEnabledZones;
 
 			Logging.WriteDebugLog("Que.ProcessFullStatus() [0x{0}] Unit: {1}", lRequestId.ToString("X8"), unit.Serial);
-
+		
 			// Compressor Mode
 			ProcessPartialStatus(lRequestId, "LiveAircon.CompressorMode", jsonResponse.LiveAircon.CompressorMode?.ToString(), ref unit.Data.CompressorState);
 
@@ -814,6 +814,9 @@ namespace HMX.HASSActronQue
 
 			// Set Heating Temperature
 			ProcessPartialStatus(lRequestId, "UserAirconSettings.TemperatureSetpoint_Heat_oC", jsonResponse.UserAirconSettings.TemperatureSetpoint_Heat_oC?.ToString(), ref unit.Data.SetTemperatureHeating);
+
+			// Control All Zones
+			ProcessPartialStatus(lRequestId, "MasterInfo.ControlAllZones", jsonResponse.MasterInfo.ControlAllZones?.ToString(), ref unit.Data.ControlAllZones);
 
 			// Live Temperature
 			ProcessPartialStatus(lRequestId, "MasterInfo.LiveTemp_oC", jsonResponse.MasterInfo.LiveTemp_oC?.ToString(), ref unit.Data.Temperature);
@@ -1051,6 +1054,12 @@ namespace HMX.HASSActronQue
 									else if (change.Name == "UserAirconSettings.isOn")
 									{
 										ProcessPartialStatus(lRequestId, change.Name, change.Value.ToString(), ref unit.Data.On);
+										updateItems |= UpdateItems.Main;
+									}
+									// Control All Zones
+									else if (change.Name == "MasterInfo.ControlAllZones")
+									{
+										ProcessPartialStatus(lRequestId, change.Name, change.Value.ToString(), ref unit.Data.ControlAllZones);
 										updateItems |= UpdateItems.Main;
 									}
 									// Live Temperature
@@ -1469,6 +1478,9 @@ namespace HMX.HASSActronQue
 					MQTT.SendMessage(string.Format("homeassistant/sensor/actronque{0}coilinlettemperature/config", strHANameModifier), "{{\"name\":\"{1} Coil Inlet Temperature\",\"unique_id\":\"{0}-CoilInletTemperature\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque{3}/coilinlettemperature\",\"unit_of_measurement\":\"\u00B0C\",\"device_class\":\"temperature\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
 					MQTT.SendMessage(string.Format("homeassistant/sensor/actronque{0}fanpwm/config", strHANameModifier), "{{\"name\":\"{1} Fan PWM\",\"unique_id\":\"{0}-FanPWM\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque{3}/fanpwm\",\"unit_of_measurement\":\"%\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
 					MQTT.SendMessage(string.Format("homeassistant/sensor/actronque{0}fanrpm/config", strHANameModifier), "{{\"name\":\"{1} Fan RPM\",\"unique_id\":\"{0}-FanRPM\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque{3}/fanrpm\",\"unit_of_measurement\":\"RPM\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
+					MQTT.SendMessage(string.Format("homeassistant/switch/actronque{0}/controlallzones/config", strHANameModifier), "{{\"name\":\"Control All Zones\",\"unique_id\":\"{0}-CAZ\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actronque{3}/controlallzones\",\"command_topic\":\"actronque{3}/controlallzones/set\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"state_on\":\"ON\",\"state_off\":\"OFF\",\"availability_topic\":\"{0}/status\"}}", Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
+
+					MQTT.Subscribe("actronque{0}/controlallzones/set", unit.Serial);
 				}
 				else
 				{
@@ -1696,6 +1708,9 @@ namespace HMX.HASSActronQue
 
 					// Fan RPM
 					MQTT.SendMessage(string.Format("actronque{0}/fanrpm", unit.Serial), unit.Data.FanRPM.ToString("F0"));
+
+					// Control All Zones
+					MQTT.SendMessage(string.Format("actronque{0}/controlallzones", unit.Serial), unit.Data.ControlAllZones ? "ON" : "OFF");
 				}
 			}
 
@@ -1839,6 +1854,27 @@ namespace HMX.HASSActronQue
 
 					command.Data.command.Add("UserAirconSettings.EnabledZones", bZones);
 
+					break;
+
+				default:
+					return;
+			}
+
+			AddCommandToQueue(command);
+		}
+
+		public static void ChangeControlAllZones(long lRequestId, AirConditionerUnit unit, bool bState)
+		{
+			QueueCommand command = new QueueCommand(lRequestId, unit, DateTime.Now.AddSeconds(_iCommandExpiry));
+
+			Logging.WriteDebugLog("Que.ChangeControlAllZones() [0x{0}] Unit: {1}, Control All Zones: {2}", lRequestId.ToString("X8"), unit.Serial, bState ? "On" : "Off");
+
+			command.Data.command.Add("type", "set-settings");
+
+			switch (_strSystemType)
+			{
+				case "que":
+					command.Data.command.Add(string.Format("MasterInfo.ControlAllZones"), bState);
 					break;
 
 				default:
