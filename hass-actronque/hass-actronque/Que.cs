@@ -2012,11 +2012,18 @@ namespace HMX.HASSActronQue
 					command.Data.command.Add(string.Format("{0}.TemperatureSetpoint_Cool_oC", strCommandPrefix), dblTemperature);
 
 					break;							
-			}
+			}	
 
 			command.Data.command.Add("type", "set-settings");
 
 			AddCommandToQueue(command);
+
+			if (iZone == 0 && command.Data.command.Count > 0)
+			{
+				Logging.WriteDebugLog("Que.ChangeTemperature() [0x{0}] Unit: {1}, Setting Control All Zones to True due to Master temperature change", lRequestId.ToString("X8"), unit.Serial);
+
+				ChangeControlAllZones(lRequestId, unit, true);
+			}
 		}
 
 		private static async Task<bool> SendCommand(QueueCommand command)

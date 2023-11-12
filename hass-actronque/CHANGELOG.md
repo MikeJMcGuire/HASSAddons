@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Added entities to support the Control All Zones setting on the Actron Que.
+- Sets Control All Zones to True automatically when the master unit temperature is adjusted.
+ 
+### Removed
+
+- Removing support for i386 and armhf architectures as they are no longer supported by Microsoft (.NET). The previous versions of the add-on will continue to work, however they will no longer receive updates.
 
 ## [v2023.11.1] - 2023-11-10
 

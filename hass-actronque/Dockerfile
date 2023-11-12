@@ -1,6 +1,6 @@
 ARG BUILD_FROM
 
-FROM mcr.microsoft.com/dotnet/aspnet:$BUILD_FROM AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS base
 RUN apk add --no-cache icu-libs tzdata
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
