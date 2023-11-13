@@ -1,5 +1,18 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
+
+## [v2023.11.0] - 2023-11-13
+
+### Changed
+
+- Updated package versions.
+- Migrated from .NET 6.0 to .NET 7.0.
+- Changed base images to Alpine from Debian to match the HA base images.
+
+### Removed
+
+- Removing support for i386 and armhf architectures as they are no longer supported by Microsoft (.NET). The previous versions of the add-on will continue to work, however they will no longer receive updates.
 
 ## [v2022.9.2] - 2022-09-26
 
