@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.11.3] - 2023-11-13
+
+### Changed
+
+- Fixed a bug causing the Control All Zones to not always be turned on upon temperature change.
+
 ## [v2023.11.2] - 2023-11-12
 
 ### Added

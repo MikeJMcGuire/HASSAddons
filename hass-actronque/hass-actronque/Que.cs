@@ -1966,7 +1966,7 @@ namespace HMX.HASSActronQue
 			string strCommandPrefix = "";
 			QueueCommand command = new QueueCommand(lRequestId, unit, DateTime.Now.AddSeconds(_iCommandExpiry));
 
-			Logging.WriteDebugLog("Que.ChangeTemperature() [0x{0}] Unit: {1}, Zone: {2}, Temperature: {3}", lRequestId.ToString("X8"), unit.Serial, iZone, dblTemperature);
+			Logging.WriteDebugLog("Que.ChangeTemperature() [0x{0}] Unit: {1}, Zone: {2}, Temperature ({4}): {3}", lRequestId.ToString("X8"), unit.Serial, iZone, dblTemperature, setType.ToString());
 
 			if (iZone == 0)
 				strCommandPrefix = "UserAirconSettings";
@@ -2018,7 +2018,7 @@ namespace HMX.HASSActronQue
 
 			AddCommandToQueue(command);
 
-			if (iZone == 0 && command.Data.command.Count > 0)
+			if (iZone == 0 && !unit.Data.ControlAllZones)
 			{
 				Logging.WriteDebugLog("Que.ChangeTemperature() [0x{0}] Unit: {1}, Setting Control All Zones to True due to Master temperature change", lRequestId.ToString("X8"), unit.Serial);
 
