@@ -1,6 +1,5 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Options;
 using MQTTnet.Extensions.ManagedClient;
 using System;
 using System.Collections.Generic;
@@ -17,9 +16,8 @@ namespace HMX.HASSBlueriiot
 		
 		public static async void StartMQTT(string strMQTTServer, bool bMQTTTLS, string strClientId, string strUser, string strPassword)
 		{
-			IManagedMqttClientOptions options;
+			ManagedMqttClientOptions options;
 			MqttClientOptionsBuilder clientOptions;
-			MqttClientOptionsBuilderTlsParameters optionsTLS;
 			int iPort = 0;
 			string[] strMQTTServerArray;
 			string strMQTTBroker;
@@ -70,16 +68,15 @@ namespace HMX.HASSBlueriiot
 				clientOptions = clientOptions.WithCredentials(strUser, strPassword);
 			if (bMQTTTLS)
 			{
-				optionsTLS = new MqttClientOptionsBuilderTlsParameters
-				{
-					IgnoreCertificateChainErrors = true,
-					UseTls = true,
-					IgnoreCertificateRevocationErrors = true,
-					AllowUntrustedCertificates = true,
-					SslProtocol = System.Security.Authentication.SslProtocols.Tls12
-				};
-
-				clientOptions = clientOptions.WithTls(optionsTLS);
+				clientOptions = clientOptions.WithTlsOptions(
+					o =>
+					{
+						o.WithAllowUntrustedCertificates(true);
+						o.WithCertificateValidationHandler(_ => true);
+						o.WithIgnoreCertificateChainErrors(true);
+						o.WithIgnoreCertificateRevocationErrors(true);
+						o.WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13);
+					});
 			}
 
 			options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5)).WithClientOptions(clientOptions.Build()).Build();
@@ -125,11 +122,11 @@ namespace HMX.HASSBlueriiot
 				MqttApplicationMessage message = new MqttApplicationMessageBuilder()
 				.WithTopic(strTopic)
 				.WithPayload(string.Format(strPayloadFormat, strParams))
-				.WithExactlyOnceQoS()
+				.WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
 				.WithRetainFlag()
 				.Build();
 
-				await _mqtt.PublishAsync(message);
+				await _mqtt.EnqueueAsync(message);
 			}
 		}
 	}

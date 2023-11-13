@@ -1,9 +1,11 @@
 ARG BUILD_FROM
 
-FROM $BUILD_FROM AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS base
+RUN apk add --no-cache icu-libs tzdata
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:latest AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 WORKDIR /src
 COPY hass-blueriiot/hass-blueriiot.csproj hass-blueriiot/
 RUN dotnet restore hass-blueriiot/hass-blueriiot.csproj

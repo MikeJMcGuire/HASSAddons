@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>HMX.HASSBlueriiot</RootNamespace>
@@ -11,8 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="MBW.Client.BlueRiiotApi" Version="0.8.5" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="3.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.3.1.873" />
   </ItemGroup>
 
   <ItemGroup>
