@@ -1,0 +1,16 @@
+{
+  "MQTTUser": "user",
+  "MQTTPassword": "password",
+  "MQTTBroker": "broker",
+  "Zones": [
+    {
+      "Name": "Zone 1",
+      "Id": 1
+    },
+    {
+      "Name": "Zone 2",
+      "Id": 2
+    }
+  ],
+  "RegisterZoneTemperatures": false
+}
