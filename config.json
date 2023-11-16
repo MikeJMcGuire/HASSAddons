@@ -2,7 +2,6 @@
   "arch": [
     "amd64",
     "armv7",
-    "armhf",
     "aarch64"
   ],
   "description": "Container management made easy",
@@ -27,5 +26,5 @@
   "slug": "portaineree",
   "startup": "services",
   "url": "https://github.com/MikeJMcGuire/hass-portainer-ee",
-  "version": "2023.11.0"
+  "version": "2023.11.1"
 }
