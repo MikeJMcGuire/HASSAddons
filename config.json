@@ -13,18 +13,20 @@
   "map": [
     "ssl"
   ],
-  "ports": {
-    "8000/tcp": null,
-    "9000/tcp": null
-  },
-  "ports_description": {
-    "8000/tcp": "Port for exposing Portainer to edge agents",
-    "9000/tcp": "Port for exposing Portainer UI directly"
-  },
+	"ports": {
+		"8000/tcp": null,
+		"9000/tcp": null,
+		"9443/tcp": null
+	},
+	"ports_description": {
+		"8000/tcp": "Port for exposing Portainer to edge agents",
+		"9000/tcp": "Port for exposing Portainer UI (HTTP) directly",
+		"9443/tcp": "Port for exposing Portainer UI (HTTPS) directly"
+	},
   "name": "Portainer BE",
   "panel_icon": "mdi:docker",
   "slug": "portaineree",
   "startup": "services",
   "url": "https://github.com/MikeJMcGuire/hass-portainer-ee",
-  "version": "2023.11.1"
+  "version": "2023.11.2"
 }
