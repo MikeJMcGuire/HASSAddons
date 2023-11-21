@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace HMX.HASSActron.Controllers
 {
@@ -27,9 +28,9 @@ namespace HMX.HASSActron.Controllers
 
 			Logging.WriteDebugLog("DeviceController.Command() Client Start: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("Accept, Content-Type, Authorization, Content-Length, X-Requested-With, X-Ninja-Token"));
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("Accept, Content-Type, Authorization, Content-Length, X-Requested-With, X-Ninja-Token"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
 			AirConditioner.UpdateRequestTime(device);
 
@@ -91,9 +92,9 @@ namespace HMX.HASSActron.Controllers
 
 			Logging.WriteDebugLog("DeviceController.Data() Client: {0}:{1}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString());
 
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("Accept, Content-Type, Authorization, Content-Length, X-Requested-With, X-Ninja-Token"));
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("Accept, Content-Type, Authorization, Content-Length, X-Requested-With, X-Ninja-Token"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Methods", new Microsoft.Extensions.Primitives.StringValues("GET,PUT,POST,DELETE,OPTIONS"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
 			reader = new StreamReader(HttpContext.Request.Body);
 			strData = await reader.ReadToEndAsync();
@@ -180,9 +181,9 @@ namespace HMX.HASSActron.Controllers
 
 			Logging.WriteDebugLog("DeviceController.Activate() Client: {0}:{1} GET http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
 
-			HttpContext.Response.Headers.Add("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
-			HttpContext.Response.Headers.Add("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
-			HttpContext.Response.Headers.Add("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
+			HttpContext.Response.Headers.Append("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Append("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Append("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
 
 			response = await Proxy.ForwardRequestToOriginalWebService("GET", strUserAgent, strHost, strPage);
 			if (response.ProxySuccessful)
@@ -217,9 +218,9 @@ namespace HMX.HASSActron.Controllers
 
 			Logging.WriteDebugLog("DeviceController.ActivateDelete() Client: {0}:{1} DELETE http://{2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), strHost + strPage);
 
-			HttpContext.Response.Headers.Add("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
-			HttpContext.Response.Headers.Add("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
-			HttpContext.Response.Headers.Add("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
+			HttpContext.Response.Headers.Append("Pragma", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Append("Cache-Control", new Microsoft.Extensions.Primitives.StringValues("no-cache"));
+			HttpContext.Response.Headers.Append("Expires", new Microsoft.Extensions.Primitives.StringValues("-1"));
 
 			response = await Proxy.ForwardRequestToOriginalWebService("DELETE", strUserAgent, strHost, strPage);
 			if (response.ProxySuccessful)

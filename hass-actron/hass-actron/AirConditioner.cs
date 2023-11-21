@@ -76,8 +76,7 @@ namespace HMX.HASSActron
 				else
 					MQTT.SendMessage(string.Format("{0}/status", unit.ClientId), "online");
 			}
-		}
-		
+		}		
 
 		public static bool Configure(IConfigurationRoot configuration)
 		{
