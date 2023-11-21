@@ -118,7 +118,7 @@ namespace HMX.HASSActron
 
 			lock (_oLockData)
 			{
-				_airConditionerData.dtLastUpdate = DateTime.MinValue;
+				_airConditionerData.dtLastUpdate = DateTime.Now;
 			}
 
 			try
