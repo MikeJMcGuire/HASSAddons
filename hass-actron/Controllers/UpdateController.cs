@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
 
@@ -15,8 +16,8 @@ namespace HMX.HASSActron.Controllers
 			
 			Logging.WriteDebugLog("UpdateController.Log() Client: {0}:{1} Message: {2}", HttpContext.Connection.RemoteIpAddress.ToString(), HttpContext.Connection.RemotePort.ToString(), msg);
 
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("X-Requested-With"));
-			HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Headers", new Microsoft.Extensions.Primitives.StringValues("X-Requested-With"));
+			HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", new Microsoft.Extensions.Primitives.StringValues("*"));
 
 			strResponse = string.Format("download=\nMessageLogged={0}:{1}", msg, version);
 

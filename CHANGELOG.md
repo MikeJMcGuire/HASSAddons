@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2023.11.1] - 2023-11-22
+
+### Changed
+
+- Migrated from .NET 7.0 to .NET 8.0.
+
 ## [v2023.11.0] - 2023-11-13
 
 ### Changed
