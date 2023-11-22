@@ -1,5 +1,5 @@
 # hass-portainer-ee
-Portainer BE v2.x Add-On for Home Assistant (https://blog.mikejmcguire.com/2021/02/17/portainer-ce-2-1-add-on-for-home-assistant/)
+Portainer BE v2.x Add-On for Home Assistant (https://blog.mikejmcguire.com/2023/11/16/portainer-be-add-on-for-home-assistant-portainer-be-2-x/)
 
 This add-on provides a 2.x version of Portainer-BE/EE, as the standard add-on is based on Portainer 1.x.
 
