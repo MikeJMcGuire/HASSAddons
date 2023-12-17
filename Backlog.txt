@@ -6,3 +6,5 @@ auth interval faster if miss initial auth
 suppress updates post change?
 
 command ack pending should be per unit
+
+Add option to reduce mqtt logging (actron addon)
