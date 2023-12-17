@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.12.0] - 2023-12-17
+
+### Added
+
+- Added automatic retry when the Que gateway times out on new commands/changes. Any failed command should now be retried 2 - 3 times.
+
+### Changed
+
+- Upgraded base images to .NET 8.
+
 ## [v2023.11.3] - 2023-11-13
 
 ### Changed
