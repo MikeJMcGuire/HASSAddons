@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2023.12.1] - 2023-12-19
+
+### Added
+
+- Added MQTT alert message/event when retried commands fail.
+
 ## [v2023.12.0] - 2023-12-17
 
 ### Added

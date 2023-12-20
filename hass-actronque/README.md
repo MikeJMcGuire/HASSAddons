@@ -31,3 +31,7 @@ This option specifies if you wish to use the new independently set target heatin
 
 ### SystemType: string
 This option specifies if you have a "que" or "neo" control system. If not specified, this defaults to "que". 
+
+## Events
+### Command Failed
+In the event that a command you send (e.g. temperature change) is not accepted by the Que cloud service (e.g. it is unavailable), an MQTT message will be sent indicating the ID number of the failed command. This can then be captured to trigger a follow on automation. All commands will be retried generally around 3 times before the failure event will be sent. The event will be sent to the MQTT topic of actronqueXXXX/lastfailedcommand (XXXX is the serial number of the unit).
