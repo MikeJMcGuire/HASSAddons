@@ -1400,7 +1400,11 @@ namespace HMX.HASSActronQue
 						if (command.Expires <= DateTime.Now)
 						{
 							Logging.WriteDebugLog("Que.ProcessQueue() Command Expired: 0x{0}", command.RequestId.ToString("X8"));
+
+							SendMQTTFailedCommandAlert(command);
+
 							_queueCommands.Dequeue();
+
 							continue;
 						}
 					}
@@ -1448,6 +1452,9 @@ namespace HMX.HASSActronQue
 			foreach (AirConditionerUnit unit in _airConditionerUnits.Values)
 			{
 				Logging.WriteDebugLog("Que.MQTTRegister() Registering Unit: {0}", unit.Serial);
+
+				// Clear Last Failed Command
+				MQTT.SendMessage(string.Format("actronque{0}/lastfailedcommand", unit.Serial), "");
 
 				if (iDeviceIndex == 0)
 				{
@@ -2102,6 +2109,13 @@ namespace HMX.HASSActronQue
 			httpResponse?.Dispose();
 
 			return bRetVal;
+		}
+
+		private static void SendMQTTFailedCommandAlert(QueueCommand command)
+		{
+			Logging.WriteDebugLog("Que.SendMQTTFailedCommandAlert() Command failed: {0}", command.RequestId.ToString());
+
+			MQTT.SendMessage(string.Format("actronque{0}/lastfailedcommand", command.Unit.Serial), command.RequestId.ToString());
 		}
 
 		private static string GenerateDeviceId()
