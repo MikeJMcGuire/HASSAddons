@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2024.5.0] - 2024-05-03
+
+### Changed
+- Updated to Portainer-BE v2.19.5.
+
 ## [v2023.12.0] - 2023-12-09
 
 ### Changed
