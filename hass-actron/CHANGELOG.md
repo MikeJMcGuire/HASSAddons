@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2024.9.0] - 2024-09-08
+
+### Changed
+
+- Package updates.
+
 ## [v2023.11.3] - 2023-11-22
 
 ### Changed
