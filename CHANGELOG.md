@@ -14,7 +14,6 @@ All notable changes to this project will be documented in this file.
 - Added additional sensor entity for the air conditioner current temperature.
 - Added configuration option to reduce MQTT logging.
 - Added configuration option to reduce Que event logging.
-- Added additional logic to show compressor state per zone (when using Que per zone controls). Additional research by @DanielNagy.
 
 ### Changed
 
