@@ -19,8 +19,9 @@ namespace HMX.HASSActronQue
 		private static Timer _timerMQTT = null;
 		private static MessageHandler _messageHandler = null;
 		private static int _iLastUpdateThreshold = 5; // Minutes
-		
-		public static async void StartMQTT(string strMQTTServer, bool bMQTTTLS, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
+		private static bool _bMQTTLogging = true;
+
+		public static async void StartMQTT(string strMQTTServer, bool bMQTTLogging, bool bMQTTTLS, string strClientId, string strUser, string strPassword, MessageHandler messageHandler)
 		{
 			ManagedMqttClientOptions options;
 			MqttClientOptionsBuilder clientOptions;
@@ -37,6 +38,7 @@ namespace HMX.HASSActronQue
 
 			_strClientId = strClientId;
 			_messageHandler = messageHandler;
+			_bMQTTLogging = bMQTTLogging;
 
 			if (strMQTTServer.Contains(":"))
 			{
@@ -168,7 +170,8 @@ namespace HMX.HASSActronQue
 		
 		public static async void SendMessage(string strTopic, string strPayloadFormat, params object[] strParams)
 		{
-			Logging.WriteDebugLog("MQTT.SendMessage() {0}", strTopic);
+			if (_bMQTTLogging) 
+				Logging.WriteDebugLog("MQTT.SendMessage() {0}", strTopic);
 
 			if (_mqtt != null)
 			{
