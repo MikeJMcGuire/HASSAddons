@@ -1,10 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS base
 RUN apk add --no-cache icu-libs tzdata && rm -rf /var/cache/apk/*
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV ASPNETCORE_HTTP_PORTS=80
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /src
 COPY hass-actron/hass-actron.csproj hass-actron/
 RUN dotnet restore hass-actron/hass-actron.csproj
