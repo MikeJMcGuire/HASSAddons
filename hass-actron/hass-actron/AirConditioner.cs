@@ -161,6 +161,7 @@ namespace HMX.HASSActron
 
 				MQTT.SendMessage("homeassistant/sensor/actron/esp/config", "{{\"name\":\"{1} ESP\",\"unique_id\":\"{0}-AC-ESP\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/Default/esp\",\"availability_topic\":\"{0}/status\"}}", _strClientId, _strDeviceName, _strDeviceNameMQTT);
 				MQTT.SendMessage("homeassistant/sensor/actron/fancont/config", "{{\"name\":\"{1} Fan Continuous\",\"unique_id\":\"{0}-AC-FANC\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/Default/fancont\",\"availability_topic\":\"{0}/status\"}}", _strClientId, _strDeviceName, _strDeviceNameMQTT);
+				MQTT.SendMessage("homeassistant/sensor/actron/temperature/config", "{{\"name\":\"{1} Temperature\",\"unique_id\":\"{0}-AC-t\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/Default/temperature\",\"unit_of_measurement\":\"\u00B0C\",\"availability_topic\":\"{0}/status\"}}", _strClientId, _strDeviceName, _strDeviceNameMQTT);
 
 				foreach (int iZone in _dZones.Keys)
 				{
@@ -185,6 +186,7 @@ namespace HMX.HASSActron
 
 				MQTT.SendMessage(string.Format("homeassistant/sensor/actron{0}/esp/config", _strUnit), "{{\"name\":\"{1} ESP\",\"unique_id\":\"{0}-AC-ESP\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/{3}/esp\",\"availability_topic\":\"{0}/status\"}}", _strClientId, _strDeviceName, _strDeviceNameMQTT, _strUnit);
 				MQTT.SendMessage(string.Format("homeassistant/sensor/actron{0}/fancont/config", _strUnit), "{{\"name\":\"{1} Fan Continuous\",\"unique_id\":\"{0}-AC-FANC\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/{3}/fancont\",\"availability_topic\":\"{0}/status\"}}", _strClientId, _strDeviceName, _strDeviceNameMQTT, _strUnit);
+				MQTT.SendMessage(string.Format("homeassistant/sensor/actron{0}/temperature/config", _strUnit), "{{\"name\":\"{1} Temperature\",\"unique_id\":\"{0}-AC-t\",\"device\":{{\"identifiers\":[\"{0}\"],\"name\":\"{2}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"state_topic\":\"actron/aircon/{3}/temperature\",\"unit_of_measurement\":\"\u00B0C\",\"availability_topic\":\"{0}/status\"}}", _strClientId, _strDeviceName, _strDeviceNameMQTT);
 
 				foreach (int iZone in _dZones.Keys)
 				{
