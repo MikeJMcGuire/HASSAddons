@@ -28,5 +28,5 @@
   "slug": "portaineree",
   "startup": "services",
   "url": "https://github.com/MikeJMcGuire/hass-portainer-ee",
-  "version": "2024.12.0"
+  "version": "2025.3.0"
 }
