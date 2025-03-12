@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2025.3.0] - 2025-03-12
+
+### Added
+
+- Added additional sensor entity for the air conditioner current temperature.
+
+### Changed
+
+- Migrated from .NET 8.0 to .NET 9.0.
+
 ## [v2024.9.0] - 2024-09-08
 
 ### Changed
