@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2025.3.1] - 2025-03-12
+
+### Added
+
+- Added additional logic to show compressor state per zone (when using Que per zone controls). Additional research by @DanielNagy.
+
 ## [v2025.3.0] - 2025-03-12
 
 ### Added
@@ -8,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Added additional sensor entity for the air conditioner current temperature.
 - Added configuration option to reduce MQTT logging.
 - Added configuration option to reduce Que event logging.
+- Added additional logic to show compressor state per zone (when using Que per zone controls). Additional research by @DanielNagy.
 
 ### Changed
 
