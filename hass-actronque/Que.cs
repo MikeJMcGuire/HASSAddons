@@ -1521,9 +1521,9 @@ namespace HMX.HASSActronQue
 						if (_bPerZoneControls)
 						{
 							if (!_bSeparateHeatCool) // Default
-								MQTT.SendMessage(string.Format("homeassistant/climate/actronque{0}/zone{1}/config", strHANameModifier, iZone), "{{\"name\":\"{0} {3}\",\"unique_id\":\"{2}-z{1}ac\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"mode_command_topic\":\"actronque{5}/zone{1}/mode/set\",\"temperature_command_topic\":\"actronque{5}/zone{1}/temperature/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"temperature_state_topic\":\"actronque{5}/zone{1}/settemperature\",\"mode_state_topic\":\"actronque{5}/zone{1}/mode\",\"current_temperature_topic\":\"actronque{5}/zone{1}/temperature\",\"availability_topic\":\"{2}/status\"}}", zone.Name, iZone, Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
+								MQTT.SendMessage(string.Format("homeassistant/climate/actronque{0}/zone{1}/config", strHANameModifier, iZone), "{{\"name\":\"{0} {3}\",\"unique_id\":\"{2}-z{1}ac\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"mode_command_topic\":\"actronque{5}/zone{1}/mode/set\",\"temperature_command_topic\":\"actronque{5}/zone{1}/temperature/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"temperature_state_topic\":\"actronque{5}/zone{1}/settemperature\",\"mode_state_topic\":\"actronque{5}/zone{1}/mode\",\"current_temperature_topic\":\"actronque{5}/zone{1}/temperature\",\"action_topic\":\"actronque{5}/zone{1}/compressor\",\"availability_topic\":\"{2}/status\"}}", zone.Name, iZone, Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
 							else
-								MQTT.SendMessage(string.Format("homeassistant/climate/actronque{0}/zone{1}/config", strHANameModifier, iZone), "{{\"name\":\"{0} {3}\",\"unique_id\":\"{2}-z{1}ac\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"mode_command_topic\":\"actronque{5}/zone{1}/mode/set\",\"temperature_high_command_topic\":\"actronque{5}/zone{1}/temperature/high/set\",\"temperature_low_command_topic\":\"actronque{5}/zone{1}/temperature/low/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"temperature_high_state_topic\":\"actronque{5}/zone{1}/settemperature/high\",\"temperature_low_state_topic\":\"actronque{5}/zone{1}/settemperature/low\",\"mode_state_topic\":\"actronque{5}/zone{1}/mode\",\"current_temperature_topic\":\"actronque{5}/zone{1}/temperature\",\"availability_topic\":\"{2}/status\"}}", zone.Name, iZone, Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
+								MQTT.SendMessage(string.Format("homeassistant/climate/actronque{0}/zone{1}/config", strHANameModifier, iZone), "{{\"name\":\"{0} {3}\",\"unique_id\":\"{2}-z{1}ac\",\"device\":{{\"identifiers\":[\"{2}\"],\"name\":\"{4}\",\"model\":\"Add-On\",\"manufacturer\":\"ActronAir\"}},\"modes\":[\"off\",\"auto\",\"cool\",\"fan_only\",\"heat\"],\"mode_command_topic\":\"actronque{5}/zone{1}/mode/set\",\"temperature_high_command_topic\":\"actronque{5}/zone{1}/temperature/high/set\",\"temperature_low_command_topic\":\"actronque{5}/zone{1}/temperature/low/set\",\"min_temp\":\"12\",\"max_temp\":\"30\",\"temp_step\":\"0.5\",\"temperature_high_state_topic\":\"actronque{5}/zone{1}/settemperature/high\",\"temperature_low_state_topic\":\"actronque{5}/zone{1}/settemperature/low\",\"mode_state_topic\":\"actronque{5}/zone{1}/mode\",\"current_temperature_topic\":\"actronque{5}/zone{1}/temperature\",\"action_topic\":\"actronque{5}/zone{1}/compressor\",\"availability_topic\":\"{2}/status\"}}", zone.Name, iZone, Service.ServiceName.ToLower() + strDeviceNameModifier, strAirConditionerName, strAirConditionerNameMQTT, unit.Serial);
 
 							MQTT.Subscribe("actronque{0}/zone{1}/temperature/set", unit.Serial, iZone);
 							MQTT.Subscribe("actronque{0}/zone{1}/temperature/high/set", unit.Serial, iZone);
@@ -1678,37 +1678,47 @@ namespace HMX.HASSActronQue
 				MQTT.SendMessage(string.Format("actronque{0}/settemperature/high", unit.Serial), unit.Data.SetTemperatureCooling.ToString("N1"));
 				MQTT.SendMessage(string.Format("actronque{0}/settemperature/low", unit.Serial), unit.Data.SetTemperatureHeating.ToString("N1"));
 
-				// Compressor
-				switch (unit.Data.CompressorState)
+				if (_strSystemType == "que")
 				{
-					case "HEAT":
-						MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "heating");
-						break;
+					// Compressor
+					if (unit.Data.CompressorCapacity > 0)
+					{
+						switch (unit.Data.CompressorState)
+						{
+							case "HEAT":
+								MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "heating");
+								break;
 
-					case "COOL":
-						MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "cooling");
-						break;
+							case "COOL":
+								MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "cooling");
+								break;
 
-					case "OFF":
-						MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "off");
-						break;
+							case "OFF":
+								MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "off");
+								break;
 
-					case "IDLE":
+							case "IDLE":
+								if (unit.Data.On)
+									MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "idle");
+								else
+									MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "off");
+
+								break;
+
+							default:
+								Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Compressor State: {0}", unit.Data.CompressorState);
+
+								break;
+						}
+					}
+					else
+					{
 						if (unit.Data.On)
 							MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "idle");
 						else
 							MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "off");
+					}
 
-						break;
-
-					default:
-						Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Compressor State: {0}", unit.Data.CompressorState);
-
-						break;
-				}
-
-				if (_strSystemType == "que")
-				{
 					// Compressor Capacity
 					MQTT.SendMessage(string.Format("actronque{0}/compressorcapacity", unit.Serial), unit.Data.CompressorCapacity.ToString("F1"));
 
@@ -1726,6 +1736,36 @@ namespace HMX.HASSActronQue
 
 					// Control All Zones
 					MQTT.SendMessage(string.Format("actronque{0}/controlallzones", unit.Serial), unit.Data.ControlAllZones ? "ON" : "OFF");
+				}
+				else
+				{
+					switch (unit.Data.CompressorState)
+					{
+						case "HEAT":
+							MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "heating");
+							break;
+
+						case "COOL":
+							MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "cooling");
+							break;
+
+						case "OFF":
+							MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "off");
+							break;
+
+						case "IDLE":
+							if (unit.Data.On)
+								MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "idle");
+							else
+								MQTT.SendMessage(string.Format("actronque{0}/compressor", unit.Serial), "off");
+
+							break;
+
+						default:
+							Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Compressor State: {0}", unit.Data.CompressorState);
+
+							break;
+					}
 				}
 			}
 
@@ -1778,6 +1818,48 @@ namespace HMX.HASSActronQue
 
 						MQTT.SendMessage(string.Format("actronque{0}/zone{1}/settemperature/high", unit.Serial, iIndex), unit.Zones[iIndex].SetTemperatureCooling.ToString("N1"));
 						MQTT.SendMessage(string.Format("actronque{0}/zone{1}/settemperature/low", unit.Serial, iIndex), unit.Zones[iIndex].SetTemperatureHeating.ToString("N1"));
+
+						if (_strSystemType == "que")
+						{
+							// Compressor
+							if (unit.Data.CompressorCapacity > 0 && unit.Zones[iIndex].Position > 0)
+							{
+								switch (unit.Data.CompressorState)
+								{
+									case "HEAT":
+										MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "heating");
+										break;
+
+									case "COOL":
+										MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "cooling");
+										break;
+
+									case "OFF":
+										MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "off");
+										break;
+
+									case "IDLE":
+										if (unit.Data.On)
+											MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "idle");
+										else
+											MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "off");
+
+										break;
+
+									default:
+										Logging.WriteDebugLog("Que.MQTTUpdateData() Unexpected Compressor State: {0}", unit.Data.CompressorState);
+
+										break;
+								}
+							}
+							else
+							{
+								if (unit.Zones[iIndex].State)
+									MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "idle");
+								else
+									MQTT.SendMessage(string.Format("actronque{0}/zone{1}/compressor", unit.Serial, iIndex), "off");
+							}
+						}	
 					}
 
 					// Per Zone Sensors
