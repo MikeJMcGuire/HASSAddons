@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2025.3.1] - 2025-03-13
+
+### Changed
+
+- Fixed multiple unit sensor issue.
+
 ## [v2025.3.0] - 2025-03-12
 
 ### Added
