@@ -17,6 +17,9 @@ Setting this option to false will reduce the amount of MQTT logging.
 ### MQTTTLS: true/false
 Setting this option to true will force the MQTT client to attempt a TLS connection to the MQTT broker.
 
+### DisableEventUpdates: true/false
+Due to an ongoing issue with the cloud service, this will need to be set to true to prevent the add-on trying to retrieve new events and instead force status polling every X seconds.
+
 ### PerZoneControls: true/false
 If you Actron has controllers in each zone, setting this option to true will create an air conditioner controller in HA for each zone.
 
