@@ -50,14 +50,13 @@ namespace HMX.HASSActronQue
 		private static bool _bPerZoneControls = false;
 		private static bool _bPerZoneSensors = false;
 		private static bool _bSeparateHeatCool = false;
-		private static bool _bNeoNoEventMode = false;
+		private static bool _bDisableEventUpdates = false;
 		private static bool _bQueLogging = true;
 		private static bool _bEventsReceived = false;
 		private static Queue<QueueCommand> _queueCommands = new Queue<QueueCommand>();
 		private static HttpClient _httpClient = null, _httpClientAuth = null, _httpClientCommands = null;
 		private static int _iCancellationTime = 15; // Seconds
 		private static int _iPollInterval = 15; // Seconds
-		private static int _iPollIntervalNeoNoEventsMode = 30; // Seconds
 		private static int _iPollIntervalUpdate = 5; // Seconds
 		private static int _iAuthenticationInterval = 60; // Seconds
 		private static int _iQueueInterval = 4; // Seconds
@@ -112,7 +111,7 @@ namespace HMX.HASSActronQue
 			}
 		}
 
-		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, string strSystemType, int iPollInterval, bool bQueLogs, bool bPerZoneControls, bool bPerZoneSensors, bool bSeparateHeatCool, ManualResetEvent eventStop)
+		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, string strSystemType, int iPollInterval, bool bQueLogs, bool bPerZoneControls, bool bPerZoneSensors, bool bDisableEventUpdates, bool bSeparateHeatCool, ManualResetEvent eventStop)
 		{
 			Thread threadMonitor;
 			string strDeviceUniqueIdentifierInput;
@@ -128,6 +127,7 @@ namespace HMX.HASSActronQue
 			_bPerZoneControls = bPerZoneControls;
 			_bPerZoneSensors = bPerZoneSensors;
 			_iPollInterval = iPollInterval;
+			_bDisableEventUpdates = bDisableEventUpdates;
 			_bSeparateHeatCool = bSeparateHeatCool;
 			_eventStop = eventStop;
 
@@ -737,6 +737,9 @@ namespace HMX.HASSActronQue
 
 					Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Responded (Encoding {1}, {2} bytes)", lRequestId.ToString("X8"), httpResponse.Content.Headers.ContentEncoding.ToString() == "" ? "N/A" : httpResponse.Content.Headers.ContentEncoding.ToString(), (httpResponse.Content.Headers.ContentLength ?? 0) == 0 ? "N/A" : httpResponse.Content.Headers.ContentLength.ToString());
 
+					if (Service.IsDevelopment)
+						Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Response: {1}", lRequestId.ToString("X8"), strResponse);
+
 					lock (_oLockData)
 					{
 						unit.Data.LastUpdated = DateTime.Now;
@@ -788,7 +791,8 @@ namespace HMX.HASSActronQue
 
 		private static void ProcessFullStatus(long lRequestId, AirConditionerUnit unit, dynamic jsonResponse)
 		{
-			JArray aEnabledZones;
+			JArray aEnabledZones, aPeripherals;
+			string strSerial = "";
 
 			Logging.WriteDebugLog("Que.ProcessFullStatus() [0x{0}] Unit: {1}", lRequestId.ToString("X8"), unit.Serial);
 		
@@ -837,6 +841,30 @@ namespace HMX.HASSActronQue
 
 			// Fan RPM
 			ProcessPartialStatus(lRequestId, "LiveAircon.FanRPM", jsonResponse.LiveAircon.FanRPM?.ToString(), ref unit.Data.FanRPM);
+
+			// Peripherals
+			if (_strSystemType == "neo")
+			{
+				aPeripherals = jsonResponse.AirconSystem.Peripherals;
+				if (aPeripherals.Count == 0)
+					Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Unable to read state information: {1}", lRequestId.ToString("X8"), "AirconSystem.Peripherals");
+				else
+				{
+					for (int iPeripheralIndex = 0; iPeripheralIndex < aPeripherals.Count; iPeripheralIndex++)
+					{
+						// SerialNumber
+						ProcessPartialStatus(lRequestId, string.Format("AirconSystem.Peripherals[{0}].SerialNumber", iPeripheralIndex), jsonResponse.AirconSystem.Peripherals[iPeripheralIndex].SerialNumber?.ToString(), ref strSerial);
+
+						if (!unit.Peripherals.ContainsKey(strSerial))
+							unit.Peripherals.Add(strSerial, new AirConditionerPeripheral(strSerial));
+						else
+							Logging.WriteDebugLog("Que.GetAirConditionerFullStatus() [0x{0}] Duplicate Peripheral: {1}", lRequestId.ToString("X8"), strSerial);
+
+						// SerialNumber
+						ProcessPartialStatus(lRequestId, string.Format("AirconSystem.Peripherals[{0}].RemainingBatteryCapacity_pc", iPeripheralIndex), jsonResponse.AirconSystem.Peripherals[iPeripheralIndex].RemainingBatteryCapacity_pc?.ToString(), ref unit.Peripherals[strSerial].Battery);
+					}
+				}
+			}
 
 			// Zones
 			aEnabledZones = jsonResponse.UserAirconSettings.EnabledZones;
@@ -952,7 +980,7 @@ namespace HMX.HASSActronQue
 			string strResponse;
 			dynamic jsonResponse;
 			bool bRetVal = true;
-			string strEventType;
+			string strEventType, strTimestamp;
 			int iIndex;
 			UpdateItems updateItems = UpdateItems.None;
 
@@ -1008,6 +1036,8 @@ namespace HMX.HASSActronQue
 						_bEventsReceived = true;
 
 						strEventType = jsonResponse.events[iEvent].type;
+						// Future experiment on last event received
+						// strTimestamp = jsonResponse.events[iEvent].timestamp;
 
 						if (_bQueLogging)
 							Logging.WriteDebugLog("Que.GetAirConditionerEvents() [0x{0}] Event Type: {1}", lRequestId.ToString("X8"), strEventType);
@@ -1236,7 +1266,7 @@ namespace HMX.HASSActronQue
 						Logging.WriteDebugLog("Que.AirConditionerMonitor() Quick Update");
 
 						// Normal Mode
-						if (!_bNeoNoEventMode)
+						if (!_bDisableEventUpdates)
 						{
 							_bCommandAckPending = true;
 							iCommandAckRetries = _iCommandAckRetryCounter;
@@ -1253,7 +1283,7 @@ namespace HMX.HASSActronQue
 								}
 							}
 						}
-						// Neo No Events Mode
+						// No Events Mode
 						else
 						{
 							Thread.Sleep(_iPostCommandSleepTimerNeoNoEventsMode * 1000);
@@ -1285,7 +1315,7 @@ namespace HMX.HASSActronQue
 						}
 
 						// Normal Mode
-						if (!_bNeoNoEventMode)
+						if (!_bDisableEventUpdates)
 						{
 							foreach (AirConditionerUnit unit in _airConditionerUnits.Values)
 							{
@@ -1301,13 +1331,13 @@ namespace HMX.HASSActronQue
 								else if (_strSystemType == "neo")
 								{
 									Logging.WriteDebugLog("Que.AirConditionerMonitor() No Neo Events Received - Switching to Full Status Polling");
-									_bNeoNoEventMode = true;
+									_bDisableEventUpdates = true;
 								}
 							}
 						}
 
-						// Neo No Events Mode
-						if (_bNeoNoEventMode)
+						// No Events Mode
+						if (_bDisableEventUpdates)
 						{
 							foreach (AirConditionerUnit unit in _airConditionerUnits.Values)
 							{
@@ -1340,7 +1370,7 @@ namespace HMX.HASSActronQue
 					iCommandAckRetries = 0;
 				}
 				else
-					iWaitInterval = (!_bNeoNoEventMode ? _iPollInterval : _iPollIntervalNeoNoEventsMode);
+					iWaitInterval = _iPollInterval;
 			}
 
 			Logging.WriteDebugLog("Que.AirConditionerMonitor() Complete");
@@ -1933,7 +1963,7 @@ namespace HMX.HASSActronQue
 				case "neo":
 					bZones = new bool[] { false, false, false, false, false, false, false, false };
 
-					if (_bNeoNoEventMode)
+					if (_bDisableEventUpdates)
 					{   // Temporarily set zone state to support subsequent zone changes before the next poll
 						if (unit.Zones.ContainsKey(iZone))
 							unit.Zones[iZone].State = bState;
