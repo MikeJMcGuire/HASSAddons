@@ -36,8 +36,9 @@ namespace HMX.HASSActronQue
 			Low
 		}
 
-		private static string _strBaseURLQue = "https://que.actronair.com.au/";
-		private static string _strBaseURLNeo = "https://nimbus.actronair.com.au/";
+		private static string _strBaseURLQueCommands = "https://que.actronair.com.au/";
+		private static string _strBaseURLNeoCommands = "https://nimbus.actronair.com.au/";
+		private static string _strBaseURL = "https://nimbus.actronair.com.au/";
 		private static string _strSystemType;
 		private static string _strDeviceName = "HASSActronQue";
 		private static string _strAirConditionerName = "Air Conditioner";
@@ -73,9 +74,7 @@ namespace HMX.HASSActronQue
 		private static AutoResetEvent _eventUpdate = new AutoResetEvent(false);
 		private static PairingToken _pairingToken;
 		private static QueToken _queToken = null;
-		//private static AirConditionerData _airConditionerData = new AirConditionerData();
 		private static Dictionary<string, AirConditionerUnit> _airConditionerUnits = new Dictionary<string, AirConditionerUnit>();
-		//private static Dictionary<int, AirConditionerZone> _airConditionerZones = new Dictionary<int, AirConditionerZone>();
 		private static object _oLockData = new object(), _oLockQueue = new object();
 		private static bool _bCommandAckPending = false;
 
@@ -133,7 +132,7 @@ namespace HMX.HASSActronQue
 
 			_httpClientAuth.BaseAddress = new Uri(GetBaseURL());
 			_httpClient.BaseAddress = new Uri(GetBaseURL());
-			_httpClientCommands.BaseAddress = new Uri(GetBaseURL());
+			_httpClientCommands.BaseAddress = new Uri(GetBaseURLCommands());
 
 			// Get Device Id
 			try
@@ -2254,11 +2253,16 @@ namespace HMX.HASSActronQue
 
 		private static string GetBaseURL()
 		{
+			return _strBaseURL;
+		}
+
+		private static string GetBaseURLCommands()
+		{
 			switch (_strSystemType)
 			{
-				case "que": return _strBaseURLQue;
-				case "neo": return _strBaseURLNeo;
-				default: return _strBaseURLQue;
+				case "que": return _strBaseURLQueCommands;
+				case "neo": return _strBaseURLNeoCommands;
+				default: return _strBaseURL;
 			}
 		}
 	}
