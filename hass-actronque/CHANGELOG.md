@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2025.7.3] - 2025-07-24
+
+### Changed
+
+- Changed the Que API endpoint to limit dependance on the Neo API endpoint.
+- Increased the default full status polling interval to 45 seconds from 30 seconds to reduce load on the cloud service.
+- Reduced the interval for the automatic full status poll after sending a change/command to 4 seconds from 10 seconds.
+
+### Removed
+
+- Removed event based updates for Que and Neo as Actron have indicated they are no longer available (and adjusted intervals accordingly).
+
 ## [v2025.7.2] - 2025-07-16
 
 ### Added
