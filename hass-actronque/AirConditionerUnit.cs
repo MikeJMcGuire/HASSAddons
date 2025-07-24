@@ -15,9 +15,9 @@ namespace HMX.HASSActronQue
 		public AirConditionerData Data;
 		public Dictionary<int, AirConditionerZone> Zones;	
 		public Dictionary<int, AirConditionerPeripheral> Peripherals;
-		public HttpClient HttpClientCommands;
+		public HttpClient HttpClientCommands, HttpClientStatus;
 
-		public AirConditionerUnit(string strName, string strSerial, string strModelType)
+		public AirConditionerUnit(string strName, string strSerial, string strModelType, string strBearerToken, Uri uriBaseAddress)
 		{
 			HttpClientHandler httpClientHandler = new HttpClientHandler();
 
@@ -34,9 +34,26 @@ namespace HMX.HASSActronQue
 			Peripherals = new Dictionary<int, AirConditionerPeripheral>();
 
 			if (Service.IsDevelopment)
+			{
+				HttpClientStatus = new HttpClient(new LoggingClientHandler(httpClientHandler));
 				HttpClientCommands = new HttpClient(new LoggingClientHandler(httpClientHandler));
+			}
 			else
+			{
+				HttpClientStatus = new HttpClient(httpClientHandler); 
 				HttpClientCommands = new HttpClient(httpClientHandler);
+			}
+
+			HttpClientStatus.BaseAddress = uriBaseAddress;
+			HttpClientCommands.BaseAddress = uriBaseAddress;
+
+			UpdateBearerToken(strBearerToken);
+		}
+
+		public void UpdateBearerToken(string strBearerToken)
+		{
+			HttpClientStatus.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", strBearerToken);
+			HttpClientCommands.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", strBearerToken);
 		}
 	}
 }
