@@ -52,6 +52,8 @@ namespace HMX.HASSActronQue
 
 		public void UpdateBearerToken(string strBearerToken)
 		{
+			Logging.WriteDebugLog("AirConditionerUnit.UpdateBearerToken()");
+
 			HttpClientStatus.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", strBearerToken);
 			HttpClientCommands.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", strBearerToken);
 		}
