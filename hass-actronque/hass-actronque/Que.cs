@@ -332,7 +332,7 @@ namespace HMX.HASSActronQue
 
 					_httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _queToken.BearerToken);
 					foreach (AirConditionerUnit unit in _airConditionerUnits.Values)
-						unit.UpdateBearerToken(strResponse);
+						unit.UpdateBearerToken(_queToken.BearerToken);
 
 					// Update Token File
 					try
