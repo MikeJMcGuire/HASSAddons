@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2025.7.4] - 2025-07-30
+
+### Changed
+
+- Fixed an issue with authentication token regeneration not working consistently.
+
 ## [v2025.7.3] - 2025-07-24
 
 ### Changed
