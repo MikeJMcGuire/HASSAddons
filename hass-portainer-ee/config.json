@@ -8,7 +8,7 @@
   "docker_api": true,
   "image": "mikejmcguire/hass-portainer-ee-{arch}",
   "ingress": true,
-  "ingress_port": 9002,
+  "ingress_port": 9000,
   "init": false,
   "map": [
     "ssl"
@@ -28,5 +28,5 @@
   "slug": "portaineree",
   "startup": "services",
   "url": "https://github.com/MikeJMcGuire/hass-portainer-ee",
-  "version": "2025.9.4"
+  "version": "2025.7.0"
 }
