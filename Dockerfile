@@ -1,5 +1,10 @@
-FROM portainer/portainer-ee:2.27.9-alpine
+FROM portainer/portainer-ee:2.33.1-alpine
 
-RUN apk --no-cache add tzdata && rm -rf /var/cache/apk/*
+RUN apk add --no-cache tzdata nginx supervisor && rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["/portainer"]
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY supervisord.conf /etc/supervisord.conf
+
+EXPOSE 80
+
+ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
