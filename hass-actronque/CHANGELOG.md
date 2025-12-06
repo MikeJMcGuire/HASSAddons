@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2025.12.0] - 2025-12-06
+
+### Changed
+
+- Added additional logic to account for an authentication mismatch between Actron's two API endpoints.
+
 ## [v2025.9.0] - 2025-09-24
 
 ### Added
