@@ -83,23 +83,9 @@ namespace HMX.HASSActronQue
 
 		static Que()
 		{
-			HttpClientHandler httpClientHandler = new HttpClientHandler();
-
 			Logging.WriteDebugLog("Que.Que()");
 
-			if (httpClientHandler.SupportsAutomaticDecompression)
-				httpClientHandler.AutomaticDecompression = System.Net.DecompressionMethods.All;
-
-			if (Service.IsDevelopment)
-			{
-				_httpClient = new HttpClient(new LoggingClientHandler(httpClientHandler));
-				_httpClientAuth = new HttpClient(new LoggingClientHandler(httpClientHandler));
-			}
-			else
-			{
-				_httpClient = new HttpClient(httpClientHandler);
-				_httpClientAuth = new HttpClient(httpClientHandler);
-			}
+			InitialiseHttpClient();
 		}
 
 		public static async void Initialise(string strQueUser, string strQuePassword, string strSerialNumber, int iPollInterval, bool bQueLogs, bool bPerZoneControls, bool bSeparateHeatCool, ManualResetEvent eventStop)
@@ -473,7 +459,7 @@ namespace HMX.HASSActronQue
 			string strPageURL = "api/v0/client/ac-systems?includeAcms=true&includeNeo=true";
 			string strResponse;
 			dynamic jsonResponse;
-			bool bRetVal = true;
+			bool bRetVal = true, bResetRequired = false;
 			string strSerial, strDescription, strType;
 
 			Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _httpClient.BaseAddress, strPageURL);
@@ -526,6 +512,13 @@ namespace HMX.HASSActronQue
 
 							_airConditionerUnits.Add(strSerial, unit);
 
+							if (strType == "nxgen")
+							{
+								Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Que detected", lRequestId.ToString("X8"));
+
+								bResetRequired = true;
+							}
+
 							Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Monitoring AC: {1}", lRequestId.ToString("X8"), strSerial);
 						}
 					}
@@ -561,6 +554,16 @@ namespace HMX.HASSActronQue
 
 				bRetVal = false;
 				goto Cleanup;
+			}
+
+			if (bResetRequired && _airConditionerUnits.Count == 1)
+			{
+				Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}]  Switching API endpoint and reauthenticating.", lRequestId.ToString("X8"));
+				InitialiseHttpClient();
+
+				_eventAuthenticationFailure.Set();
+
+				bRetVal = false;
 			}
 
 		Cleanup:
@@ -2324,6 +2327,30 @@ namespace HMX.HASSActronQue
 				case "neo": return _strBaseURLNeo;
 				default: return _strBaseURL;
 			}
+		}
+
+		private static void InitialiseHttpClient()
+		{
+			HttpClientHandler httpClientHandler = new HttpClientHandler();
+			
+			Logging.WriteDebugLog("Que.InitialiseHttpClient()");
+
+			if (httpClientHandler.SupportsAutomaticDecompression)
+				httpClientHandler.AutomaticDecompression = System.Net.DecompressionMethods.All;
+
+			if (Service.IsDevelopment)
+			{
+				_httpClient = new HttpClient(new LoggingClientHandler(httpClientHandler));
+				_httpClientAuth = new HttpClient(new LoggingClientHandler(httpClientHandler));
+			}
+			else
+			{
+				_httpClient = new HttpClient(httpClientHandler);
+				_httpClientAuth = new HttpClient(httpClientHandler);
+			}
+
+			_httpClient.BaseAddress = new Uri(GetBaseURLDevice("nxgen"));
+			_httpClientAuth.BaseAddress = new Uri(GetBaseURLDevice("nxgen"));
 		}
 	}
 }
