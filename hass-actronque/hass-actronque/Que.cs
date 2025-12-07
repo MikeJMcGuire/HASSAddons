@@ -459,7 +459,7 @@ namespace HMX.HASSActronQue
 			string strPageURL = "api/v0/client/ac-systems?includeAcms=true&includeNeo=true";
 			string strResponse;
 			dynamic jsonResponse;
-			bool bRetVal = true, bResetRequired = false;
+			bool bRetVal = true, bResetRequired = false, bNeoFound = false;
 			string strSerial, strDescription, strType;
 
 			Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Base: {1}{2}", lRequestId.ToString("X8"), _httpClient.BaseAddress, strPageURL);
@@ -518,8 +518,10 @@ namespace HMX.HASSActronQue
 
 								bResetRequired = true;
 							}
+							else
+								bNeoFound = true;
 
-							Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Monitoring AC: {1}", lRequestId.ToString("X8"), strSerial);
+                            Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Monitoring AC: {1}", lRequestId.ToString("X8"), strSerial);
 						}
 					}
 				}
@@ -556,9 +558,9 @@ namespace HMX.HASSActronQue
 				goto Cleanup;
 			}
 
-			if (bResetRequired && _airConditionerUnits.Count == 1)
+			if (bResetRequired && !bNeoFound)
 			{
-				Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}]  Switching API endpoint and reauthenticating.", lRequestId.ToString("X8"));
+				Logging.WriteDebugLog("Que.GetAirConditionerSerial() [0x{0}] Switching API endpoint and reauthenticating.", lRequestId.ToString("X8"));
 				InitialiseHttpClient();
 
 				_eventAuthenticationFailure.Set();
