@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2025.12.1] - 2025-12-07
+
+### Changed
+
+- Updated 2025.12.0 logic for multiple Que units.
+
 ## [v2025.12.0] - 2025-12-06
 
 ### Changed
