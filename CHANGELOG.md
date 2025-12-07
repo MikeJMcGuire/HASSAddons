@@ -1,13 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [v2025.9.4] - 2025-09-11
-
-### Added
-- Added NGINX as a reverse proxy for the Portainer UI due to incompatibility between the UI and HA ingress.
+## [v2025.12.0] - 2025-12-07
 
 ### Changed
-- Updated to Portainer-BE v2.33.1.
+- Updated to Portainer-BE v2.33.5.
+- The UI needs to be accessed from within the HA add-on screen, as the HA ingress is currently incompatible with the new Portainer UI.
 
 ## [v2025.7.0] - 2025-07-30
 
