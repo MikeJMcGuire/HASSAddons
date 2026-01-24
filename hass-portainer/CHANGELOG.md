@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2026.1.0] - 2026-01-24
+
+### Changed
+- Updated to Portainer-BE v2.33.6.
+- The UI needs to be accessed from within the HA add-on screen, as the HA ingress is currently incompatible with the new Portainer UI.
+
 ## [v2025.7.0] - 2025-07-30
 
 ### Changed
