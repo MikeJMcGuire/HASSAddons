@@ -14,16 +14,18 @@
   ],
   "ports": {
     "8000/tcp": null,
-    "9000/tcp": null
+    "9000/tcp": null,
+    "9443/tcp": null
   },
   "ports_description": {
     "8000/tcp": "Port for exposing Portainer to edge agents",
-    "9000/tcp": "Port for exposing Portainer UI directly"
+    "9000/tcp": "Port for exposing Portainer UI directly",
+    "9443/tcp": "Port for exposing Portainer UI directly (HTTPS)"
   },
   "name": "Portainer",
   "panel_icon": "mdi:docker",
   "slug": "portainer",
   "startup": "services",
   "url": "https://github.com/MikeJMcGuire/hass-portainer",
-  "version": "2026.1.0"
+  "version": "2026.2.0"
 }
