@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2026.2.0] - 2026-2-11
+
+### Added
+
+- Added switch to toggle constant fan mode.
+- Added switches to toggle quiet/away mode.
+
 ## [v2025.12.1] - 2025-12-07
 
 ### Changed

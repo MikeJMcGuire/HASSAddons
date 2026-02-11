@@ -235,6 +235,16 @@ namespace HMX.HASSActronQue
 			{
 				Que.ChangeControlAllZones(lRequestId, Que.Units[strUnit], strPayload == "ON" ? true : false);
 			}
+			// Quiet Mode
+			else if (strTopic.StartsWith(strUnitHeader + "/quietmode/set"))
+			{
+				Que.ChangeQuietMode(lRequestId, Que.Units[strUnit], strPayload == "ON" ? true : false);
+			}
+			// Away Mode
+			else if (strTopic.StartsWith(strUnitHeader + "/awaymode/set"))
+			{
+				Que.ChangeAwayMode(lRequestId, Que.Units[strUnit], strPayload == "ON" ? true : false);
+			}
 			// Fan Speed
 			else if (strTopic.StartsWith(strUnitHeader + "/fan/set"))
 			{
@@ -260,6 +270,11 @@ namespace HMX.HASSActronQue
 
 						break;
 				}
+			}
+			// Fan Continuous
+			else if (strTopic.StartsWith(strUnitHeader + "/fancontinuous/set"))
+			{
+				Que.ChangeFanContinuous(lRequestId, Que.Units[strUnit], strPayload == "ON" ? true : false);
 			}
 			// Temperature
 			else if (strTopic.StartsWith(strUnitHeader + "/temperature"))
