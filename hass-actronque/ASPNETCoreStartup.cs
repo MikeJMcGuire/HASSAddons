@@ -40,7 +40,7 @@ namespace HMX.HASSActronQue
 			{
 				services.AddControllers();
 				services.AddHttpContextAccessor();
-				services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
+				//services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 			}
 			catch (Exception eException)
 			{

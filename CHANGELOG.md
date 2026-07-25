@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2026.7.0] - 2026-07-25
+
+### Changed
+
+- Upgraded .NET packages/framework.
+
 ## [v2026.2.0] - 2026-2-11
 
 ### Added
