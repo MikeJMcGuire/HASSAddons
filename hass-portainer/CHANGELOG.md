@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2026.7.0] - 2026-07-25
+
+### Changed
+- Updated to Portainer CE v2.39.5.
+- Changed port configuration to additionally expose 9443 for HTTPS.
+
 ## [v2026.2.0] - 2026-02-11
 
 ### Changed
